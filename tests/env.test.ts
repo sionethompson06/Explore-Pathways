@@ -10,8 +10,35 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const ORIGINAL_ENV = { ...process.env };
 
+/**
+ * Every key src/env.ts's schema reads, explicitly cleared before each
+ * test's own overrides are applied. Without this, a value the
+ * surrounding process actually has set -- e.g. CI's workflow-level
+ * `GUEST_SESSION_TTL_MINUTES: "60"` -- would silently leak into a test
+ * that means to exercise the "unset" case, passing locally (where no
+ * such variable happens to be exported) while failing in CI. Every
+ * test must be able to control its own env.ts-relevant input
+ * regardless of what the host process happens to export.
+ */
+const ENV_SCHEMA_KEYS = [
+  "NODE_ENV",
+  "DATABASE_URL",
+  "BETTER_AUTH_SECRET",
+  "BETTER_AUTH_URL",
+  "EMAIL_MODE",
+  "SCHEDULER_MODE",
+  "AI_MODE",
+  "ALLOW_TEST_FIXTURES",
+  "DEPLOYMENT_MODE",
+  "GUEST_SESSION_TTL_MINUTES",
+  "LIVE_DEPLOYMENT_APPROVED",
+] as const;
+
 function setEnv(overrides: Record<string, string | undefined>) {
-  process.env = { ...ORIGINAL_ENV, ...overrides };
+  const cleared = Object.fromEntries(
+    ENV_SCHEMA_KEYS.map((key) => [key, undefined]),
+  );
+  process.env = { ...ORIGINAL_ENV, ...cleared, ...overrides };
 }
 
 beforeEach(() => {

@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
-import { env } from "@/env";
 
 /**
  * Applies committed migrations from drizzle/ to whatever database
@@ -10,19 +9,33 @@ import { env } from "@/env";
  * phase -- there is no production database, credential, or
  * deployment target yet. It refuses to run if NODE_ENV=production,
  * as an extra guardrail on top of that operational fact.
+ *
+ * Reads process.env directly, the same convention
+ * scripts/test-db-setup.ts already uses, rather than importing
+ * `@/env`: this is a standalone Node CLI tool run via `tsx`, outside
+ * the Next.js bundler that makes the app's own `import "server-only"`
+ * modules (env.ts, db/client.ts) safe to import -- under plain Node,
+ * `server-only`'s guard throws unconditionally, so a script must never
+ * import those modules directly.
  */
 async function main() {
-  if (env.isProduction) {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_URL is not set. See .env.example for the required shape.",
+    );
+  }
+  if (process.env.NODE_ENV === "production") {
     throw new Error(
       "Refusing to run scripts/migrate.ts with NODE_ENV=production. " +
         "No production database exists for this application yet.",
     );
   }
 
-  const pool = new Pool({ connectionString: env.DATABASE_URL });
+  const pool = new Pool({ connectionString: databaseUrl });
   const db = drizzle(pool);
 
-  console.info(`Applying migrations to ${maskConnectionString(env.DATABASE_URL)} ...`);
+  console.info(`Applying migrations to ${maskConnectionString(databaseUrl)} ...`);
   await migrate(db, { migrationsFolder: "./drizzle" });
   console.info("Migrations applied successfully.");
 
