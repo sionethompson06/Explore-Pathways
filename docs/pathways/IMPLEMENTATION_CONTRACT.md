@@ -1,9 +1,10 @@
 # Pathways Discovery App — Implementation Contract
 
-Version: 0.1.0-phase0-candidate
-Status: Proposed canonical build contract, produced by Phase 0 reconciliation. Awaiting owner acceptance before Phase 1 coding begins.
+Version: 0.2.0-phase0-corrected
+Status: Owner-accepted canonical build contract. DEC-B1-B10 accepted; DEC-C1-C7 resolved and implemented in `contracts/` (see `contracts/CHANGELOG.md`). Phase 1 application implementation is authorized and in progress.
 Repository: sionethompson06/Explore-Pathways
 Branch: claude/kind-gauss-f2d7ng
+Phase 0 commit: 46f1a21 (verified as HEAD before this correction work began; no divergence found)
 
 Source-of-truth order (per master prompt): owner's latest explicit decisions -> engineering resolutions explicitly accepted for this build -> normalized specifications in the handoff pack -> contracts/fixtures -> historical narrative -> implementation convenience. This document is the single place those layers are reconciled into one contract. Where the pack disagrees with itself, the discrepancy is recorded below rather than silently resolved.
 
@@ -30,7 +31,7 @@ Explicitly **not** part of this build: a school, LMS, grades, transcripts, an NC
 
 ## 3. Reconciliation register
 
-Each item below carries a disposition. **ACCEPTED** items are already reflected in the normalized specifications and contracts and require no further owner action to begin coding against them. **PROPOSED** items are corrections the handoff pack itself flags as requiring explicit owner acceptance before they control implementation (Specification 06 says Phase 0 "must surface these changes for owner acceptance rather than silently applying a rewrite"). **NEW FINDING** items are gaps this Phase 0 audit discovered that are not resolved anywhere in the pack. Full detail and per-item status lives in `DECISION_LOG.md`; this section is the summary.
+**Status as of owner authorization: all items in this section are closed.** §3.1 was already accepted at Phase 0. §3.2 (DEC-B1-B10) is now accepted by explicit owner authorization. §3.3 (DEC-C1-C7) is now resolved exactly per the owner's specific instructions and implemented in `contracts/`; see `contracts/CHANGELOG.md` for the precise diff against the original pack and `docs/pathways/DECISION_LOG.md` §C for the resolution-by-resolution record. The text below is retained as the historical record of what Phase 0 originally found; it is no longer an open request.
 
 ### 3.1 Carried from the latest decisions (ACCEPTED)
 1. K-12 supported; grades 5-12 marketing emphasis; grade bands are ELEMENTARY (K-4), MIDDLE (5-8), HIGH_SCHOOL (9-12), UNDETERMINED — branching categories, not assertions about local school organization.
@@ -83,15 +84,18 @@ These were found by cross-checking every one of the 52 rules in `contracts/rules
 
 ## 5. Canonical registries (by reference, not duplicated here)
 
-The authoritative content lives in the contracts, not in this document, so that there is exactly one place to update each:
-- `contracts/question-bank.json` — 38 question definitions (`DISC_001`-`DISC_034`, `DISC_E01`-`DISC_E04`), each with field name, parent-facing wording, input type, show-when branch condition, required-when-shown flag, matching-use note, and allowed values where applicable. Full enumeration and branch-condition trace is in `REQUIREMENT_TRACEABILITY.md`.
-- `contracts/taxonomy.json` — 10 base models (`B01`-`B10`, `B10` permanently `discovery_enabled: false`), 10 overlays (`O01`-`O10`), 12 possible supports (`S01`-`S12`), 18 opportunities (`OP01`-`OP18`), 20 review signals, plus explicit constraints (no provider IDs, no invented real schools, `B10` excluded regardless of score or unmet need).
-- `contracts/rules.json` — 52 declarative rules, each with a stable ID, group, `when` condition, `score_effects`, `activate` block (overlays/supports/opportunities/reviews), `reason_template`, `reason_type`, and `status: PILOT_UNVALIDATED` (these are transparent pilot heuristics, not empirically validated placement criteria, and must be labeled as such everywhere they surface).
-- `contracts/scoring-policy.json` — baseline 50 (internal sort only), multipliers (1.75 primary-goal / 1.5 top-priority / 1.15 secondary-goal / 1.0 default, never multiplied together), group aggregation rule, the two-group display gate, public label set, diversity/sorting rule, and postprocess rules (auto-added reviews for homeschool/remote/cost cases, K-4 opportunity remapping, MS-vs-HS opportunity horizon).
-- `contracts/report-contract.json` — the public DTO shape (what a browser may ever receive) versus the internal engine-run record (what stays server-side), the `forbidden_in_public` field list, and the LLM output schema/validation note for the two AI-eligible slots.
-- `contracts/legacy-aliases.json` — import-only mapping from historical/ambiguous IDs to canonical ones; retired ambiguous IDs are named explicitly and must never be re-minted.
-- `contracts/content-library.json` — approved base-model card copy, CTA templates by scheduler mode, fallback/limited-information copy, and the explicit `forbidden_claims` list.
-- `fixtures/golden-profiles.json` — 14 synthetic fixture cases (`FX01`-`FX14`) plus 9 metamorphic invariants; these are the acceptance bar for Phase 4, not proof of educational validity.
+These now physically exist in the repository at the paths below (repository root), committed in the Phase 0 corrections commit. This is the single authoritative source; application code validates and consumes it, never redefines it. The original, byte-identical pack the owner supplied is preserved separately, unmodified, at `docs/pathways/pack/contracts/` for historical reference only and is not read by any code. Every difference between the two is recorded in `contracts/CHANGELOG.md`.
+
+- `contracts/question-bank.json` — **39** question definitions (`DISC_001`-`DISC_034`, `DISC_E01`-`DISC_E04`, plus `DISC_020A` added at Phase 0 corrections), each with field name, parent-facing wording, input type, show-when branch condition, required-when-shown flag, matching-use note, and allowed values where applicable. Full enumeration and branch-condition trace is in `REQUIREMENT_TRACEABILITY.md`.
+- `contracts/taxonomy.json` — 10 base models (`B01`-`B10`, `B10` permanently `discovery_enabled: false` and `reachability_status: EXCLUDED`), 10 overlays (`O01`-`O10`), 12 possible supports (`S01`-`S12`, `S01` `reachability_status: BASELINE`), 18 opportunities (`OP01`-`OP18`, 5 `reachability_status: RESERVED`), 20 review signals (1 `reachability_status: OPERATIONAL_LAYER`), each now carrying an explicit `reachability_status` (Phase 0 correction), plus explicit constraints (no provider IDs, no invented real schools, `B10` excluded regardless of score or unmet need).
+- `contracts/rules.json` — **55** rule entries (54 evaluable + 1 `RETIRED`), each with a stable ID, group, `when` condition, `score_effects`, `activate` block (overlays/supports/opportunities/reviews), `reason_template`, `reason_type`, and `status: PILOT_UNVALIDATED` (these are transparent pilot heuristics, not empirically validated placement criteria, and must be labeled as such everywhere they surface). Three rules (`ADV_007`, `ADV_008`, `GRADE_001`) were added and one (`HOME_003`) retired at Phase 0 corrections.
+- `contracts/scoring-policy.json` — unchanged from the original pack: baseline 50 (internal sort only), multipliers (1.75 primary-goal / 1.5 top-priority / 1.15 secondary-goal / 1.0 default, never multiplied together), group aggregation rule, the two-group display gate (kept unchanged per DEC-C7), public label set, diversity/sorting rule, and postprocess rules.
+- `contracts/report-contract.json` — unchanged from the original pack: the public DTO shape versus the internal engine-run record, the `forbidden_in_public` field list, and the LLM output schema/validation note for the two AI-eligible slots.
+- `contracts/legacy-aliases.json` — unchanged: import-only mapping from historical/ambiguous IDs to canonical ones.
+- `contracts/content-library.json` — unchanged: approved base-model card copy, CTA templates by scheduler mode, fallback/limited-information copy, and the explicit `forbidden_claims` list.
+- `fixtures/golden-profiles.json` — **17** synthetic fixture cases (`FX01`-`FX14` original, `FX15`-`FX17` added at Phase 0 corrections per DEC-C7) plus 9 metamorphic invariants; these are the acceptance bar for Phase 4, not proof of educational validity.
+- `fixtures/QA_MATRIX.md` — unchanged.
+- `contracts/CHANGELOG.md` — the exact diff between the original pack and these corrected contracts, item by item.
 
 ## 6. MVP scope boundary
 
@@ -109,18 +113,17 @@ The authoritative content lives in the contracts, not in this document, so that 
 
 This build implements only: guest session, profile revisions, engine runs, reports, guardian access, consent, consultation workflow, and staff notes. The full future `StudentPathwayRecord` (courses, mastery, interventions, opportunities, historical pathway changes) is a modeling target for the schema to anticipate, not something to build now.
 
-## 9. Proposed minimal stack for Phase 1
-
-Given the repository is greenfield (Section 1), the master prompt's default stack applies without any existing-framework conflict:
+## 9. Approved stack for Phase 1 (owner-decided, DEC-E1)
 
 - **Framework:** Next.js, App Router, TypeScript.
-- **Database:** PostgreSQL, accessed through a typed migration layer (e.g. Drizzle or Prisma migrate — final selection is a Phase 1 decision, not fixed here) with schema-validated inputs/outputs (e.g. Zod) at every server boundary.
-- **Auth:** a supported, established provider (e.g. Auth.js/NextAuth or a managed provider) implementing verified single-use email sign-in; not bespoke. Provider selection is unconfirmed (Section 10 / `INTEGRATION_REGISTER.md`).
-- **UI:** accessible component primitives + design tokens (WCAG 2.2 AA target), utility CSS.
-- **Tests:** unit + integration tests for the engine/report/access-control modules; browser E2E for the funnel.
-- **Hosting:** Vercel is the pack's proposed default; not yet connected or verified for this repository — unconfirmed.
-- **Package manager / exact pinned versions:** not fixed by this document. Per the master prompt, current supported versions must be selected by checking official documentation and the actual repository at Phase 1 kickoff, not invented from memory here.
-- **Architecture:** one modular application. No microservices, no vector database, no drag-and-drop rule editor. The recommendation engine and report assembler are framework-independent server modules; no UI component may contain a second scoring implementation.
+- **Database:** PostgreSQL, accessed through Drizzle (schema + typed migrations) with Zod validating every server boundary's inputs/outputs.
+- **Auth:** Better Auth via its Drizzle adapter, implementing verified single-use email-link sign-in groundwork; live email sending disabled until separately approved. Not bespoke.
+- **Package manager:** pnpm, with a committed lockfile.
+- **UI:** accessible component primitives + design tokens (WCAG 2.2 AA target), utility CSS. Not built in Phase 1 (Phase 1 is a minimal app shell, not the marketing website).
+- **Tests:** Vitest for unit/integration tests (contract validation, engine/report/access-control modules once they exist) against a real local/test PostgreSQL instance, not mocks.
+- **Hosting:** not connected or verified for this repository in Phase 1 — no paid services, hosted accounts, domains, or production resources are authorized by this stack choice.
+- **Exact pinned versions:** recorded in `INTEGRATION_REGISTER.md` as actually installed, checked against official documentation at install time, current stable releases only (no beta/canary/RC).
+- **Architecture:** one modular application. No microservices, no vector database, no drag-and-drop rule editor. The recommendation engine and report assembler (Phase 4/5, not built yet) will be framework-independent server modules; no UI component may contain a second scoring implementation. Canonical registries live in `contracts/` and `fixtures/` at the repository root as the single authoritative source; application code validates and consumes them, it never redefines rule content inline.
 
 Full integration-by-integration status (auth/database/email/scheduling/AI/deployment, each marked CONFIRMED or UNCONFIRMED, no secrets) is in `INTEGRATION_REGISTER.md`.
 
@@ -128,11 +131,11 @@ Full integration-by-integration status (auth/database/email/scheduling/AI/deploy
 
 See `DECISION_LOG.md` for the complete, itemized list with dispositions. In summary:
 
-**Needed before/at the start of coding (Phase 1):**
-- Acceptance of Section 3.2 (items 7-16) as controlling.
-- Resolution of Section 3.3 finding #1 (`ncaa_interest` canonical ID) before Phase 3, and findings #2-#5 before Phase 4.
-- Confirmation this repository and branch are correct (done — Section 1).
-- Auth provider, database/ORM pairing, and package manager selection (or explicit delegation to the Phase 1 implementer to choose and record).
+**Resolved before Phase 1 coding began (all closed):**
+- Section 3.2 (DEC-B1-B10): accepted.
+- Section 3.3 (DEC-C1-C7): resolved and implemented in `contracts/`.
+- Repository and branch confirmed correct (Section 1).
+- Auth provider, database/ORM pairing, and package manager: decided (DEC-E1 — Better Auth, Drizzle, pnpm).
 
 **Needed only before a later feature or live launch (not blockers to Phase 1-9 development against synthetic/fixture data):**
 - Legal operating entity, final brand, published privacy notice and terms, contact address.

@@ -1,0 +1,1849 @@
+{
+  "version": "1.0.0-candidate",
+  "status": "PILOT_UNVALIDATED",
+  "normalized_fact_fields": [
+    "grade_band",
+    "athletics_interest",
+    "homeschool_interest",
+    "home_or_online_interest",
+    "frequent_travel",
+    "foundation_concern",
+    "supplemental_need"
+  ],
+  "rules": [
+    {
+      "id": "FLEX_001",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "flexibility_importance",
+            "op": "in",
+            "value": [
+              "VERY_IMPORTANT",
+              "ESSENTIAL"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 2,
+        "B04": 2,
+        "B06": 3,
+        "B07": 2,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP16"
+        ],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "Your family said schedule flexibility matters. Actual program schedules still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "FLEX_002",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "unavailable_academic_times",
+            "op": "contains_any",
+            "value": [
+              "MORNING",
+              "AFTERNOON",
+              "EVENING",
+              "VARIES"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 2,
+        "B04": 2,
+        "B06": 3,
+        "B07": 1,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "You identified times when scheduled instruction would not work.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "FLEX_003",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "frequent_travel",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 3,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [
+          "O05"
+        ],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_STATE_AVAILABILITY",
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "Travel makes location and attendance requirements important to investigate.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "DELIVERY_001",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED",
+              "ONLINE_TEACHER_SUPPORTED"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 3,
+        "B06": 3,
+        "B04": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family wants to explore online schooling; program requirements remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "DELIVERY_002",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "HYBRID"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B07": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You expressed interest in a mix of remote and in-person education.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "DELIVERY_003",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "IN_PERSON"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 3,
+        "B05": 3,
+        "B07": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You want to consider an in-person learning arrangement.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HOME_001",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [
+          "O08"
+        ],
+        "supports": [
+          "S11"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_STATE_HOMESCHOOL"
+        ]
+      },
+      "reason_template": "You expressed interest in supported homeschooling.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HOME_002",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "desired_parent_involvement",
+            "op": "in",
+            "value": [
+              "VERY_INVOLVED",
+              "REGULAR_SUPPORT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You want an active role in day-to-day learning.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HOME_003",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "desired_parent_involvement",
+            "op": "eq",
+            "value": "PROGRAM_MANAGES"
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": -3,
+        "B09": -2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_PRIORITY_TRADEOFF"
+        ]
+      },
+      "reason_template": "Home-based arrangements vary in how much instructional management remains with the family.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "PAR_001",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "desired_parent_involvement",
+            "op": "eq",
+            "value": "PROGRAM_MANAGES"
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 2,
+        "B03": 2,
+        "B05": 2,
+        "B06": 2,
+        "B07": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You prefer a program to manage instruction; actual supervision needs still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "IND_001",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "learning_support_pattern",
+            "op": "in",
+            "value": [
+              "REGULAR_GUIDANCE",
+              "CLOSE_ADULT_SUPPORT",
+              "INDEPENDENT_WORK_DIFFICULT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S07",
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_LIVE_SUPPORT"
+        ]
+      },
+      "reason_template": "Your answers suggest regular human guidance should be part of the plan.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "IND_002",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "learning_support_pattern",
+            "op": "in",
+            "value": [
+              "INDEPENDENT",
+              "OCCASIONAL_CHECK_INS"
+            ]
+          },
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "SELF_PACED",
+              "BLEND"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 2,
+        "B09": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report some comfort with independent learning and an interest in self-paced or blended work.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "LEARN_001",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "LIVE_TEACHER",
+              "ONE_TO_ONE",
+              "SMALL_GROUP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 2,
+        "B05": 2,
+        "B07": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S07"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Direct teacher interaction is one of your stated preferences.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "LEARN_002",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "BLEND"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B07": 3,
+        "B03": 1,
+        "B06": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You prefer a combination of independent work and live support; availability must be checked.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "LEARN_003",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "HANDS_ON",
+              "MOVEMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP17"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Hands-on experiences are among the activities your student enjoys.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ELEM_001",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "daytime_support_availability",
+            "op": "in",
+            "value": [
+              "OCCASIONAL",
+              "NOT_ARRANGED"
+            ]
+          },
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": -3,
+        "B09": -3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ADULT_SUPPORT"
+        ]
+      },
+      "reason_template": "The practical daytime support arrangement needs to be established before choosing home-based learning.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "ELEM_002",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "daytime_support_availability",
+            "op": "eq",
+            "value": "MOST_LEARNING_DAYS"
+          },
+          {
+            "field": "desired_parent_involvement",
+            "op": "in",
+            "value": [
+              "VERY_INVOLVED",
+              "REGULAR_SUPPORT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You want to be involved and report that daytime adult support can be available.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ELEM_003",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "daytime_support_availability",
+            "op": "in",
+            "value": [
+              "UNKNOWN",
+              "NOT_ARRANGED"
+            ]
+          },
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED",
+              "ONLINE_TEACHER_SUPPORTED",
+              "HOMESCHOOL"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ADULT_SUPPORT"
+        ]
+      },
+      "reason_template": "For a young student, the daytime adult-support plan is an important part of evaluating home-based options.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "SOCIAL_001",
+      "version": "1.0.0-candidate",
+      "group": "social",
+      "when": {
+        "all": [
+          {
+            "field": "in_person_peer_preference",
+            "op": "eq",
+            "value": "VERY_IMPORTANT"
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 3,
+        "B05": 3,
+        "B07": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP14"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Regular in-person time with peers is important to your family.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "SOCIAL_002",
+      "version": "1.0.0-candidate",
+      "group": "social",
+      "when": {
+        "all": [
+          {
+            "field": "in_person_peer_preference",
+            "op": "eq",
+            "value": "VERY_IMPORTANT"
+          },
+          {
+            "field": "home_or_online_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP14"
+        ],
+        "reviews": [
+          "REV_SOCIAL_PLAN"
+        ]
+      },
+      "reason_template": "An online or home-based plan should address the in-person community your family values.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "ACAD_001",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_academic_position",
+            "op": "eq",
+            "value": "AHEAD"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP01"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "You report a need for more challenge; academic readiness has not been verified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_academic_position",
+            "op": "eq",
+            "value": "MIXED"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O07"
+        ],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ACADEMIC_CONTEXT"
+        ]
+      },
+      "reason_template": "You describe different needs across subjects, so subject-specific planning may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_003",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_academic_position",
+            "op": "in",
+            "value": [
+              "STRUGGLING",
+              "SIGNIFICANT_CONCERNS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S02"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_ACADEMIC_CONTEXT"
+        ]
+      },
+      "reason_template": "You would like a clearer understanding of where additional academic support could help.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_004",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "READING"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S03"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified reading as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_005",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "WRITING"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S05"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified writing as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_006",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "MATH"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S04"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified math as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_007",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "ROUTINES",
+              "ORGANIZATION",
+              "TIME_MANAGEMENT",
+              "TASK_COMPLETION",
+              "STUDY_SKILLS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S06",
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You identified learning routines or organization as an area to support.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "FOUND_001",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "foundation_concern",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O06"
+        ],
+        "supports": [
+          "S02"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_FOUNDATIONAL_SKILLS"
+        ]
+      },
+      "reason_template": "Foundational learning is an area your family would like to understand more clearly.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "FOUND_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "subject_advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "MATH",
+              "READING",
+              "WRITING",
+              "SCIENCE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP18"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "You want to explore additional challenge in a specific subject; this does not establish readiness to accelerate.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_001",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "athletics_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O01"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP10"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Athletics is one of your family's stated planning priorities.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_002",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "weekly_athletic_commitment",
+            "op": "in",
+            "value": [
+              "HOURS_16_20",
+              "HOURS_21_PLUS"
+            ]
+          },
+          {
+            "field": "flexibility_importance",
+            "op": "in",
+            "value": [
+              "VERY_IMPORTANT",
+              "ESSENTIAL"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 2,
+        "B07": 1,
+        "B08": 2,
+        "B09": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report a substantial athletic schedule and a need for flexibility.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_003",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "college_athletics_interest",
+            "op": "in",
+            "value": [
+              "DEFINITELY",
+              "POSSIBLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S09"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_COLLEGE_ATHLETICS"
+        ]
+      },
+      "reason_template": "College athletics is a future interest to include in planning.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_004",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "college_athletics_interest",
+            "op": "in",
+            "value": [
+              "DEFINITELY",
+              "POSSIBLY"
+            ]
+          },
+          {
+            "field": "ncaa_interest",
+            "op": "in",
+            "value": [
+              "YES",
+              "MAYBE",
+              "UNKNOWN"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_NCAA"
+        ]
+      },
+      "reason_template": "Relevant college-athletic academic requirements would need review; no eligibility determination has been made.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_005",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "reclassification_interest",
+            "op": "in",
+            "value": [
+              "YES",
+              "POSSIBLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_RECLASSIFICATION"
+        ]
+      },
+      "reason_template": "Grade-placement questions require individualized academic and athletic review.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_001",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "HONORS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP02"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_002",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "AP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP03"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_003",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "DUAL_ENROLLMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O03"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP04"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_004",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "COLLEGE_COURSES"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O03"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP05"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_005",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "EARLY_GRADUATION"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_GRADUATION"
+        ]
+      },
+      "reason_template": "Early graduation requires a broader academic and future-planning review.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_006",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "ADVANCED_MATH",
+              "ADVANCED_SCIENCE",
+              "HIGH_SCHOOL_EARLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP01"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family wants to investigate a more challenging subject pathway.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_001",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "reported_graduation_status",
+            "op": "in",
+            "value": [
+              "NO",
+              "MOSTLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S10"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_TRANSCRIPT",
+          "REV_GRADUATION"
+        ]
+      },
+      "reason_template": "Graduation progress should be reviewed using actual records; the cause of any concern is not yet established.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "reported_graduation_status",
+            "op": "eq",
+            "value": "UNKNOWN"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_GRADUATION_UNKNOWN"
+        ]
+      },
+      "reason_template": "Your current graduation status is not yet clear from the information provided.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_003",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "credit_recovery_need",
+            "op": "in",
+            "value": [
+              "YES",
+              "POSSIBLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O04"
+        ],
+        "supports": [
+          "S10"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_TRANSCRIPT"
+        ]
+      },
+      "reason_template": "You indicated that missing credits may need attention; no course prescription has been made.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_004",
+      "version": "1.0.0-candidate",
+      "group": "continuity",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "school_change_preference",
+            "op": "in",
+            "value": [
+              "OPEN_TO_CHANGE",
+              "SEEKING_CHANGE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_CREDIT_TRANSFER"
+        ]
+      },
+      "reason_template": "Before changing schools, review how completed coursework would be considered by the receiving institution.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "COST_001",
+      "version": "1.0.0-candidate",
+      "group": "cost",
+      "when": {
+        "all": [
+          {
+            "field": "cost_preference",
+            "op": "eq",
+            "value": "PREFER_TUITION_FREE"
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 2,
+        "B03": 3,
+        "B04": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family would prefer to explore publicly funded schooling options; eligibility and any separate service costs still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "CURR_001",
+      "version": "1.0.0-candidate",
+      "group": "continuity",
+      "when": {
+        "all": [
+          {
+            "field": "school_change_preference",
+            "op": "eq",
+            "value": "STAY_CURRENT"
+          }
+        ]
+      },
+      "score_effects": {
+        "B01": 4
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You prefer to improve the current educational arrangement rather than change schools.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "CURR_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "school_change_preference",
+            "op": "in",
+            "value": [
+              "STAY_CURRENT",
+              "OPEN_TO_CHANGE"
+            ]
+          },
+          {
+            "field": "supplemental_need",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B01": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "The stated academic or enrichment goal may be explored through added support before deciding whether to change schools.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ENV_001",
+      "version": "1.0.0-candidate",
+      "group": "context",
+      "when": {
+        "all": [
+          {
+            "field": "discovery_reasons",
+            "op": "contains_any",
+            "value": [
+              "ENVIRONMENT_CONCERN",
+              "CURRENT_SCHOOL_CONCERN",
+              "DIFFERENT_ENVIRONMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ENVIRONMENT"
+        ]
+      },
+      "reason_template": "You identified the learning environment as something to discuss with an advisor.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "CONF_001",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED"
+            ]
+          },
+          {
+            "field": "learning_support_pattern",
+            "op": "in",
+            "value": [
+              "REGULAR_GUIDANCE",
+              "CLOSE_ADULT_SUPPORT",
+              "INDEPENDENT_WORK_DIFFICULT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_PRIORITY_TRADEOFF",
+          "REV_LIVE_SUPPORT"
+        ]
+      },
+      "reason_template": "The desired independence and the reported support needs should be considered together.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "OPP_001",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "CAREER_CTE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP08"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Career-related learning is an interest your family wants to explore.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "OPP_002",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "discovery_reasons",
+            "op": "contains_any",
+            "value": [
+              "ARTS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O10"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP11"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Arts or performance activities are part of the schedule you want education to support.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "PAR_002",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "desired_parent_involvement",
+            "op": "eq",
+            "value": "PROGRAM_MANAGES"
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": -3,
+        "B09": -2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_PRIORITY_TRADEOFF"
+        ]
+      },
+      "review_model_scope": [
+        "B08",
+        "B09"
+      ],
+      "reason_template": "Family-led or assembled home learning may require more coordination than your family wants to manage; review the actual support arrangement.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    }
+  ]
+}

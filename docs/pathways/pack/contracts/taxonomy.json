@@ -1,0 +1,302 @@
+{
+  "version": "1.0.0-candidate",
+  "base_models": [
+    {
+      "id": "B01",
+      "label": "Current school with support",
+      "family": "CURRENT",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B02",
+      "label": "Traditional public school",
+      "family": "IN_PERSON",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B03",
+      "label": "Public virtual schooling",
+      "family": "VIRTUAL",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B04",
+      "label": "Charter or independent-study arrangement",
+      "family": "FLEXIBLE_SCHOOL",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B05",
+      "label": "Private in-person schooling",
+      "family": "IN_PERSON",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B06",
+      "label": "Private online schooling",
+      "family": "VIRTUAL",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B07",
+      "label": "Hybrid schooling",
+      "family": "HYBRID",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B08",
+      "label": "Supported family-led homeschool",
+      "family": "HOMESCHOOL",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B09",
+      "label": "Homeschool with external course providers",
+      "family": "HOMESCHOOL",
+      "discovery_enabled": true,
+      "status": "GENERIC_MODEL_NOT_VERIFIED_PROVIDER"
+    },
+    {
+      "id": "B10",
+      "label": "Future Pathways Mastery Program",
+      "family": "PATHWAYS_FUTURE",
+      "discovery_enabled": false,
+      "status": "FUTURE_NOT_AVAILABLE"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "O01",
+      "label": "Student-athlete planning"
+    },
+    {
+      "id": "O02",
+      "label": "Academic challenge and acceleration exploration"
+    },
+    {
+      "id": "O03",
+      "label": "College advancement exploration"
+    },
+    {
+      "id": "O04",
+      "label": "Credit or graduation recovery exploration"
+    },
+    {
+      "id": "O05",
+      "label": "Flexible lifestyle"
+    },
+    {
+      "id": "O06",
+      "label": "Foundational academic support"
+    },
+    {
+      "id": "O07",
+      "label": "Personalized learning"
+    },
+    {
+      "id": "O08",
+      "label": "Homeschool support"
+    },
+    {
+      "id": "O09",
+      "label": "Career and CTE exploration"
+    },
+    {
+      "id": "O10",
+      "label": "Arts and performance"
+    }
+  ],
+  "supports": [
+    {
+      "id": "S01",
+      "label": "Pathways advising",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S02",
+      "label": "Academic tutoring review",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S03",
+      "label": "Reading support",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S04",
+      "label": "Mathematics support",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S05",
+      "label": "Writing support",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S06",
+      "label": "Organization and learning-routine support",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S07",
+      "label": "Live teacher support",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S08",
+      "label": "College planning",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S09",
+      "label": "College-athletic academic planning",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S10",
+      "label": "Graduation and credit planning",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S11",
+      "label": "Parent homeschool planning",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    },
+    {
+      "id": "S12",
+      "label": "Academic progress monitoring",
+      "default_status": "POSSIBLE_SERVICE_NOT_PRESCRIBED"
+    }
+  ],
+  "opportunities": [
+    {
+      "id": "OP01",
+      "label": "Advanced coursework",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP02",
+      "label": "Honors exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP03",
+      "label": "AP exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP04",
+      "label": "Dual-enrollment exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP05",
+      "label": "College-course exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP06",
+      "label": "Research and independent projects",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP07",
+      "label": "Internship exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP08",
+      "label": "Career or CTE exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP09",
+      "label": "Industry-credential exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP10",
+      "label": "Athletics schedule coordination",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP11",
+      "label": "Arts and performance",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP12",
+      "label": "Entrepreneurship",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP13",
+      "label": "STEM enrichment",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP14",
+      "label": "Learning-community exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP15",
+      "label": "Travel-related learning",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP16",
+      "label": "Flexible weekly routine",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP17",
+      "label": "Hands-on and project exploration",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    },
+    {
+      "id": "OP18",
+      "label": "Foundational challenge and enrichment",
+      "default_status": "EXPLORE_NOT_ELIGIBLE"
+    }
+  ],
+  "review_signals": [
+    "REV_ADULT_SUPPORT",
+    "REV_LIVE_SUPPORT",
+    "REV_SOCIAL_PLAN",
+    "REV_ACADEMIC_CONTEXT",
+    "REV_FOUNDATIONAL_SKILLS",
+    "REV_ADVANCEMENT_READINESS",
+    "REV_COLLEGE_ATHLETICS",
+    "REV_NCAA",
+    "REV_RECLASSIFICATION",
+    "REV_TRANSCRIPT",
+    "REV_GRADUATION",
+    "REV_GRADUATION_UNKNOWN",
+    "REV_CREDIT_TRANSFER",
+    "REV_STATE_HOMESCHOOL",
+    "REV_STATE_AVAILABILITY",
+    "REV_COST_ALIGNMENT",
+    "REV_ENVIRONMENT",
+    "REV_PRIORITY_TRADEOFF",
+    "REV_AGE_GRADE_CONTEXT",
+    "REV_SCHEDULE_COMPATIBILITY",
+    "REV_SERVICE_AVAILABILITY"
+  ],
+  "constraints": [
+    "Never confuse an overlay or service with a school of record.",
+    "Current school is not assumed public, tuition-free, in-person, or high-support.",
+    "Online does not guarantee asynchronous scheduling, low adult involvement, or legal cross-state attendance.",
+    "No public numerical ability, fit or family-value score.",
+    "No provider IDs or invented real schools in Discovery V1.",
+    "B10 remains unavailable regardless of score or unmet need."
+  ]
+}

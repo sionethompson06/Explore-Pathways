@@ -1,6 +1,7 @@
 # Pathways Discovery App — Decision Log
 
-Version: 0.1.0-phase0-candidate
+Version: 0.2.0-phase0-corrected
+Owner reviewed and authorized this log's 0.1.0-phase0-candidate revision. DEC-B1 through DEC-B10 are now **ACCEPTED** by explicit owner authorization. DEC-C1 through DEC-C7 are now **RESOLVED** per the owner's specific instructions, implemented in `contracts/` (see `contracts/CHANGELOG.md` for the exact diff) and traced in `docs/pathways/REQUIREMENT_TRACEABILITY.md`. Phase 1 application implementation is authorized and in progress.
 Companion to `IMPLEMENTATION_CONTRACT.md`. Each row is one decision point. **Status** is one of `ACCEPTED` (already reflected in the pack's normalized specs/contracts, no further owner input required to build against it), `PROPOSED` (the pack itself flags this as needing explicit owner sign-off before it controls implementation), or `UNRESOLVED` (an open question this Phase 0 audit surfaced that the pack does not answer). **Blocks** indicates what this decision gates — nothing, Phase 1, Phase 3, Phase 4, or live launch.
 
 ## A. Decisions carried from the latest owner direction (ACCEPTED)
@@ -14,7 +15,7 @@ Companion to `IMPLEMENTATION_CONTRACT.md`. Each row is one decision point. **Sta
 | DEC-A5 | AI limited to two writing slots (R01 summary, R02 insight); never chooses pathways; report fully functional with zero AI keys | Spec 05, 08 (prompt); Spec 06 §5 | Nothing |
 | DEC-A6 | Provider/business/legal facts require explicit configuration/approval before assertion; mockups are visual reference only, never a source of copyable claims | Spec 06 §6; prompts/03 | Nothing |
 
-## B. Builder-review corrections proposed in Specification 06 (PROPOSED — owner acceptance requested)
+## B. Builder-review corrections proposed in Specification 06 (ACCEPTED — owner authorization received)
 
 | ID | Decision | Already implemented in contracts? | Blocks |
 |---|---|---|---|
@@ -29,21 +30,21 @@ Companion to `IMPLEMENTATION_CONTRACT.md`. Each row is one decision point. **Sta
 | DEC-B9 | Report storage/versioning subordinate to an approved retention/deletion policy | Partially — architecture anticipates this (`ReportSnapshot`, retention-governed `ProfileRevision`); actual retention *period* is a launch decision (see Section D) | Phase 1 (schema), launch (values) |
 | DEC-B10 | Advisory/sales workflow architecturally independent of educational rank | Yes — Spec 04 "Independent lead workflow"; engine input contract excludes lead fields entirely | Phase 1, Phase 4, Phase 7 |
 
-**Requested owner action:** one confirmation that DEC-B1 through DEC-B10 are accepted as currently drafted in the contracts closes this entire section. No re-drafting is proposed here; these are already-written content being surfaced for sign-off, per Specification 06's own instruction that Phase 0 must not apply them silently.
+**Owner action:** received. Accepted as written, subject to the clarifications in the owner's authorization message, none of which altered DEC-B1-B10's substance (the clarifications applied to DEC-C1-C7 instead). Closed.
 
-## C. New findings from this Phase 0 audit (UNRESOLVED)
+## C. New findings from this Phase 0 audit (RESOLVED per owner instruction)
 
 These came from manually cross-checking all 52 rules against all 38 questions and the full taxonomy (10 base models, 10 overlays, 12 supports, 18 opportunities, 20 review signals). Full explanation is in `IMPLEMENTATION_CONTRACT.md` §3.3; this table is the tracking record.
 
-| ID | Finding | Recommended resolution | Blocks |
-|---|---|---|---|
-| DEC-C1 | `ncaa_interest` (read by rule `ATH_004`, supplied in fixture `FX04`) has no canonical question ID in the 38-entry registry; it exists only as prose ("DISC_020 follow-up") in Spec 02 | Owner/engineering choice: (a) mint a formal ID (e.g. `DISC_020A`) with full wording/branch/allowed-values, or (b) document it explicitly as a structural sub-field of `DISC_020` in the question-bank schema. Either works; the pack must pick one. | Phase 3 (questionnaire), Phase 4 (engine validation) |
-| DEC-C2 | `DISC_022` offers `RESEARCH` as a selectable advancement interest; no rule maps it to `OP06` ("Research and independent projects") or anywhere else. A parent who picks it gets no acknowledgment. | Add a rule (pattern-consistent with `ADV_001`-`ADV_004`) mapping `advancement_interests contains RESEARCH` → activate `OP06`, review `REV_ADVANCEMENT_READINESS`. | Phase 4 |
-| DEC-C3 | Six opportunities are unreachable by any of the 52 rules: `OP06` (Research), `OP07` (Internship), `OP09` (Industry-credential), `OP12` (Entrepreneurship), `OP13` (STEM enrichment), `OP15` (Travel-related learning) | Either add activating rules for each (some have no corresponding question input yet either — e.g. no question currently captures "entrepreneurship" or "internship" interest, so this may require new question(s) too), or explicitly mark these as reserved/not-yet-active in `taxonomy.json` so Phase 4's validator doesn't expect them to be reachable. | Phase 4 |
-| DEC-C4 | Two supports are unreachable: `S01` (Pathways advising), `S08` (College planning) | Confirm whether `S01` is intentionally an always-offered baseline service outside the rule-gated mechanism (plausible, since advising is the product's universal next step) rather than a gap. `S08` has no rule despite `DISC_023` (`college_intent`) being an obvious candidate trigger — recommend adding one. | Phase 4 |
-| DEC-C5 | Two review signals have no documented trigger anywhere: `REV_AGE_GRADE_CONTEXT`, `REV_SERVICE_AVAILABILITY` | Most likely mappings (inferred by this audit, not stated in the pack): `REV_AGE_GRADE_CONTEXT` → emit when `grade_band = UNDETERMINED`; `REV_SERVICE_AVAILABILITY` → emit when advising/consultation is not live for the family's stated location. Needs explicit confirmation, not assumption, before Phase 4 encodes it. | Phase 4 |
-| DEC-C6 | Rules `HOME_003` and `PAR_002` are logically redundant (`PAR_002`'s condition is a strict superset of `HOME_003`'s; both produce identical score effects on B08/B09). Not a scoring bug — group aggregation already takes only one most-negative value — but a report-layer duplication risk (two differently-worded reasons for one underlying fact). | Deduplicate at the reason-message layer in Phase 4/5, or retire `HOME_003` in favor of `PAR_002` alone. Either is a content change, not an architecture change. | Phase 4, Phase 5 |
-| DEC-C7 (advisory only, not a blocker) | Rule density is uneven: `cost` and `context` groups each have exactly one contributing rule, versus three or more in most other groups. Given the two-group display gate, a family whose only strong signal is affordability or environment-concern alone will rarely clear the gate on that basis alone. | No action required to proceed; flagged for Phase 4 rule-authoring awareness and for the "one/zero cards is valid" expectation to be explained accordingly in QA. | None (informational) |
+| ID | Finding | Owner-directed resolution | Implemented at | Status |
+|---|---|---|---|---|
+| DEC-C1 | `ncaa_interest` had no canonical question ID. | Formal question `DISC_020A` added exactly per owner's specified wording, values, labels, and show-when (grade MIDDLE/HS AND athletics branch active AND `college_athletics_interest` DEFINITELY/POSSIBLY; never K-4). Explicit-UNKNOWN-vs-hidden distinction formalized as a `global_rules` entry. | `contracts/question-bank.json` | RESOLVED |
+| DEC-C2 | `RESEARCH` advancement interest had no rule. | New rule `ADV_007`: `advancement_interests contains RESEARCH` (MIDDLE/HS) → overlay `O02`, opportunity `OP06`, review `REV_ADVANCEMENT_READINESS`. Empty `score_effects` per instruction not to change base-model scores. Age-appropriateness already satisfied because K-4's DISC_022 value subset excludes RESEARCH entirely. | `contracts/rules.json`, `contracts/question-bank.json` | RESOLVED |
+| DEC-C3 | Six opportunities unreachable. | `OP06` made reachable via `ADV_007`. `OP07`, `OP09`, `OP12`, `OP13`, `OP15` explicitly marked `RESERVED` in `taxonomy.json` (kept, described, forbidden from display, exempted from reachability-check failure) rather than given fabricated triggers, since no question currently captures their underlying interest. | `contracts/taxonomy.json` | RESOLVED |
+| DEC-C4 | `S01`, `S08` unreachable. | `S01` marked `BASELINE` (potential service category, not rule-gated; actual availability comes from service configuration, never implies an assigned/purchased advisor). New signal-only rule `ADV_008`: `college_intent in [DEFINITELY, PROBABLY]` (MIDDLE/HS) → support `S08`. Empty `score_effects`; never K-4 (branch already excludes it). | `contracts/rules.json`, `contracts/taxonomy.json` | RESOLVED |
+| DEC-C5 | `REV_AGE_GRADE_CONTEXT`, `REV_SERVICE_AVAILABILITY` had no trigger. | New rule `GRADE_001`: `grade_band = UNDETERMINED` → `REV_AGE_GRADE_CONTEXT` (empty `score_effects`; neutral clarification need, never a risk score or presumption of retention/acceleration/disability/eligibility). `REV_SERVICE_AVAILABILITY` explicitly documented as **outside** the rules engine by design — an operational/service-configuration concern resolved by the Phase 6 consultation adapter, affecting only the report CTA, never educational scoring or candidate display. | `contracts/rules.json`, `contracts/taxonomy.json` | RESOLVED |
+| DEC-C6 | `HOME_003`/`PAR_002` redundant. | `HOME_003` marked `RETIRED` with `replacement_rule_id: PAR_002` and a `retired_reason` documenting the direct comparison confirming retirement changes no score and removes no unique behavior (kept in the file, not deleted, for historical explainability; Phase 4 engine must skip RETIRED rules). `PAR_002` given `dedup_key: HOME_MANAGEMENT_TRADEOFF` for report-layer deduplication. | `contracts/rules.json` | RESOLVED |
+| DEC-C7 | Thin `cost`/`context` groups. | Display gate left unchanged, exactly as instructed — no artificial score contributions added. Three regression fixtures added instead: `FX15_AFFORDABILITY_ONLY`, `FX16_ENVIRONMENT_ONLY`, `FX17_MOSTLY_UNKNOWN`, each asserting that a zero/minimal-card, `LIMITED_INFORMATION` outcome is valid and correct. | `fixtures/golden-profiles.json` | RESOLVED |
 
 ## D. Decisions needed only before live launch (not blockers to Phases 1-9 against synthetic data)
 
@@ -58,8 +59,8 @@ These came from manually cross-checking all 52 rules against all 38 questions an
 
 Until each of these is supplied, the corresponding feature returns an honest unavailable/request state. None is invented or defaulted anywhere in this contract.
 
-## E. Decision needed now to unblock Phase 1 specifically
+## E. Phase 1 stack (RESOLVED — owner-approved)
 
-| ID | Decision | Notes |
+| ID | Decision | Status |
 |---|---|---|
-| DEC-E1 | Confirm database/ORM pairing (e.g. Postgres + Drizzle vs. Postgres + Prisma) and auth provider (e.g. Auth.js vs. a managed provider) | Repository is greenfield (no existing selection to preserve). Recommendation in `IMPLEMENTATION_CONTRACT.md` §9 is to let the Phase 1 implementer choose a current, officially-supported pairing and record the exact pinned versions in `INTEGRATION_REGISTER.md`, rather than fixing version numbers in this document from memory. Owner may instead specify a preference now if one exists. |
+| DEC-E1 | Next.js App Router + TypeScript + PostgreSQL + Drizzle (schema/migrations) + Better Auth (authentication groundwork, email-link, live sending disabled) + Zod (runtime validation) + pnpm with a committed lockfile. Current mutually-compatible stable releases only; no beta/canary/RC pins. | RESOLVED — exact installed versions recorded in `INTEGRATION_REGISTER.md` once installed. |

@@ -1,0 +1,706 @@
+{
+  "version": "1.1.0-phase0-corrected",
+  "status": "PHASE_0_CORRECTED_AUTHORITATIVE",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C1. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/question-bank.json).",
+  "questions": [
+    {
+      "id": "DISC_001",
+      "field": "student_display_name",
+      "parent_wording": "What should we call your student? A first name or nickname is fine.",
+      "input_type": "short_text",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Optional presentation only. Never affects fit. Maximum 40 characters; fallback: your student."
+    },
+    {
+      "id": "DISC_002",
+      "field": "current_grade",
+      "parent_wording": "What grade is your student currently in?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "K-4 ELEMENTARY; 5-8 MIDDLE; 9-12 HIGH_SCHOOL; other/unknown UNDETERMINED. Do not infer grade from age.",
+      "allowed_values": [
+        "K",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_003",
+      "field": "student_age",
+      "parent_wording": "How old is your student?",
+      "input_type": "integer_or_unknown",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Optional age in years, not date of birth. No automatic eligibility or retention decision. Under-5 or adult entries receive neutral advisor review; do not infer educational placement."
+    },
+    {
+      "id": "DISC_004",
+      "field": "residence",
+      "parent_wording": "Where does your student currently live?",
+      "input_type": "location",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "State: US states and DC plus US_TERRITORY, OUTSIDE_US, UNKNOWN. ZIP optional string, never numeric. Do not infer legal residency, local eligibility, location permission, or service availability. State-only does not block generic Discovery."
+    },
+    {
+      "id": "DISC_005",
+      "field": "current_education_model",
+      "parent_wording": "How is your student currently learning?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Starting context only. UNKNOWN is not NOT_ENROLLED. No automatic school-change conclusion.",
+      "allowed_values": [
+        "TRADITIONAL_PUBLIC",
+        "CHARTER",
+        "PRIVATE",
+        "ONLINE",
+        "HOMESCHOOL",
+        "HYBRID",
+        "INDEPENDENT_STUDY",
+        "NOT_ENROLLED",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_006",
+      "field": "discovery_reasons",
+      "parent_wording": "What brought you to Pathways?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "K-4 hides COLLEGE_ADVANCEMENT, CREDIT_RECOVERY, GRADE_PLANNING. EXPLORING exclusive. OTHER needs no mandatory narrative.",
+      "allowed_values": [
+        "SCHEDULE_FLEXIBILITY",
+        "ATHLETICS",
+        "HOMESCHOOL",
+        "ONLINE",
+        "ACADEMIC_ACCELERATION",
+        "ADVANCED_COURSES",
+        "COLLEGE_ADVANCEMENT",
+        "CREDIT_RECOVERY",
+        "GRADE_PLANNING",
+        "TRAVEL",
+        "ARTS",
+        "CURRENT_SCHOOL_CONCERN",
+        "ACADEMIC_SUPPORT",
+        "DIFFERENT_ENVIRONMENT",
+        "PERSONALIZED_LEARNING",
+        "ENVIRONMENT_CONCERN",
+        "SMALLER_ENVIRONMENT",
+        "FAMILY_INVOLVEMENT",
+        "OTHER",
+        "EXPLORING"
+      ]
+    },
+    {
+      "id": "DISC_007",
+      "field": "primary_discovery_reason",
+      "parent_wording": "Which matters most to your family right now?",
+      "input_type": "single_from_previous",
+      "show_when": "MULTIPLE_DISCOVERY_REASONS",
+      "required_when_shown": true,
+      "matching_use": "Values restricted to current DISC_006 choices. Auto-derive if exactly one choice. No hidden default."
+    },
+    {
+      "id": "DISC_008",
+      "field": "desired_primary_change",
+      "parent_wording": "What would you most like to make possible?",
+      "input_type": "single",
+      "show_when": "PRIMARY_REASON_UNCLEAR",
+      "required_when_shown": false,
+      "matching_use": "Use only if primary reason OTHER/EXPLORING or unresolved; otherwise suppress redundant question. K-4 hides COLLEGE_COURSES.",
+      "allowed_values": [
+        "TIME_CONTROL",
+        "CHALLENGE",
+        "SUPPORT",
+        "ATHLETICS_TIME",
+        "LOCATION_FLEXIBILITY",
+        "COLLEGE_COURSES",
+        "DIFFERENT_ENVIRONMENT",
+        "BACK_ON_TRACK",
+        "PERSONALIZATION",
+        "OUTSIDE_OPPORTUNITIES",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_009",
+      "field": "reported_academic_position",
+      "parent_wording": "Overall, how would you describe your student academically?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Parent-reported perception only, not diagnostic evidence.",
+      "allowed_values": [
+        "AHEAD",
+        "ON_LEVEL",
+        "MIXED",
+        "STRUGGLING",
+        "SIGNIFICANT_CONCERNS",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_010",
+      "field": "reported_support_needs",
+      "parent_wording": "Where could additional support be helpful?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "NONE and UNKNOWN exclusive. PHONICS/ROUTINES/COMMUNICATION/CONFIDENCE elementary emphasis; MISSING_CREDITS only HS. Never infer diagnosis.",
+      "allowed_values": [
+        "READING",
+        "PHONICS",
+        "WRITING",
+        "MATH",
+        "SCIENCE",
+        "ROUTINES",
+        "ORGANIZATION",
+        "TIME_MANAGEMENT",
+        "ENGAGEMENT",
+        "TASK_COMPLETION",
+        "ATTENDANCE",
+        "MISSING_CREDITS",
+        "STUDY_SKILLS",
+        "COMMUNICATION",
+        "CONFIDENCE",
+        "NONE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_011",
+      "field": "learning_support_pattern",
+      "parent_wording": "When learning independently, what support is usually helpful?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "K-4 wording: When learning at home, how much adult help is useful? INDEPENDENT label becomes works for short periods. Never compare K-4 independence to HS.",
+      "allowed_values": [
+        "INDEPENDENT",
+        "OCCASIONAL_CHECK_INS",
+        "REGULAR_GUIDANCE",
+        "CLOSE_ADULT_SUPPORT",
+        "INDEPENDENT_WORK_DIFFICULT",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_012",
+      "field": "preferred_learning_environment",
+      "parent_wording": "Which learning experiences seem to work best?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Preferences, not scientifically assigned learning styles. UNKNOWN exclusive; no claim that modality preference determines ability.",
+      "allowed_values": [
+        "SELF_PACED",
+        "LIVE_TEACHER",
+        "BLEND",
+        "HANDS_ON",
+        "SMALL_GROUP",
+        "ONE_TO_ONE",
+        "BOOKS",
+        "TECHNOLOGY",
+        "MOVEMENT",
+        "UNKNOWN"
+      ],
+      "max_selections": 3
+    },
+    {
+      "id": "DISC_013",
+      "field": "flexibility_importance",
+      "parent_wording": "How important is a flexible school schedule?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Scheduling preference does not establish any provider capability.",
+      "allowed_values": [
+        "NOT_IMPORTANT",
+        "SOMEWHAT",
+        "VERY_IMPORTANT",
+        "ESSENTIAL",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_014",
+      "field": "flexibility_reasons",
+      "parent_wording": "What would greater flexibility make possible?",
+      "input_type": "multi",
+      "show_when": "FLEXIBILITY_SOMEWHAT_OR_HIGHER",
+      "required_when_shown": false,
+      "matching_use": "K-4 hides WORK and COLLEGE_COURSES. Do not solicit medical details. Deduplicate with DISC_006 and athletic branch.",
+      "allowed_values": [
+        "ATHLETIC_TRAINING",
+        "COMPETITION",
+        "ATHLETIC_TRAVEL",
+        "FAMILY_TRAVEL",
+        "ARTS",
+        "WORK",
+        "BUSINESS",
+        "APPOINTMENTS",
+        "COLLEGE_COURSES",
+        "PACE",
+        "FAMILY_RESPONSIBILITIES",
+        "FAMILY_TIME",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_015",
+      "field": "preferred_academic_time",
+      "parent_wording": "When would academics ideally happen?",
+      "input_type": "single",
+      "show_when": "FLEXIBILITY_SOMEWHAT_OR_HIGHER",
+      "required_when_shown": false,
+      "matching_use": "A preference is not a required unavailable time. Never derive afternoon unavailable from morning preferred.",
+      "allowed_values": [
+        "MORNING",
+        "AFTERNOON",
+        "EVENING",
+        "THROUGHOUT_DAY",
+        "VARIES",
+        "NO_PREFERENCE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_016",
+      "field": "primary_sport",
+      "parent_wording": "What is your student's main sport?",
+      "input_type": "short_text",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Optional structured sport list + other; 60 characters maximum. No prestige weighting."
+    },
+    {
+      "id": "DISC_017",
+      "field": "athletic_level",
+      "parent_wording": "Which best describes their current participation?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Advisor context only. Not educational ability, family value, recruiting potential, or score multiplier.",
+      "allowed_values": [
+        "RECREATIONAL",
+        "SCHOOL",
+        "CLUB_TRAVEL",
+        "REGIONAL",
+        "NATIONAL",
+        "ACADEMY",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_018",
+      "field": "weekly_athletic_commitment",
+      "parent_wording": "About how much time goes to training, practice, and competition weekly?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Scheduling context, not automatic proof of missing school.",
+      "allowed_values": [
+        "UNDER_5",
+        "HOURS_5_10",
+        "HOURS_11_15",
+        "HOURS_16_20",
+        "HOURS_21_PLUS",
+        "VARIES",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_019",
+      "field": "athletic_travel_frequency",
+      "parent_wording": "How often does athletics involve travel?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Travel does not equal permission to attend a virtual public school from anywhere.",
+      "allowed_values": [
+        "RARELY",
+        "FEW_YEAR",
+        "MONTHLY",
+        "SEVERAL_MONTH",
+        "WEEKLY",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_020",
+      "field": "college_athletics_interest",
+      "parent_wording": "Might college athletics be a future interest?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST_AND_MIDDLE_OR_HS",
+      "required_when_shown": false,
+      "matching_use": "Optional and future-oriented in middle grades. No implied division or eligibility. A DEFINITELY/POSSIBLY answer shows the formal follow-up question DISC_020A (ncaa_interest). Corrected at Phase 0 (DEC-C1): ncaa_interest was previously an undefined nested follow-up; it is now its own canonical question.",
+      "allowed_values": [
+        "DEFINITELY",
+        "POSSIBLY",
+        "PROBABLY_NOT",
+        "NO",
+        "TOO_EARLY",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_020A",
+      "field": "ncaa_interest",
+      "parent_wording": "Would you like help understanding NCAA academic requirements as part of planning for possible college athletics?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST_AND_MIDDLE_OR_HS_AND_COLLEGE_ATHLETICS_DEFINITELY_OR_POSSIBLY",
+      "required_when_shown": false,
+      "matching_use": "Added at Phase 0 corrections (DEC-C1), owner-specified wording and values. show_when resolves to: DISC_020's branch (ATHLETICS_INTEREST_AND_MIDDLE_OR_HS) is active AND DISC_020 was answered DEFINITELY or POSSIBLY. Never shown for K-4 (unreachable there because the parent athletics/college-athletics branches are never active for ELEMENTARY). Do not infer NCAA interest from athletic participation alone; this question must be explicitly answered to produce ncaa_interest. An explicitly selected UNKNOWN is a recorded answer and may support review signal REV_NCAA (per rule ATH_004). A skipped, missing, or branch-inactive (hidden) question produces an effective value of NOT_APPLICABLE, not UNKNOWN, and must not satisfy any rule condition or trigger any signal -- this distinction (per Specification 02's 'UNKNOWN, NOT_ANSWERED and NOT_APPLICABLE are distinct') is the specific ambiguity this question's addition resolves. On any branch change that deactivates this question, its raw and effective answers are removed from the active profile per the standing global rule on hidden branch answers.",
+      "allowed_values": [
+        "YES",
+        "MAYBE",
+        "NO",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "YES": "Yes",
+        "MAYBE": "Possibly",
+        "NO": "No",
+        "UNKNOWN": "I'm not sure"
+      }
+    },
+    {
+      "id": "DISC_021",
+      "field": "reclassification_interest",
+      "parent_wording": "Is grade placement or reclassification something you want an advisor to review?",
+      "input_type": "single",
+      "show_when": "GRADE_PLANNING_REASON_AND_MIDDLE_OR_HS",
+      "required_when_shown": false,
+      "matching_use": "Review only; never recommend repeating a grade or promise another eligibility year.",
+      "allowed_values": [
+        "YES",
+        "POSSIBLY",
+        "NO",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_022",
+      "field": "advancement_interests",
+      "parent_wording": "Which opportunities would you like to explore?",
+      "input_type": "multi",
+      "show_when": "ADVANCEMENT_INTEREST_OR_REPORTED_AHEAD_OR_MIXED",
+      "required_when_shown": false,
+      "matching_use": "K-4 only ENRICHMENT, ADVANCED_MATH, ADVANCED_SCIENCE, UNKNOWN; age-appropriate labels -- RESEARCH is not offered to K-4, so the age-appropriate-language requirement in DEC-C2 is already satisfied by this existing filter. Middle shows early/longer-term wording. None imply readiness or eligibility. RESEARCH is connected to opportunity OP06 via rule ADV_007 (added at Phase 0 corrections, DEC-C2): an interest signal only, never proof of readiness, and it does not change any base-model score.",
+      "allowed_values": [
+        "ENRICHMENT",
+        "HONORS",
+        "AP",
+        "ADVANCED_MATH",
+        "ADVANCED_SCIENCE",
+        "HIGH_SCHOOL_EARLY",
+        "DUAL_ENROLLMENT",
+        "COLLEGE_COURSES",
+        "EARLY_GRADUATION",
+        "RESEARCH",
+        "CAREER_CTE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_023",
+      "field": "college_intent",
+      "parent_wording": "Is college currently part of the future plan?",
+      "input_type": "single",
+      "show_when": "HIGH_SCHOOL_OR_MIDDLE_WITH_ADVANCEMENT_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "College interest alone does not activate dual enrollment or advanced-course readiness. A DEFINITELY/PROBABLY answer activates the S08 college-planning possible-service signal (rule ADV_008, added at Phase 0 corrections, DEC-C4). That signal never implies AP, dual-enrollment, admissions or college readiness, and never affects base-model ranking; it is never shown for K-4, since this question's own branch already excludes K-4.",
+      "allowed_values": [
+        "DEFINITELY",
+        "PROBABLY",
+        "UNKNOWN",
+        "PROBABLY_NOT",
+        "NOT_CURRENTLY"
+      ]
+    },
+    {
+      "id": "DISC_024",
+      "field": "reported_graduation_status",
+      "parent_wording": "As far as you know, is your student on track for graduation?",
+      "input_type": "single",
+      "show_when": "HIGH_SCHOOL",
+      "required_when_shown": false,
+      "matching_use": "Parent-reported; not an audit. NO triggers graduation review, not an assertion that credits are missing.",
+      "allowed_values": [
+        "YES",
+        "MOSTLY",
+        "NO",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_025",
+      "field": "credit_recovery_need",
+      "parent_wording": "Are missing credits part of what you want to address?",
+      "input_type": "single",
+      "show_when": "HIGH_SCHOOL_AND_GRADUATION_OR_CREDIT_CONCERN",
+      "required_when_shown": false,
+      "matching_use": "Only YES/POSSIBLY activates credit-recovery exploration. Unknown remains unknown.",
+      "allowed_values": [
+        "YES",
+        "POSSIBLY",
+        "NO",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_026",
+      "field": "family_priorities",
+      "parent_wording": "Choose up to three priorities for your next educational arrangement.",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "K-4 hides COLLEGE_PREPARATION and DIPLOMA. All known selections weight declared dimensions only; no universal school-quality scores. UNKNOWN exclusive.",
+      "allowed_values": [
+        "FLEXIBILITY",
+        "ACADEMIC_QUALITY",
+        "PERSONAL_SUPPORT",
+        "COLLEGE_PREPARATION",
+        "ATHLETIC_FLEXIBILITY",
+        "ACCREDITATION",
+        "DIPLOMA",
+        "AFFORDABILITY",
+        "ADVANCED_COURSES",
+        "SELF_PACED",
+        "LIVE_TEACHER",
+        "SOCIAL",
+        "LOCATION_FLEXIBILITY",
+        "ACADEMIC_ADVANCEMENT",
+        "SMALL_ENVIRONMENT",
+        "UNKNOWN"
+      ],
+      "max_selections": 3
+    },
+    {
+      "id": "DISC_027",
+      "field": "desired_parent_involvement",
+      "parent_wording": "How involved would you like to be in day-to-day learning?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Desire is distinct from actual availability. PROGRAM_MANAGES does not mean no supervision exists.",
+      "allowed_values": [
+        "VERY_INVOLVED",
+        "REGULAR_SUPPORT",
+        "CHECK_INS",
+        "PROGRAM_MANAGES",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_028",
+      "field": "cost_preference",
+      "parent_wording": "How would you like us to approach program costs?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Preference, not budget ceiling or income. Never make a family less worthy of advice. Pathways fees disclosed separately.",
+      "allowed_values": [
+        "PREFER_TUITION_FREE",
+        "OPEN_AFFORDABLE_PAID",
+        "OPEN_PRIVATE_TUITION",
+        "DEPENDS_ON_VALUE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_029",
+      "field": "desired_start_timeline",
+      "parent_wording": "When would you like a change to begin?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Lead operations only. Cannot change educational ranking or emotional pressure.",
+      "allowed_values": [
+        "ASAP",
+        "WITHIN_30_DAYS",
+        "NEXT_SEMESTER",
+        "NEXT_SCHOOL_YEAR",
+        "EXPLORING",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_030",
+      "field": "parent_context",
+      "parent_wording": "Anything else you want an advisor to know?",
+      "input_type": "short_text",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Optional 750 characters; reminder not to include medical details, IDs, or records. Exclude from model input, ranking, pixels and analytics. Advisor-only sanitized display; no diagnosis or intent inference."
+    },
+    {
+      "id": "DISC_E01",
+      "field": "foundational_learning_priorities",
+      "parent_wording": "Which foundations would you particularly like to strengthen?",
+      "input_type": "multi",
+      "show_when": "ELEMENTARY_AND_SUPPORT_PRIORITIES_NOT_ALREADY_KNOWN",
+      "required_when_shown": false,
+      "matching_use": "Do not repeat known support questions. NONE/UNKNOWN exclusive.",
+      "allowed_values": [
+        "READING",
+        "PHONICS",
+        "COMPREHENSION",
+        "WRITING",
+        "MATH",
+        "PROBLEM_SOLVING",
+        "LEARNING_ROUTINES",
+        "NONE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_E02",
+      "field": "daytime_support_person",
+      "parent_wording": "Who might support learning during the day?",
+      "input_type": "single",
+      "show_when": "ELEMENTARY_OR_HOME_BASED_INTEREST_WITH_SUPPORT_NEED",
+      "required_when_shown": false,
+      "matching_use": "Person type does not prove capacity, teacher qualification, or sufficient supervision.",
+      "allowed_values": [
+        "PARENT_GUARDIAN",
+        "FAMILY_MEMBER",
+        "TUTOR_COACH",
+        "CHILDCARE_PROVIDER",
+        "LEARNING_PROGRAM",
+        "VARIES",
+        "NOT_ARRANGED",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_E03",
+      "field": "in_person_peer_preference",
+      "parent_wording": "How important is regular in-person time with other students?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Available across K-12. Never call a preference a developmental diagnosis.",
+      "allowed_values": [
+        "VERY_IMPORTANT",
+        "SOMEWHAT",
+        "NICE_TO_HAVE",
+        "NOT_PRIORITY",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_E04",
+      "field": "daytime_support_availability",
+      "parent_wording": "How much daytime adult support could realistically be available?",
+      "input_type": "single",
+      "show_when": "ELEMENTARY_OR_HOME_BASED_INTEREST_WITH_SUPPORT_NEED",
+      "required_when_shown": false,
+      "matching_use": "New gap-filling input. Availability, not willingness. No assumption of unattended learning being suitable.",
+      "allowed_values": [
+        "MOST_LEARNING_DAYS",
+        "PART_OF_DAY",
+        "OCCASIONAL",
+        "NOT_ARRANGED",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_031",
+      "field": "school_change_preference",
+      "parent_wording": "Are you mainly looking to change schools or improve the current arrangement?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "New gap-filling input. Required before any school-change inference; unknown does not mean seeking change.",
+      "allowed_values": [
+        "STAY_CURRENT",
+        "OPEN_TO_CHANGE",
+        "SEEKING_CHANGE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_032",
+      "field": "unavailable_academic_times",
+      "parent_wording": "Are there times when scheduled instruction would not work?",
+      "input_type": "multi",
+      "show_when": "FLEXIBILITY_VERY_OR_ESSENTIAL",
+      "required_when_shown": false,
+      "matching_use": "New explicit constraint input. NONE/UNKNOWN exclusive; do not infer minimum-hours waivers.",
+      "allowed_values": [
+        "MORNING",
+        "AFTERNOON",
+        "EVENING",
+        "VARIES",
+        "NONE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_033",
+      "field": "desired_delivery",
+      "parent_wording": "Which arrangements would you like to consider?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "New direct model-interest input. Distinguishes delivery interest from preferred activity.",
+      "allowed_values": [
+        "ONLINE_SELF_PACED",
+        "ONLINE_TEACHER_SUPPORTED",
+        "HYBRID",
+        "IN_PERSON",
+        "HOMESCHOOL",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_034",
+      "field": "subject_advancement_interests",
+      "parent_wording": "Are there particular subjects where your student wants more challenge?",
+      "input_type": "multi",
+      "show_when": "ADVANCEMENT_INTEREST_OR_REPORTED_AHEAD_OR_MIXED",
+      "required_when_shown": false,
+      "matching_use": "New subject-interest input; not demonstrated ability. No math-ahead inference from overall-ahead answer.",
+      "allowed_values": [
+        "MATH",
+        "READING",
+        "WRITING",
+        "SCIENCE",
+        "OTHER",
+        "NONE",
+        "UNKNOWN"
+      ]
+    }
+  ],
+  "global_rules": [
+    "Required means an answer may be UNKNOWN; do not force certainty.",
+    "NONE, UNKNOWN and EXPLORING are exclusive where specified.",
+    "Do not initialize a real answer by default.",
+    "Branch changes remove hidden answers from effective evaluation; preserve only necessary revision history under retention policy.",
+    "Do not claim a fixed question count or completion time before measuring actual branches.",
+    "Render friendly labels for enum values; technical values are never displayed.",
+    "Display name is optional and excluded from scoring and AI requests.",
+    "No transcripts, diagnoses, medical documents, full address, date of birth, Social Security number or NCAA identifier in Discovery.",
+    "An explicitly selected UNKNOWN is a recorded answer and may support a review signal where a rule documents that (e.g. DISC_020A -> REV_NCAA via ATH_004). A skipped, missing, or branch-inactive (hidden) question is never treated as an explicit UNKNOWN -- its effective value is NOT_APPLICABLE -- and must not satisfy any rule condition or trigger any signal. Added at Phase 0 corrections, DEC-C1; this generalizes the same distinction to every question in this registry, not only DISC_020A."
+  ]
+}

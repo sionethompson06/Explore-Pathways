@@ -1,17 +1,18 @@
 # Pathways Discovery App — Integration Register
 
-Version: 0.1.0-phase0-candidate
-No secrets, credentials, tokens, or account identifiers appear in this document. "CONFIRMED" means an owner-approved, specific choice exists and is recorded here by name/mode only (never a key or credential). "UNCONFIRMED" means no choice has been made yet. Nothing in this register implies a service is connected, live, or tested — Phase 0 performed no integration work.
+Version: 0.2.0-phase0-corrected
+No secrets, credentials, tokens, or account identifiers appear in this document. "CONFIRMED" means an owner-approved, specific choice exists and is recorded here by name/mode only (never a key or credential). "UNCONFIRMED" means no choice has been made yet. A CONFIRMED framework/library choice does not by itself imply a live external service is connected — see the "Mode" column.
 
-| Integration | Status | Mode at Phase 1 start | Notes |
+| Integration | Status | Mode at Phase 1 | Notes |
 |---|---|---|---|
 | Source control / repository | CONFIRMED | — | `sionethompson06/Explore-Pathways` on GitHub, branch `claude/kind-gauss-f2d7ng`, owner-confirmed. |
-| Hosting/deployment | UNCONFIRMED | Not deployed | Pack proposes Vercel as a default; no project has been connected or verified for this repository. Preview deployments, if used later, do not count as production approval. |
-| Application framework | UNCONFIRMED (recommended, not yet owner-fixed) | — | Next.js App Router + TypeScript recommended per master prompt default (repository is greenfield — no existing framework to preserve or conflict with). Exact version to be pinned at Phase 1 start by checking official documentation, not invented here. |
-| Database | UNCONFIRMED | Not provisioned | PostgreSQL recommended per master prompt default. No instance provisioned; no connection string exists. |
-| Migration/ORM layer | UNCONFIRMED | — | A typed migration layer is required (e.g. Drizzle or Prisma migrate); specific choice is DEC-E1 in `DECISION_LOG.md`. |
-| Schema validation | UNCONFIRMED (recommended) | — | Zod or equivalent runtime validator recommended for both request validation and public DTO shaping. |
-| Authentication | UNCONFIRMED | Not configured | Must be an established, supported provider implementing verified single-use email sign-in (e.g. Auth.js or a managed provider) — never bespoke auth. Google sign-in, if added, is optional. Specific provider is DEC-E1. Until configured, no staff/advisor/admin area may be exposed unsecured. |
+| Hosting/deployment | UNCONFIRMED | Not deployed | No project connected or verified for this repository. No paid services, hosted accounts, or domains authorized in Phase 1. Preview deployments, if used later, do not count as production approval. |
+| Application framework | **CONFIRMED (DEC-E1)** | Local dev/build only | Next.js App Router + TypeScript. Exact installed version recorded below once scaffolded. |
+| Database | **CONFIRMED (DEC-E1)** | Local/test instance only | PostgreSQL. This session's sandbox has `postgresql-16` (server + client) already installed; used as a local/test cluster only, never a production database. |
+| Migration/ORM layer | **CONFIRMED (DEC-E1)** | Local/test only | Drizzle (schema + typed migrations). |
+| Schema validation | **CONFIRMED (DEC-E1)** | — | Zod, used at every server boundary (request validation and public DTO shaping). |
+| Package manager | **CONFIRMED (DEC-E1)** | — | pnpm, with a committed lockfile. |
+| Authentication | **CONFIRMED (DEC-E1)**, library only | Groundwork only, live sending disabled | Better Auth via its Drizzle adapter, implementing verified single-use email-link sign-in. No real email is sent in Phase 1 (see Email row). No staff/advisor/admin area is exposed unsecured. No custom auth system, impersonation route, public role selector, or dev-login shortcut. |
 | Email delivery | UNCONFIRMED | UNCONFIGURED | No provider selected, no sending credential exists. Report/save flows must present an honest "not yet available" state for anything requiring real email until this is resolved (DEC-D3). |
 | Scheduler / consultation booking | UNCONFIRMED | UNCONFIGURED | Adapter must support three modes end-to-end: `UNCONFIGURED`, `REQUEST_ONLY`, `LIVE_VERIFIED`. No provider selected. A browser redirect must never be treated as a confirmed booking; confirmation requires a validated provider API/webhook with signature and replay checks. |
 | AI / LLM provider | UNCONFIRMED | DISABLED | Optional for launch (Phase 8). No provider, data-handling terms, or budget ceiling approved yet (DEC-D5). The full Discovery Report must work end-to-end with this in the DISABLED state — this is a hard MVP requirement, not a temporary placeholder. |
