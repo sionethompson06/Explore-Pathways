@@ -1,8 +1,14 @@
+import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { eq, and, gt } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import { discoverySession } from "@/db/schema";
 import { generateId } from "./ids";
+import {
+  guestSessionTtlMs,
+  guestSessionTtlSeconds,
+  isSecureCookieDeploymentMode,
+} from "./session-config";
 
 /**
  * Guest session issuance and lookup. Implements Specification 07
@@ -15,9 +21,15 @@ import { generateId } from "./ids";
  * OWASP API1:2023 (Broken Object Level Authorization) means by
  * "identifiers alone do not provide authorization" applied to
  * sessions specifically.
+ *
+ * Session expiry is not data deletion: an expired session simply
+ * stops being a valid credential. The underlying row (and anything it
+ * links to) is subject to the separate, not-yet-implemented
+ * retention/deletion policy tracked in
+ * docs/pathways/DECISION_LOG.md section D -- this module invents no
+ * retention period of its own.
  */
 
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 const TOKEN_BYTES = 32; // 256 bits of entropy
 
 export interface IssuedGuestSession {
@@ -38,7 +50,7 @@ export async function createGuestSession(
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
   const tokenHash = hashToken(token);
   const id = generateId("dsess");
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  const expiresAt = new Date(Date.now() + guestSessionTtlMs);
 
   await db.insert(discoverySession).values({
     id,
@@ -74,13 +86,23 @@ export async function getGuestSessionByToken(db: Database, token: string) {
 
 export const GUEST_SESSION_COOKIE_NAME = "pathways_guest_session";
 
-/** Cookie attributes for the guest session token. Secure is conditional on the deployment actually being HTTPS. */
-export function guestSessionCookieOptions(isProduction: boolean) {
+/**
+ * Cookie attributes for the guest session token. `secure` reflects
+ * DEPLOYMENT_MODE (see session-config.ts's
+ * isSecureCookieDeploymentMode), not NODE_ENV -- a production build
+ * is not necessarily a live HTTPS deployment, and this function does
+ * not itself inspect any inbound request's protocol (no route sets
+ * this cookie yet; see session-config.ts's doc comment for what a
+ * future route should additionally check). `maxAge` and the database
+ * expiry above are both derived from the same guestSessionTtl*
+ * constants, so they cannot drift apart.
+ */
+export function guestSessionCookieOptions() {
   return {
     httpOnly: true,
-    secure: isProduction,
+    secure: isSecureCookieDeploymentMode(),
     sameSite: "lax" as const,
     path: "/",
-    maxAge: SESSION_TTL_MS / 1000,
+    maxAge: guestSessionTtlSeconds,
   };
 }

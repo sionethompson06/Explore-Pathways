@@ -10,6 +10,8 @@ import {
   assignAdvisor,
   unassignAdvisor,
   grantStaffRole,
+  revokeStaffRole,
+  softDeleteStudent,
 } from "./helpers/factories";
 import {
   getStudentForGuestToken,
@@ -120,23 +122,90 @@ describe.skipIf(!hasTestDatabase)("record-level authorization (real PostgreSQL)"
         assertGuardianCanAccessStudent(db(), guardian, student),
       ).rejects.toThrow(AuthorizationError);
     });
+
+    it("a guardian link exists but the student has been soft-deleted: deny", async () => {
+      const guardian = await createTestUser(db());
+      const student = await createTestStudent(db());
+      await linkGuardianToStudent(db(), guardian, student);
+
+      await expect(
+        assertGuardianCanAccessStudent(db(), guardian, student),
+      ).resolves.toBeUndefined();
+
+      await softDeleteStudent(db(), student);
+
+      await expect(
+        assertGuardianCanAccessStudent(db(), guardian, student),
+      ).rejects.toThrow(AuthorizationError);
+
+      const results = await listStudentsForGuardian(db(), guardian);
+      expect(results).toHaveLength(0);
+    });
   });
 
-  describe("unauthorized advisor access rejection", () => {
-    it("an advisor with no assignment cannot access a case", async () => {
+  describe("advisor case access requires BOTH an active staff role AND an active assignment", () => {
+    it("assignment exists, but no active staff role: deny", async () => {
       const advisor = await createTestUser(db());
       const student = await createTestStudent(db());
       const caseId = await createConsultationRequest(db(), student);
+      await assignAdvisor(db(), advisor, caseId);
 
       await expect(
         assertAdvisorCanAccessCase(db(), advisor, caseId),
       ).rejects.toThrow(AuthorizationError);
     });
 
-    it("an advisor gains access only after explicit assignment, and loses it on unassignment", async () => {
+    it("staff role revoked, assignment remains: deny", async () => {
       const advisor = await createTestUser(db());
       const student = await createTestStudent(db());
       const caseId = await createConsultationRequest(db(), student);
+      const roleId = await grantStaffRole(db(), advisor, "ADVISOR");
+      await assignAdvisor(db(), advisor, caseId);
+
+      await expect(
+        assertAdvisorCanAccessCase(db(), advisor, caseId),
+      ).resolves.toBeUndefined();
+
+      await revokeStaffRole(db(), roleId);
+
+      await expect(
+        assertAdvisorCanAccessCase(db(), advisor, caseId),
+      ).rejects.toThrow(AuthorizationError);
+    });
+
+    it("active staff role without assignment: deny", async () => {
+      const advisor = await createTestUser(db());
+      const student = await createTestStudent(db());
+      const caseId = await createConsultationRequest(db(), student);
+      await grantStaffRole(db(), advisor, "ADVISOR");
+
+      await expect(
+        assertAdvisorCanAccessCase(db(), advisor, caseId),
+      ).rejects.toThrow(AuthorizationError);
+      expect(await listActiveCasesForAdvisor(db(), advisor)).toHaveLength(0);
+    });
+
+    it("active role plus active assignment: allow", async () => {
+      const advisor = await createTestUser(db());
+      const student = await createTestStudent(db());
+      const caseId = await createConsultationRequest(db(), student);
+      await grantStaffRole(db(), advisor, "ADVISOR");
+      await assignAdvisor(db(), advisor, caseId);
+
+      await expect(
+        assertAdvisorCanAccessCase(db(), advisor, caseId),
+      ).resolves.toBeUndefined();
+
+      const cases = await listActiveCasesForAdvisor(db(), advisor);
+      expect(cases).toHaveLength(1);
+      expect(cases[0]!.case.id).toBe(caseId);
+    });
+
+    it("an advisor loses access on unassignment even while their staff role remains active", async () => {
+      const advisor = await createTestUser(db());
+      const student = await createTestStudent(db());
+      const caseId = await createConsultationRequest(db(), student);
+      await grantStaffRole(db(), advisor, "ADVISOR");
 
       const assignmentId = await assignAdvisor(db(), advisor, caseId);
       await expect(
@@ -149,11 +218,13 @@ describe.skipIf(!hasTestDatabase)("record-level authorization (real PostgreSQL)"
       ).rejects.toThrow(AuthorizationError);
     });
 
-    it("advisor A cannot access advisor B's assigned case", async () => {
+    it("cross-advisor access is denied even when advisor A holds an active staff role", async () => {
       const advisorA = await createTestUser(db());
       const advisorB = await createTestUser(db());
       const student = await createTestStudent(db());
       const caseForB = await createConsultationRequest(db(), student);
+      await grantStaffRole(db(), advisorA, "ADVISOR");
+      await grantStaffRole(db(), advisorB, "ADVISOR");
       await assignAdvisor(db(), advisorB, caseForB);
 
       await expect(
@@ -162,6 +233,17 @@ describe.skipIf(!hasTestDatabase)("record-level authorization (real PostgreSQL)"
 
       const casesForA = await listActiveCasesForAdvisor(db(), advisorA);
       expect(casesForA).toHaveLength(0);
+    });
+
+    it("ADMIN gets no bypass: an active ADMIN role without an assignment is still denied", async () => {
+      const admin = await createTestUser(db());
+      const student = await createTestStudent(db());
+      const caseId = await createConsultationRequest(db(), student);
+      await grantStaffRole(db(), admin, "ADMIN");
+
+      await expect(
+        assertAdvisorCanAccessCase(db(), admin, caseId),
+      ).rejects.toThrow(AuthorizationError);
     });
   });
 

@@ -127,3 +127,20 @@ export async function grantStaffRole(
   await db.insert(staffRole).values({ id, userId, role });
   return id;
 }
+
+export async function revokeStaffRole(db: Database, staffRoleId: string) {
+  await db
+    .update(staffRole)
+    .set({ revokedAt: new Date() })
+    .where(eq(staffRole.id, staffRoleId));
+}
+
+export async function softDeleteStudent(
+  db: Database,
+  studentPathwayRecordId: string,
+) {
+  await db
+    .update(studentPathwayRecord)
+    .set({ deletedAt: new Date() })
+    .where(eq(studentPathwayRecord.id, studentPathwayRecordId));
+}

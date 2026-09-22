@@ -83,5 +83,97 @@ describe("environment validation", () => {
     expect(env.SCHEDULER_MODE).toBe("UNCONFIGURED");
     expect(env.AI_MODE).toBe("DISABLED");
     expect(env.isProduction).toBe(false);
+    expect(env.DEPLOYMENT_MODE).toBe("LOCAL");
+  });
+
+  describe("DEPLOYMENT_MODE / session TTL (Phase 1A repair item 5)", () => {
+    it("defaults to DEPLOYMENT_MODE=LOCAL and an illustrative 60-minute session TTL when unset", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("LOCAL");
+      expect(env.GUEST_SESSION_TTL_MINUTES).toBeUndefined();
+      expect(env.resolvedGuestSessionTtlMinutes).toBe(60);
+    });
+
+    it("rejects a GUEST_SESSION_TTL_MINUTES below the minimum bound", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        GUEST_SESSION_TTL_MINUTES: "1",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/at least 5 minutes/);
+    });
+
+    it("rejects a GUEST_SESSION_TTL_MINUTES above the maximum bound", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        GUEST_SESSION_TTL_MINUTES: "99999",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/at most 31 days/);
+    });
+
+    it("refuses DEPLOYMENT_MODE=LIVE without LIVE_DEPLOYMENT_APPROVED=true", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "LIVE",
+        GUEST_SESSION_TTL_MINUTES: "120",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/LIVE_DEPLOYMENT_APPROVED/);
+    });
+
+    it("refuses DEPLOYMENT_MODE=LIVE without an explicit GUEST_SESSION_TTL_MINUTES, even when approved", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "LIVE",
+        LIVE_DEPLOYMENT_APPROVED: "true",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(
+        /GUEST_SESSION_TTL_MINUTES to be set explicitly/,
+      );
+    });
+
+    it("accepts DEPLOYMENT_MODE=LIVE only with both LIVE_DEPLOYMENT_APPROVED=true and an explicit TTL", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "LIVE",
+        LIVE_DEPLOYMENT_APPROVED: "true",
+        GUEST_SESSION_TTL_MINUTES: "120",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("LIVE");
+      expect(env.resolvedGuestSessionTtlMinutes).toBe(120);
+    });
+
+    it("PREVIEW mode uses the illustrative default without requiring approval or an explicit TTL", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "PREVIEW",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("PREVIEW");
+      expect(env.resolvedGuestSessionTtlMinutes).toBe(60);
+    });
   });
 });

@@ -13,6 +13,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
+      // Test-only: see tests/helpers/server-only-shim.ts for why this
+      // alias exists and why it does not weaken the real app build's
+      // server/client boundary enforcement (that's Next.js's own
+      // bundler, untouched by this file).
+      "server-only": path.resolve(
+        import.meta.dirname,
+        "./tests/helpers/server-only-shim.ts",
+      ),
     },
   },
 });

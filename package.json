@@ -16,17 +16,20 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:ci": "vitest run --reporter=default --reporter=json --outputFile=vitest-report.json",
+    "test:assert-integration-ran": "tsx scripts/assert-integration-tests-ran.ts vitest-report.json",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:test:setup": "tsx scripts/test-db-setup.ts"
   },
   "dependencies": {
-    "next": "16.3.5",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
     "better-auth": "1.7.5",
     "drizzle-orm": "0.45.3",
+    "next": "16.3.5",
     "pg": "8.23.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -34,11 +37,11 @@
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "typescript": "6.0.3",
     "drizzle-kit": "0.31.11",
-    "vitest": "5.0.1",
-    "tsx": "4.23.15",
     "eslint": "9.39.5",
-    "eslint-config-next": "16.3.5"
+    "eslint-config-next": "16.3.5",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "5.0.1"
   }
 }

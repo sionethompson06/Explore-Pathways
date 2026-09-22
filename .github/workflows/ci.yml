@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "claude/**"
   pull_request:
 
 # Least-privilege default; this workflow only reads the repository
@@ -32,14 +34,16 @@ jobs:
           --health-retries 10
 
     env:
-      NODE_ENV: test
-      # Local-to-this-job PostgreSQL only (the `postgres` service
-      # container above, discarded when the job ends). Never a real
-      # or shared database -- see docs/pathways/INTEGRATION_REGISTER.md.
+      # Shared by every step below; step-specific NODE_ENV/mode
+      # overrides are applied per step further down, not here --
+      # a production-mode build must actually run in production
+      # mode, and test-mode test execution must actually run in
+      # test mode. Neither should be forced into the other's mode
+      # for the whole job.
       DATABASE_URL: postgresql://pathways_app:pathways_ci_only_password@localhost:5432/pathways_dev
       TEST_DATABASE_URL: postgresql://pathways_app:pathways_ci_only_password@localhost:5432/pathways_test
       # A CI-only placeholder value, not a real secret: satisfies
-      # src/env.ts's 32-character minimum so build/typecheck/test can
+      # src/env.ts's minimum-length check so build/typecheck/test can
       # run. Better Auth is never asked to protect anything real in
       # this workflow.
       BETTER_AUTH_SECRET: ci-only-placeholder-secret-not-a-real-credential-00
@@ -48,6 +52,11 @@ jobs:
       SCHEDULER_MODE: UNCONFIGURED
       AI_MODE: DISABLED
       ALLOW_TEST_FIXTURES: "false"
+      # An explicit, bounded, clearly-non-production illustrative
+      # value -- see docs/pathways/INTEGRATION_REGISTER.md and
+      # src/server/session.ts. This is a CI/local-test convenience,
+      # never an approved production retention/session policy.
+      GUEST_SESSION_TTL_MINUTES: "60"
 
     steps:
       - uses: actions/checkout@v4
@@ -76,12 +85,37 @@ jobs:
             -c "CREATE DATABASE pathways_test OWNER pathways_app;"
 
       - name: Apply migrations (dev + test databases)
+        env:
+          NODE_ENV: development
         run: |
           pnpm db:migrate
           pnpm db:test:setup
 
-      - name: Test
-        run: pnpm test
+      - name: Test (PostgreSQL integration coverage is required, not optional)
+        env:
+          NODE_ENV: test
+          # This is the specific gate the owner's Phase 1A repair asked
+          # for: a missing/blank TEST_DATABASE_URL must fail this job,
+          # never silently skip into green. An *unreachable* database
+          # (the service container down, network refused) already
+          # fails independently -- resetTestDatabase()'s connection
+          # attempt throws rather than skipping. See
+          # tests/helpers/db.ts.
+          REQUIRE_TEST_DATABASE: "true"
+        run: pnpm test:ci
 
-      - name: Build
+      - name: Verify the required integration suites actually executed
+        # A second, independent guard: even if the two PostgreSQL-
+        # dependent test files were accidentally excluded from this
+        # run (a broken include glob, a renamed/deleted file) rather
+        # than merely lacking a database, the previous step could
+        # exit 0 with no failing assertions and no visible sign that
+        # required coverage vanished. This reads vitest's own JSON
+        # report and fails loudly if that happened. See
+        # scripts/assert-integration-tests-ran.ts.
+        run: pnpm test:assert-integration-ran
+
+      - name: Build (production mode)
+        env:
+          NODE_ENV: production
         run: pnpm build

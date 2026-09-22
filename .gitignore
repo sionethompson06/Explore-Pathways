@@ -26,6 +26,7 @@ pnpm-debug.log*
 # Test/coverage output
 coverage/
 .vitest-cache/
+vitest-report.json
 
 # TypeScript build info
 *.tsbuildinfo

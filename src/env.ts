@@ -1,3 +1,4 @@
+import "server-only";
 import { z } from "zod";
 
 /**
@@ -62,10 +63,55 @@ const rawEnvSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+
+  // Deployment/operating mode, deliberately separate from NODE_ENV.
+  // A production *build* (NODE_ENV=production) can still be a
+  // non-live preview deployment; NODE_ENV alone must not be read as
+  // "this is collecting real family data." LOCAL: a developer's own
+  // machine. PREVIEW: a deployed-but-not-publicly-promoted build
+  // (e.g. a PR preview). LIVE: the only mode that may ever collect
+  // real guest/family data -- gated further below.
+  DEPLOYMENT_MODE: z.enum(["LOCAL", "PREVIEW", "LIVE"]).default("LOCAL"),
+
+  // Bounded guest-session lifetime, shared by the database expiry and
+  // the cookie maxAge (see src/server/session-config.ts). Optional
+  // here: LOCAL/PREVIEW get a documented illustrative default below;
+  // LIVE must set this explicitly (checked below) since a session
+  // lifetime is an operating decision, not a code default, once real
+  // guest data is involved.
+  GUEST_SESSION_TTL_MINUTES: z.coerce
+    .number()
+    .int()
+    .min(5, "GUEST_SESSION_TTL_MINUTES must be at least 5 minutes")
+    .max(44640, "GUEST_SESSION_TTL_MINUTES must be at most 31 days (44640 minutes)")
+    .optional(),
+
+  // A single, explicit, human-made acknowledgment that the required
+  // operating and privacy approvals for live guest data collection
+  // have actually been obtained (see docs/pathways/DECISION_LOG.md
+  // section D -- retention periods, privacy notice, terms, etc. are
+  // still owner decisions, not implemented by this flag). This flag
+  // does not grant those approvals; it only refuses to run in LIVE
+  // mode without someone affirmatively setting it, so LIVE mode can
+  // never be reached by a missing/default value. No retention or
+  // deletion subsystem is implemented by this flag.
+  LIVE_DEPLOYMENT_APPROVED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 });
+
+// Local/test/preview illustrative default only -- see
+// GUEST_SESSION_TTL_MINUTES above and docs/pathways/INTEGRATION_REGISTER.md.
+// This is a development convenience, never an approved production
+// retention or session policy; LIVE mode must set the variable
+// explicitly and is refused below if it does not.
+const ILLUSTRATIVE_DEV_SESSION_TTL_MINUTES = 60;
 
 export type Env = z.infer<typeof rawEnvSchema> & {
   isProduction: boolean;
+  /** Resolved, always-present TTL in minutes: the configured value, or the illustrative LOCAL/PREVIEW default. Never used to silently supply a default in LIVE mode -- that is refused below instead. */
+  resolvedGuestSessionTtlMinutes: number;
 };
 
 function loadEnv(): Env {
@@ -104,7 +150,38 @@ function loadEnv(): Env {
     );
   }
 
-  return { ...env, isProduction: env.NODE_ENV === "production" };
+  // LIVE deployment mode is the only mode that may ever collect real
+  // guest/family data. Both of the following must be explicitly and
+  // affirmatively configured -- there is no default that reaches
+  // LIVE. This is a narrow activation gate, not a substitute for the
+  // actual retention/privacy/terms decisions still tracked as launch
+  // decisions in docs/pathways/DECISION_LOG.md section D.
+  if (env.DEPLOYMENT_MODE === "LIVE") {
+    if (!env.LIVE_DEPLOYMENT_APPROVED) {
+      throw new Error(
+        "DEPLOYMENT_MODE=LIVE requires LIVE_DEPLOYMENT_APPROVED=true. Refusing to " +
+          "start: live guest data collection must not activate without an explicit, " +
+          "affirmative acknowledgment that the required operating and privacy " +
+          "approvals have actually been obtained.",
+      );
+    }
+    if (env.GUEST_SESSION_TTL_MINUTES === undefined) {
+      throw new Error(
+        "DEPLOYMENT_MODE=LIVE requires GUEST_SESSION_TTL_MINUTES to be set " +
+          "explicitly. Refusing to start: a live session lifetime is an operating " +
+          "decision, not a code default.",
+      );
+    }
+  }
+
+  const resolvedGuestSessionTtlMinutes =
+    env.GUEST_SESSION_TTL_MINUTES ?? ILLUSTRATIVE_DEV_SESSION_TTL_MINUTES;
+
+  return {
+    ...env,
+    isProduction: env.NODE_ENV === "production",
+    resolvedGuestSessionTtlMinutes,
+  };
 }
 
 export const env = loadEnv();

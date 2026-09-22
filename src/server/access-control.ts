@@ -1,3 +1,4 @@
+import "server-only";
 import { eq, and, isNull } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import {
@@ -25,6 +26,17 @@ import { getGuestSessionByToken } from "./session";
  * "Missing configuration must fail safely, not disable security":
  * every function below denies (returns null / empty / throws) on any
  * ambiguous or missing input, never on a best-effort default-allow.
+ *
+ * Every `guardianUserId` / `advisorUserId` / `userId` parameter below
+ * is a raw ID-based internal check: it must be supplied only from an
+ * ID that already came out of a verified Principal (see
+ * src/server/principal.ts), never directly from client-supplied
+ * input (a request body field, query param, or header). These
+ * functions have no way to verify that on their own -- that
+ * verification is principal.ts's job, at the request-facing boundary,
+ * before any of these are ever called. Treat every function in this
+ * file as internal to that boundary, not as something a route handler
+ * calls directly on unverified input.
  */
 
 export class AuthorizationError extends Error {
@@ -94,11 +106,17 @@ export async function listStudentsForGuardian(
 }
 
 /**
- * Throws AuthorizationError unless an explicit, active link exists.
- * Callers must call this (or use listStudentsForGuardian, which is
- * self-scoping) before any read or write touching a specific student
- * on a guardian's behalf. Knowing the student's ID -- e.g. from a URL
- * a guardian typed or guessed -- is never sufficient by itself.
+ * Throws AuthorizationError unless an explicit, active link exists
+ * AND the student record itself still exists and is not soft-deleted
+ * -- matching listStudentsForGuardian's restriction exactly, so a
+ * single-record check can never be more permissive than the list
+ * (previously it was: this used to check only the link, not the
+ * student's deletedAt, unlike the list; fixed here per Phase 1A
+ * repair item 3). Callers must call this (or use
+ * listStudentsForGuardian, which is self-scoping) before any read or
+ * write touching a specific student on a guardian's behalf. Knowing
+ * the student's ID -- e.g. from a URL a guardian typed or guessed --
+ * is never sufficient by itself.
  */
 export async function assertGuardianCanAccessStudent(
   db: Database,
@@ -108,6 +126,10 @@ export async function assertGuardianCanAccessStudent(
   const [link] = await db
     .select({ id: guardianStudentAccess.id })
     .from(guardianStudentAccess)
+    .innerJoin(
+      studentPathwayRecord,
+      eq(guardianStudentAccess.studentPathwayRecordId, studentPathwayRecord.id),
+    )
     .where(
       and(
         eq(guardianStudentAccess.guardianUserId, guardianUserId),
@@ -116,73 +138,22 @@ export async function assertGuardianCanAccessStudent(
           studentPathwayRecordId,
         ),
         isNull(guardianStudentAccess.revokedAt),
+        isNull(studentPathwayRecord.deletedAt),
       ),
     )
     .limit(1);
 
   if (!link) {
     throw new AuthorizationError(
-      "Guardian does not have an active, explicit link to this student.",
+      "Guardian does not have an active, explicit link to an existing, non-deleted student.",
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Advisor access -- explicit case assignment only.
-// ---------------------------------------------------------------------------
-
-/**
- * Every consultation case actively assigned to this advisor. An
- * advisor sees nothing by simply being staff -- only cases someone
- * (another advisor/admin, per the Phase 7 workflow, not built yet)
- * explicitly assigned to them and has not since unassigned.
- */
-export async function listActiveCasesForAdvisor(
-  db: Database,
-  advisorUserId: string,
-) {
-  return db
-    .select({ case: consultationRequest })
-    .from(advisorAssignment)
-    .innerJoin(
-      consultationRequest,
-      eq(advisorAssignment.consultationRequestId, consultationRequest.id),
-    )
-    .where(
-      and(
-        eq(advisorAssignment.advisorUserId, advisorUserId),
-        isNull(advisorAssignment.unassignedAt),
-      ),
-    );
-}
-
-/** Throws unless the advisor has an active assignment to this exact case. */
-export async function assertAdvisorCanAccessCase(
-  db: Database,
-  advisorUserId: string,
-  consultationRequestId: string,
-): Promise<void> {
-  const [assignment] = await db
-    .select({ id: advisorAssignment.id })
-    .from(advisorAssignment)
-    .where(
-      and(
-        eq(advisorAssignment.advisorUserId, advisorUserId),
-        eq(advisorAssignment.consultationRequestId, consultationRequestId),
-        isNull(advisorAssignment.unassignedAt),
-      ),
-    )
-    .limit(1);
-
-  if (!assignment) {
-    throw new AuthorizationError(
-      "Advisor does not have an active assignment to this case.",
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Staff role -- never self-selected, never trusted from a client claim.
+// Staff role -- never self-selected, never trusted from a client
+// claim. Defined before the advisor-access section below, which
+// depends on it.
 // ---------------------------------------------------------------------------
 
 type StaffRoleValue = (typeof staffRoleEnum.enumValues)[number];
@@ -219,4 +190,92 @@ export async function requireStaffRole(
     );
   }
   return role;
+}
+
+// ---------------------------------------------------------------------------
+// Advisor access -- BOTH an active authorized staff role AND an
+// active case assignment are required, always, for both list and
+// single-case functions (Phase 1A repair item 3). Neither check
+// alone is sufficient: an active assignment left over after a staff
+// role is revoked must deny (a former advisor's old assignments do
+// not survive their staff status), and simply holding a staff role
+// must never itself grant visibility into a case nobody assigned.
+//
+// ADMIN is included in the allowed-role set alongside ADVISOR, but
+// gets no different treatment: an ADMIN with no assignment to a case
+// is denied exactly like anyone else. There is deliberately no
+// "if admin, skip the assignment check" branch anywhere in this file
+// -- that would be the blanket admin bypass the Phase 1A repair
+// explicitly prohibits. An admin who needs to see a specific case
+// must be explicitly assigned to it, the same as an advisor.
+// ---------------------------------------------------------------------------
+
+const CASE_ACCESS_ROLES = ["ADVISOR", "ADMIN"] as const satisfies readonly StaffRoleValue[];
+
+/**
+ * Every consultation case actively assigned to this advisor, but only
+ * if they currently hold an active, authorized staff role at all. An
+ * advisor sees nothing by simply being staff -- only cases someone
+ * (another advisor/admin, per the Phase 7 workflow, not built yet)
+ * explicitly assigned to them and has not since unassigned -- and
+ * sees nothing at all, regardless of old assignments, once their
+ * staff role is revoked.
+ */
+export async function listActiveCasesForAdvisor(
+  db: Database,
+  advisorUserId: string,
+) {
+  const role = await getStaffRole(db, advisorUserId);
+  if (!role || !CASE_ACCESS_ROLES.includes(role)) return [];
+
+  return db
+    .select({ case: consultationRequest })
+    .from(advisorAssignment)
+    .innerJoin(
+      consultationRequest,
+      eq(advisorAssignment.consultationRequestId, consultationRequest.id),
+    )
+    .where(
+      and(
+        eq(advisorAssignment.advisorUserId, advisorUserId),
+        isNull(advisorAssignment.unassignedAt),
+      ),
+    );
+}
+
+/**
+ * Throws unless the advisor BOTH currently holds an active,
+ * authorized staff role AND has an active assignment to this exact
+ * case. Checked in that order so a revoked staff role fails fast
+ * without needing to also look up the assignment.
+ */
+export async function assertAdvisorCanAccessCase(
+  db: Database,
+  advisorUserId: string,
+  consultationRequestId: string,
+): Promise<void> {
+  const role = await getStaffRole(db, advisorUserId);
+  if (!role || !CASE_ACCESS_ROLES.includes(role)) {
+    throw new AuthorizationError(
+      "User does not hold an active, authorized staff role required for case access.",
+    );
+  }
+
+  const [assignment] = await db
+    .select({ id: advisorAssignment.id })
+    .from(advisorAssignment)
+    .where(
+      and(
+        eq(advisorAssignment.advisorUserId, advisorUserId),
+        eq(advisorAssignment.consultationRequestId, consultationRequestId),
+        isNull(advisorAssignment.unassignedAt),
+      ),
+    )
+    .limit(1);
+
+  if (!assignment) {
+    throw new AuthorizationError(
+      "Advisor does not have an active assignment to this case.",
+    );
+  }
 }

@@ -13,6 +13,29 @@ const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 
 export const hasTestDatabase = Boolean(TEST_DATABASE_URL);
 
+/**
+ * An explicitly partial local run (no TEST_DATABASE_URL set) is
+ * allowed to skip the PostgreSQL-dependent suites honestly -- see
+ * every describe.skipIf(!hasTestDatabase) block. That is a real,
+ * visible "skipped" outcome, never reported as "passed."
+ *
+ * CI (or anyone who wants the same guarantee) sets
+ * REQUIRE_TEST_DATABASE=true, which turns a missing TEST_DATABASE_URL
+ * into a hard failure at module load -- before any test can be
+ * silently skipped into a green run. An *unreachable* (as opposed to
+ * merely unset) database is already a hard failure independent of
+ * this flag: resetTestDatabase()'s connection attempt rejects and
+ * fails the test, it does not skip.
+ */
+if (process.env.REQUIRE_TEST_DATABASE === "true" && !hasTestDatabase) {
+  throw new Error(
+    "REQUIRE_TEST_DATABASE=true but TEST_DATABASE_URL is not set. " +
+      "This run is configured to require real PostgreSQL integration " +
+      "coverage (e.g. CI) and must fail loudly rather than silently " +
+      "skip the persistence/authorization test suites.",
+  );
+}
+
 let pool: Pool | undefined;
 export const testDb = TEST_DATABASE_URL
   ? drizzle(
