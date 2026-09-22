@@ -28,6 +28,14 @@ coverage/
 .vitest-cache/
 vitest-report.json
 
+# Playwright output (screenshots/traces are local inspection evidence,
+# not committed -- their capture is reported in the evidence docs
+# instead of the binary files themselves)
+/screenshots/
+/test-results/
+/playwright-report/
+/blob-report/
+
 # TypeScript build info
 *.tsbuildinfo
 

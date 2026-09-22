@@ -1,6 +1,6 @@
 # Pathways Discovery App — Integration Register
 
-Version: 0.3.0-phase1a-repair
+Version: 0.4.0-phase2-complete
 No secrets, credentials, tokens, or account identifiers appear in this document. "CONFIRMED" means an owner-approved, specific choice exists and is recorded here by name/mode only (never a key or credential). "UNCONFIRMED" means no choice has been made yet. A CONFIRMED framework/library choice does not by itself imply a live external service is connected — see the "Mode" column.
 
 | Integration | Status | Mode at Phase 1 | Notes |
@@ -19,7 +19,8 @@ No secrets, credentials, tokens, or account identifiers appear in this document.
 | Scheduler / consultation booking | UNCONFIRMED | UNCONFIGURED | Adapter must support three modes end-to-end: `UNCONFIGURED`, `REQUEST_ONLY`, `LIVE_VERIFIED`. No provider selected. A browser redirect must never be treated as a confirmed booking; confirmation requires a validated provider API/webhook with signature and replay checks. |
 | AI / LLM provider | UNCONFIRMED | DISABLED | Optional for launch (Phase 8). No provider, data-handling terms, or budget ceiling approved yet (DEC-D5). The full Discovery Report must work end-to-end with this in the DISABLED state — this is a hard MVP requirement, not a temporary placeholder. |
 | Analytics | UNCONFIRMED (recommended, not yet owner-fixed) | — | First-party only; no third-party ad pixels or session-replay tooling permitted on intake/report/auth/booking/staff screens under any configuration. |
-| Media / imagery rights | UNCONFIRMED | — | The two supplied homepage mockups are design reference only; no photography or copy from them may be treated as licensed or available for production use without separate confirmation (DEC-D6). |
+| Media / imagery rights | UNCONFIRMED | — | The two supplied homepage mockups are design reference only; no photography or copy from them may be treated as licensed or available for production use without separate confirmation (DEC-D6). **As built in Phase 2, this is moot for the current site**: zero photographs or stock imagery are used anywhere -- every visual is CSS or hand-written inline SVG. See `MEDIA_SOURCE_REGISTER.md`. This row stays UNCONFIRMED because a *future* phase wanting real photography would still need DEC-D6 resolved; nothing in Phase 2 required it. |
+| Public marketing site (Phase 2) | **BUILT** | Non-indexable development preview | `/`, `/how-it-works`, 4 `/pathways/[slug]` audience pages, `/for-partners`, `/discover` (honest entry point only), `/privacy`, `/terms` -- all real routes, no dead links (verified by `tests/e2e/navigation.spec.ts`). Makes zero database calls and zero third-party network calls. `app/robots.ts` disallows every crawler on every route; root layout's per-page `robots: {index:false, follow:false}` metadata does the same at the page level -- both must stay in force until a separate live-launch/public-indexing decision. See `PHASE_STATUS.md` "Phase 2 evidence" for full detail. |
 
 ## What each UNCONFIRMED integration means operationally right now
 

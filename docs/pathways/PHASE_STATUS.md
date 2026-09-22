@@ -1,14 +1,16 @@
 # Pathways Discovery App — Phase Status
 
-Version: 0.4.0-phase1a-repair
+Version: 0.5.0-phase2-complete
 This document is updated at the end of every phase per the master prompt's "End-of-phase evidence and stop rule." A phase is never marked COMPLETE on the strength of a compile/build alone.
+
+**Owner acceptance recorded 2026-09-22:** the owner reviewed the Phase 1A repair's actual GitHub Actions dispatch -- run [35712550363](https://github.com/sionethompson06/Explore-Pathways/actions/runs/35712550363) (commit `b459183`), conclusion `success` -- and explicitly accepted Phase 1 and Phase 1A for continued development, with the explicit caveat "This is not production-launch approval." The owner then authorized Phase 2 (Marketing Website and Design System) in the same message, with the explicit stop instruction "Stop after the Phase 2 evidence report... Do not proceed to Phase 3."
 
 | Phase | Description | Status | Date | Evidence |
 |---|---|---|---|---|
 | Phase 0 | Reconcile requirements, freeze build contract | **COMPLETE** | 2026-09-22 | See "Phase 0 completion evidence" below. |
 | Phase 0 corrections | Apply owner-approved DEC-B1-B10 acceptance and DEC-C1-C7 resolutions to the contracts | **COMPLETE** | 2026-09-22 | See "Phase 0 corrections evidence" below. Committed separately from Phase 1 code, per owner instruction. |
-| Phase 1 | Foundation, contracts, safe persistence | **COMPLETE, THEN REPAIRED** | 2026-09-22 | See "Phase 1 evidence" below. Six real correctness/security gaps were subsequently found in review and fixed under a targeted repair, not a redo -- see "Phase 1A repair evidence" below. |
-| Phase 2 | Marketing website and design system | NOT_STARTED | — | Depends on Phase 1. |
+| Phase 1 | Foundation, contracts, safe persistence | **COMPLETE, THEN REPAIRED, OWNER-ACCEPTED** | 2026-09-22 | See "Phase 1 evidence" below. Six real correctness/security gaps were subsequently found in review and fixed under a targeted repair -- see "Phase 1A repair evidence" below. Owner-accepted for continued development (not production-launch approval) after inspecting the actual passing GitHub Actions run. |
+| Phase 2 | Marketing website and design system | **COMPLETE** | 2026-09-22 | See "Phase 2 evidence" below. |
 | Phase 3 | Conditional Discovery profile | NOT_STARTED | — | Depends on Phase 1; DEC-C1 (`ncaa_interest` canonical ID) should be resolved first. |
 | Phase 4 | Deterministic recommendation and evidence engine | NOT_STARTED | — | Depends on Phase 1/3; DEC-C1 through DEC-C6 should be resolved first (see `DECISION_LOG.md` §C). |
 | Phase 5 | Discovery Report, template-complete | NOT_STARTED | — | Depends on Phase 4. |
@@ -160,4 +162,46 @@ The final pushed commit for this repair is `b459183` (two commits: `65a91a6` the
 - Magic-link's full lifecycle is proven correct against Better Auth's real code paths using an in-memory test-only delivery adapter; no real email provider has ever been connected in any phase, so the *send* step of a genuine production email flow remains unverified by construction (it does not exist yet -- see `INTEGRATION_REGISTER.md`).
 - `DEPLOYMENT_MODE=LIVE` and its required `GUEST_SESSION_TTL_MINUTES`/`LIVE_DEPLOYMENT_APPROVED` gating are validated by unit tests only; no actual LIVE deployment has ever been attempted or approved (see `DECISION_LOG.md` §D).
 
-Phase 2 remains **NOT_STARTED**. This repair is stopped here, per explicit owner instruction ("Do not restart planning, redesign the architecture, change the business model, or begin Phase 2... Stop after the evidence report").
+This repair is stopped here, per explicit owner instruction ("Do not restart planning, redesign the architecture, change the business model, or begin Phase 2... Stop after the evidence report"). Phase 2 was subsequently separately authorized -- see "Phase 2 evidence" below.
+
+## Phase 2 evidence
+
+**Scope executed:** the public marketing website and its design system, exactly as authorized -- homepage (all 8 sections), `/how-it-works`, four `/pathways/[slug]` audience pages, `/for-partners`, `/discover` (an honest entry point, not the Phase 3 questionnaire), `/privacy` and `/terms` (draft shells), `app/robots.ts` and `app/sitemap.ts`, and a small reusable component/token system. No recommendation rule, scoring logic, auth policy, access-control model, or database schema was touched. No real email/scheduler/AI, no third-party tracking, no new external service, no hosting change, no merge to `main`.
+
+**Design approach:** CSS custom-property tokens (`app/globals.css`) plus CSS Modules per component -- deliberately not a framework install (no Tailwind/Chakra/etc.), since none of the components needed justify one. Colors (deep navy structure, restrained teal accent, warm-neutral backgrounds), spacing, and tone follow the two supplied homepage mockups' general direction only; no pixel, photo, or copy was taken from them (see `MEDIA_SOURCE_REGISTER.md`). All icons and the hero illustration are hand-written inline SVG -- zero photographs or stock imagery anywhere on the site.
+
+**Files changed:** see the Phase 2 commit for the exact list. New: `app/globals.css`, `app/robots.ts`, `app/sitemap.ts`, `app/how-it-works/page.tsx`, `app/pathways/[slug]/page.tsx`, `app/for-partners/page.tsx`, `app/discover/{page.tsx,discover.module.css}`, `app/privacy/page.tsx`, `app/terms/page.tsx`, `src/components/marketing/**` (Header, MobileNav, Footer, Container, Section, Button, Card, Badge, Faq, Logo, PageHero, MarketingLayout, icons, and `home/` subcomponents), `src/content/**` (goals, nav-links, faq, how-it-works, audience-pages, report-preview), `playwright.config.ts`, `tests/e2e/{navigation,mobile-menu,responsive}.spec.ts`, `docs/pathways/MEDIA_SOURCE_REGISTER.md`, `README.md`. Rewritten: `app/page.tsx` (the real homepage, replacing the Phase 1 placeholder), `app/layout.tsx` (real metadata + marketing chrome, `robots: {index:false, follow:false}` kept intentionally), `package.json`/`pnpm-lock.yaml` (added `@playwright/test` devDependency + `test:e2e` script), `.gitignore` (Playwright output).
+
+**Schema/migration changes:** none. The marketing site makes no database call.
+
+**Commands actually run and results (this session):**
+- `pnpm typecheck` -- pass, 0 errors.
+- `pnpm lint` -- pass, 0 errors/warnings.
+- `pnpm test` -- **70/70 tests passed, 8/8 files**, real local PostgreSQL -- identical to the Phase 1A count, confirming the marketing site introduced zero regression to the foundation/auth/authorization layer.
+- `pnpm build` (`NODE_ENV=production`) -- pass. All 15 routes compiled: `/`, `/how-it-works`, `/for-partners`, `/privacy`, `/terms`, `/robots.txt`, `/sitemap.xml` statically prerendered; the four `/pathways/[slug]` audience pages statically generated via `generateStaticParams`; `/discover` and the two `/api/*` routes server-rendered on demand (expected -- `/discover` reads a query-string search param).
+- `pnpm test:e2e` (Playwright, Chromium) -- **26/26 tests passed**: public navigation (header/footer links, audience routes, 404 on an unknown slug, FAQ accordion, privacy/terms draft labeling), Discovery entry routing (allowlisted interest selection, an XSS-attempt query value confirmed never reflected into the page, changing the selection), mobile navigation (closed by default with the panel's links genuinely absent from the DOM, opens/closes, Escape closes it, its CTA works), responsive screenshots at 375/768/1440px plus a 320px reflow check and a 400px zoom-equivalent check (all confirmed no horizontal overflow), and four accessibility checks (skip link, visible keyboard focus, `prefers-reduced-motion` honored, exactly one `<h1>` per page).
+- Manual verification beyond the automated suite: started the production build (`pnpm start`) and diffed a screenshot against the `next dev` screenshots -- confirmed Next.js's dev-only floating "N" indicator (visible in the `next dev`-served screenshots below) does not appear in the production build; it is framework dev tooling, not application UI.
+- Every one of the 9 Playwright-captured screenshots (`screenshots/*.png`, git-ignored -- local inspection evidence) was actually opened and visually inspected, not just captured: no clipped/overflowing text, no overlapping buttons, correct 1/2/3-column responsive collapse of the goal grid and journey list, correct mobile-menu panel rendering, correct footer column stacking at narrow widths.
+
+**Tests not run / not applicable to Phase 2:**
+- Playwright was run locally against this sandbox's pre-installed Chromium; it was **not** added to `.github/workflows/ci.yml`. GitHub's hosted runners have no pre-installed browser, so wiring this in would mean adding a `playwright install --with-deps` step -- a real CI workflow change beyond what this phase's authorization asked for ("do not redesign the stack... without a concrete need"). The existing CI job (typecheck/lint/migrate/test/build) runs unchanged and unweakened; Playwright's 26/26 local pass is real evidence for this delivery, but is not yet independently re-verified by GitHub Actions the way the Vitest suite is.
+- No axe-core/Lighthouse automated accessibility audit was run; the accessibility checks that did run (skip link, focus visibility, reduced motion, heading structure, keyboard-reachable mobile menu, no color-only information) are the specific items the Phase 2 authorization listed, checked directly, not a full WCAG 2.2 AA conformance claim.
+- No cross-browser check (Firefox/WebKit) -- only the pre-installed Chromium was available in this sandbox.
+
+**Screenshots:** captured at 375px, 768px, 1440px (homepage plus `/discover`, `/how-it-works`, `/pathways/athletes`), a 320px reflow check, and the open mobile menu -- 9 files under `screenshots/` (git-ignored; described and inspected above, not committed as binary files).
+
+**Integration mode:** unchanged from Phase 1A -- `EMAIL_MODE=UNCONFIGURED`, `SCHEDULER_MODE=UNCONFIGURED`, `AI_MODE=DISABLED`. The marketing site adds no new integration and calls no external service.
+
+**Security/privacy implications:** none new. The marketing site is entirely static/stateless public content; `/discover` reads and validates a query-string parameter against a closed allowlist (`isGoalInterest`) and never persists, submits, or reflects unvalidated input -- confirmed by a dedicated Playwright test with an XSS-attempt payload. `robots: {index:false, follow:false}` (page metadata) and `app/robots.ts` (site-wide `Disallow: /`) both stay in force; this development preview is not authorized for public search indexing.
+
+**Remaining placeholders / unavailable functions:**
+- `/for-partners` states plainly that partner inquiries have no working intake yet -- no fake form was added.
+- `/privacy` and `/terms` are explicitly labeled draft/unavailable-for-live-use, per DEC-D1/D6 remaining unresolved.
+- `app/sitemap.ts` uses the app's own configured `BETTER_AUTH_URL` (`http://localhost:3000` in dev/CI) as its base -- there is no real production domain to point it at yet (see `INTEGRATION_REGISTER.md` "Hosting/deployment": still UNCONFIRMED).
+- The six homepage "family goal" interests are a Phase-2-only marketing concept (`src/content/goals.ts`), deliberately not written into `contracts/question-bank.json` -- Phase 3's real questionnaire will need its own decision about whether/how to reuse this vocabulary, not inherit it silently.
+
+**Local viewing/test instructions:** see `README.md` (new this phase) -- `pnpm dev` then open `http://localhost:3000/`; `pnpm test:e2e` for the Playwright suite.
+
+**Remaining blockers to Phase 3:** none technical. DEC-C1 (`ncaa_interest`) is already resolved (Phase 0 corrections). No new blocker was introduced by Phase 2.
+
+This phase is stopped here, per explicit owner instruction ("Stop after the Phase 2 evidence report... Do not proceed to Phase 3"). Phase 3 has not been started.

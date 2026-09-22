@@ -1,6 +1,6 @@
 # Pathways Discovery App — Requirement Traceability
 
-Version: 0.3.0-phase1a-repair
+Version: 0.4.0-phase2-complete
 Supersedes the 0.1.0-phase0-candidate version of this document. This revision regenerates every count directly from the corrected source JSON in `contracts/` and `fixtures/` (verified by the scripts shown inline, not retyped by hand), corrects two counting errors the owner identified in the prior revision, and adds the requested Total/Active/Reserved/Retired/Excluded/Missing-input breakdown.
 
 **Corrections to the prior revision, as identified by the owner:**
@@ -150,3 +150,23 @@ The Phase 1A repair (see `docs/pathways/PHASE_STATUS.md` "Phase 1A repair eviden
 | N10 | Every phase ships tests + traceability + real evidence; compile success ≠ acceptance | The Phase 1 CI workflow had not been dispatched against actual GitHub Actions, and nothing forced the required job to fail if the test database or integration suites were unavailable/didn't run. | `.github/workflows/ci.yml` rewritten (`main`/`claude/**` triggers, per-step `NODE_ENV`, `REQUIRE_TEST_DATABASE=true` on the test step). Two independent, layered fail-loud mechanisms added: `tests/helpers/db.ts`'s `REQUIRE_TEST_DATABASE` gate (throws if the DB URL is missing) and `scripts/assert-integration-tests-ran.ts` (parses the JSON test report and fails if the required suites are missing or non-passing). Both verified locally with real non-zero exit codes; see `PHASE_STATUS.md` "CI status" for the actual GitHub Actions dispatch result. | DOCUMENTED AND REPAIRED |
 
 No count in §2-§7 above changed as part of this repair -- confirmed by re-running the same `contracts/CHANGELOG.md` validation script this session with no diff against the counts already recorded in this document.
+
+## 11. Phase 2 — screen/route map trace
+
+`IMPLEMENTATION_CONTRACT.md` §7 lists the full screen/route map. Phase 2's authorization was scoped to the public marketing subset of that map only; every other route remains NOT_STARTED and unimplemented, not merely undocumented.
+
+| Route (per §7) | Phase 2 status | Notes |
+|---|---|---|
+| `/` | **IMPLEMENTED** | Full homepage, sections A-H per the Phase 2 authorization. |
+| `/how-it-works` | **IMPLEMENTED** | Full journey (6 steps) + the free-report/paid-Blueprint distinction. |
+| `/pathways/[slug]` (athletes, homeschool, flexible-learning, academic-opportunities) | **IMPLEMENTED** | All 4 approved slugs; `generateStaticParams` scoped to exactly these 4; any other slug 404s. |
+| `/for-partners` | **IMPLEMENTED** | Collaboration-model explanation; no invented partner list, no non-functional intake form. |
+| `/discover` | **IMPLEMENTED (entry point only)** | Honest Phase 2 entry point per the authorization's explicit instruction -- allowlisted `interest` query param, no data collection, states the real questionnaire isn't enabled. Not the Phase 3 questionnaire. |
+| `/discover/profile`, `/discover/report` | NOT_STARTED | Phase 3/5. |
+| `/reports/[id]` | NOT_STARTED | Phase 5. |
+| `/consultation`, `/consultation/confirmation` | NOT_STARTED | Phase 6. |
+| `/sign-in` | NOT_STARTED | No sign-in UI exists; `app/api/auth/[...all]` (Phase 1 groundwork) is unchanged. |
+| `/family`, `/advisor`, `/advisor/cases/[id]`, `/admin` | NOT_STARTED | Phase 6/7. Per the Phase 2 authorization: "Do not add visible navigation to unfinished dashboards or sign-in flows" -- confirmed none of these appear in the header, footer, or sitemap. |
+| `/privacy`, `/terms` | **IMPLEMENTED (draft shells)** | Explicitly labeled draft/unavailable for live use, per DEC-D1; no fabricated legal contact info. |
+
+**Every visible link resolves to a real route or an honest availability statement** -- verified by `tests/e2e/navigation.spec.ts` ("footer links are all real, working routes", "an unknown pathways slug returns a real 404, not a silent blank page") and by the production build's route table (`pnpm build` output, `PHASE_STATUS.md` "Phase 2 evidence").

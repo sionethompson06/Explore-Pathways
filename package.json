@@ -18,6 +18,7 @@
     "test:watch": "vitest",
     "test:ci": "vitest run --reporter=default --reporter=json --outputFile=vitest-report.json",
     "test:assert-integration-ran": "tsx scripts/assert-integration-tests-ran.ts vitest-report.json",
+    "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:test:setup": "tsx scripts/test-db-setup.ts"
@@ -33,6 +34,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/node": "26.6.2",
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
