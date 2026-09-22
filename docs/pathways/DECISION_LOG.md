@@ -1,7 +1,7 @@
 # Pathways Discovery App — Decision Log
 
-Version: 0.2.0-phase0-corrected
-Owner reviewed and authorized this log's 0.1.0-phase0-candidate revision. DEC-B1 through DEC-B10 are now **ACCEPTED** by explicit owner authorization. DEC-C1 through DEC-C7 are now **RESOLVED** per the owner's specific instructions, implemented in `contracts/` (see `contracts/CHANGELOG.md` for the exact diff) and traced in `docs/pathways/REQUIREMENT_TRACEABILITY.md`. Phase 1 application implementation is authorized and in progress.
+Version: 0.3.0-phase1-complete
+Owner reviewed and authorized this log's 0.1.0-phase0-candidate revision. DEC-B1 through DEC-B10 are now **ACCEPTED** by explicit owner authorization. DEC-C1 through DEC-C7 are now **RESOLVED** per the owner's specific instructions, implemented in `contracts/` (see `contracts/CHANGELOG.md` for the exact diff) and traced in `docs/pathways/REQUIREMENT_TRACEABILITY.md`. DEC-E1 (Phase 1 stack) is **INSTALLED**, not merely resolved-on-paper -- see `docs/pathways/INTEGRATION_REGISTER.md` for exact versions and `docs/pathways/PHASE_STATUS.md` for full Phase 1 evidence. Phase 1 is complete and this session stopped after it, per owner instruction; Phase 2 was not started.
 Companion to `IMPLEMENTATION_CONTRACT.md`. Each row is one decision point. **Status** is one of `ACCEPTED` (already reflected in the pack's normalized specs/contracts, no further owner input required to build against it), `PROPOSED` (the pack itself flags this as needing explicit owner sign-off before it controls implementation), or `UNRESOLVED` (an open question this Phase 0 audit surfaced that the pack does not answer). **Blocks** indicates what this decision gates — nothing, Phase 1, Phase 3, Phase 4, or live launch.
 
 ## A. Decisions carried from the latest owner direction (ACCEPTED)

@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least-privilege default; this workflow only reads the repository
+# and runs checks. No deployment, no write access, no secrets beyond
+# the CI-only placeholders defined below.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, lint, build, migrate, test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pathways_app
+          POSTGRES_PASSWORD: pathways_ci_only_password
+          POSTGRES_DB: pathways_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pathways_app -d pathways_dev"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      # Local-to-this-job PostgreSQL only (the `postgres` service
+      # container above, discarded when the job ends). Never a real
+      # or shared database -- see docs/pathways/INTEGRATION_REGISTER.md.
+      DATABASE_URL: postgresql://pathways_app:pathways_ci_only_password@localhost:5432/pathways_dev
+      TEST_DATABASE_URL: postgresql://pathways_app:pathways_ci_only_password@localhost:5432/pathways_test
+      # A CI-only placeholder value, not a real secret: satisfies
+      # src/env.ts's 32-character minimum so build/typecheck/test can
+      # run. Better Auth is never asked to protect anything real in
+      # this workflow.
+      BETTER_AUTH_SECRET: ci-only-placeholder-secret-not-a-real-credential-00
+      BETTER_AUTH_URL: http://localhost:3000
+      EMAIL_MODE: UNCONFIGURED
+      SCHEDULER_MODE: UNCONFIGURED
+      AI_MODE: DISABLED
+      ALLOW_TEST_FIXTURES: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Create the CI test database
+        run: |
+          PGPASSWORD=pathways_ci_only_password psql -h localhost -U pathways_app -d pathways_dev \
+            -c "CREATE DATABASE pathways_test OWNER pathways_app;"
+
+      - name: Apply migrations (dev + test databases)
+        run: |
+          pnpm db:migrate
+          pnpm db:test:setup
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

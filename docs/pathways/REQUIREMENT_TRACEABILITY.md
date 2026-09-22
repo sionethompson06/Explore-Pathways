@@ -131,6 +131,10 @@ Regenerated directly from `contracts/taxonomy.json` and cross-checked by script 
 
 (Unchanged.) Per QA_MATRIX "Human acceptance," at least one authorized education/service reviewer must check representative reports, and parent-comprehension feedback must be recorded, before any release-QA sign-off (Phase 9) can claim this criterion met. Not applicable to Phase 0 or this Phase 1 foundation work.
 
+## 9. Phase 1 status note
+
+The contracts traced above are now consumed by real, tested code: `src/lib/contracts/` (Zod loader + referential-integrity validator) loads and validates every registry in this document, and `tests/contracts.test.ts` asserts the exact counts recorded here (39 questions, 55 rule entries with 1 retired, zero validation errors/warnings), including two negative-control tests that intentionally introduce a bad field reference and a reachable-RESERVED-opportunity violation to confirm the validator actually catches them rather than passing vacuously. See `docs/pathways/PHASE_STATUS.md` "Phase 1 evidence" for full detail.
+
 ## 8. Audit method note
 
 This revision was produced entirely by re-deriving every count from the actual corrected JSON via short verification scripts (shown inline in this document and in `contracts/CHANGELOG.md`), specifically because the owner identified that the prior revision's hand-compiled academic/future group counts did not match their own listed IDs. No count in this revision is asserted without a script that reproduces it.

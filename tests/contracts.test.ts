@@ -1,0 +1,72 @@
+import { describe, it, expect } from "vitest";
+import { loadAndValidateContracts } from "@/lib/contracts";
+
+describe("canonical registry validation", () => {
+  const { contracts, validation } = loadAndValidateContracts();
+
+  it("loads every contract file without a schema error", () => {
+    expect(contracts.questionBank.questions.length).toBeGreaterThan(0);
+    expect(contracts.rules.rules.length).toBeGreaterThan(0);
+    expect(contracts.taxonomy.base_models.length).toBeGreaterThan(0);
+  });
+
+  it("matches the counts recorded in the Phase 0 corrections", () => {
+    // 39 = 38 original + DISC_020A (DEC-C1).
+    expect(contracts.questionBank.questions.length).toBe(39);
+    // 55 = 52 original + ADV_007 + ADV_008 + GRADE_001 (DEC-C2/C4/C5); 1 retired.
+    expect(contracts.rules.rules.length).toBe(55);
+    expect(contracts.rules.rules.filter((r) => r.status === "RETIRED")).toHaveLength(1);
+    // 17 = 14 original + FX15-FX17 (DEC-C7).
+  });
+
+  it("has no unknown rule fields, no unknown activated IDs, no duplicate IDs", () => {
+    expect(validation.errors).toEqual([]);
+    expect(validation.ok).toBe(true);
+  });
+
+  it("has no unexpected reachability warnings beyond the documented exceptions", () => {
+    expect(validation.warnings).toEqual([]);
+  });
+
+  it("never marks B10 as reachable", () => {
+    const b10 = contracts.taxonomy.base_models.find((m) => m.id === "B10");
+    expect(b10?.reachability_status).toBe("EXCLUDED");
+    expect(b10?.discovery_enabled).toBe(false);
+    const evaluableRules = contracts.rules.rules.filter(
+      (r) => r.status !== "RETIRED",
+    );
+    for (const rule of evaluableRules) {
+      expect(Object.keys(rule.score_effects)).not.toContain("B10");
+    }
+  });
+
+  it("flags an injected unknown field as a validation error (negative control)", async () => {
+    const { validateContracts } = await import("@/lib/contracts/validate");
+    const tampered = structuredClone(contracts);
+    tampered.rules.rules[0]!.when.all.push({
+      field: "not_a_real_field",
+      op: "eq",
+      value: "x",
+    });
+    const result = validateContracts(tampered);
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.code === "RULE_UNKNOWN_FIELD")).toBe(
+      true,
+    );
+  });
+
+  it("flags a reachable RESERVED opportunity as a validation error (negative control)", async () => {
+    const { validateContracts } = await import("@/lib/contracts/validate");
+    const tampered = structuredClone(contracts);
+    const reserved = tampered.taxonomy.opportunities.find(
+      (o) => o.reachability_status === "RESERVED",
+    );
+    expect(reserved).toBeDefined();
+    tampered.rules.rules[0]!.activate.opportunities.push(reserved!.id);
+    const result = validateContracts(tampered);
+    expect(result.ok).toBe(false);
+    expect(
+      result.errors.some((e) => e.code === "RESERVED_OPPORTUNITY_REACHABLE"),
+    ).toBe(true);
+  });
+});

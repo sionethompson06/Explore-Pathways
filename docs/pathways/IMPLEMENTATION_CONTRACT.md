@@ -1,7 +1,7 @@
 # Pathways Discovery App — Implementation Contract
 
-Version: 0.2.0-phase0-corrected
-Status: Owner-accepted canonical build contract. DEC-B1-B10 accepted; DEC-C1-C7 resolved and implemented in `contracts/` (see `contracts/CHANGELOG.md`). Phase 1 application implementation is authorized and in progress.
+Version: 0.3.0-phase1-complete
+Status: Owner-accepted canonical build contract. DEC-B1-B10 accepted; DEC-C1-C7 resolved and implemented in `contracts/` (see `contracts/CHANGELOG.md`). Phase 1 (Foundation, Contracts and Safe Persistence) is complete; see `docs/pathways/PHASE_STATUS.md` "Phase 1 evidence" for full detail. Stopped after Phase 1 per owner instruction; Phase 2 not started.
 Repository: sionethompson06/Explore-Pathways
 Branch: claude/kind-gauss-f2d7ng
 Phase 0 commit: 46f1a21 (verified as HEAD before this correction work began; no divergence found)

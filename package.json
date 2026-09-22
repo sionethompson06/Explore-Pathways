@@ -1,0 +1,44 @@
+{
+  "name": "pathways-discovery-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pathways Discovery App - Phase 1 foundation (guest sessions, profile revisions, engine runs, report snapshots, guardian access, consent, consultation workflow, staff notes). Not a deployed application.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:test:setup": "tsx scripts/test-db-setup.ts"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "better-auth": "1.7.5",
+    "drizzle-orm": "0.45.3",
+    "pg": "8.23.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3",
+    "drizzle-kit": "0.31.11",
+    "vitest": "5.0.1",
+    "tsx": "4.23.15",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.5"
+  }
+}

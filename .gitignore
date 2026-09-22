@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Environment files (never commit real secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor/OS
+.DS_Store
+.vscode/
+.idea/
+
+# Test/coverage output
+coverage/
+.vitest-cache/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Drizzle local artifacts (migrations themselves ARE committed; this ignores generated meta journal snapshots only if configured to emit them outside migrations/)
