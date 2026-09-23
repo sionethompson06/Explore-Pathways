@@ -1,22 +1,32 @@
 import { ButtonLink } from "../Button";
 import { Container } from "../Container";
 import { HandwrittenAccent } from "../HandwrittenAccent";
+import { PhotoSlot } from "../PhotoSlot";
 import { HeroArt } from "./HeroArt";
 import { PathwayIndicators } from "./PathwayIndicators";
 import { DISCOVER_HREF, PRIMARY_CTA_LABEL, SECONDARY_CTA_LABEL } from "@/content/nav-links";
+import { MARKETING_PHOTOS } from "@/content/marketing-photos";
 import styles from "./Hero.module.css";
 
 /**
  * Section 1 (Phase 2B): a full-bleed scenic hero with the page's
  * text content overlaid on top, replacing Phase 2's two-column
- * text-plus-small-illustration layout. See HeroArt.tsx for why the
- * background is an illustrated panorama rather than photography.
+ * text-plus-small-illustration layout. The background renders real
+ * photography once `MARKETING_PHOTOS.heroStudentMountain.path` is
+ * supplied (see docs/pathways/IMAGE_ASSET_MANIFEST.md); until then it
+ * falls back to the illustrated HeroArt panorama -- see HeroArt.tsx
+ * for why that fallback is illustrated rather than photographic.
  */
 export function Hero() {
   return (
     <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={styles.art}>
-        <HeroArt />
+        <PhotoSlot
+          photoSrc={MARKETING_PHOTOS.heroStudentMountain.path}
+          alt={MARKETING_PHOTOS.heroStudentMountain.alt}
+          priority
+          fallback={<HeroArt />}
+        />
       </div>
       <div className={styles.overlay} />
 

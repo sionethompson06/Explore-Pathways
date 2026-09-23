@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { FREEDOM_CARDS, type FreedomCard as FreedomCardData } from "@/content/freedom-cards";
+import { MARKETING_PHOTOS, type MarketingPhotoKey } from "@/content/marketing-photos";
 import { IconBadge } from "../IconBadge";
+import { PhotoSlot } from "../PhotoSlot";
 import { AthleticsIcon, AcademicIcon, CompassIcon, ScheduleIcon } from "../icons";
 import styles from "./FreedomCards.module.css";
 
@@ -9,6 +11,14 @@ const ICONS: Record<FreedomCardData["id"], (props: { className?: string }) => Re
   "get-ahead": AcademicIcon,
   "learn-anywhere": CompassIcon,
   "take-back-time": ScheduleIcon,
+};
+
+/** Maps each card to its required photography slot -- see docs/pathways/IMAGE_ASSET_MANIFEST.md. */
+const PHOTO_KEY: Record<FreedomCardData["id"], MarketingPhotoKey> = {
+  "train-more": "athleteBasketball",
+  "get-ahead": "academicStudentLaptop",
+  "learn-anywhere": "flexibleTravelStudent",
+  "take-back-time": "studentLifestyle",
 };
 
 const gradientClass: Record<FreedomCardData["gradient"], string> = {
@@ -23,10 +33,16 @@ export function FreedomCards() {
     <ul className={styles.grid}>
       {FREEDOM_CARDS.map((card) => {
         const CardIcon = ICONS[card.id];
+        const photo = MARKETING_PHOTOS[PHOTO_KEY[card.id]];
         return (
           <li key={card.id} className={styles.card}>
             <div className={`${styles.imageArea} ${gradientClass[card.gradient]}`}>
-              <CardIcon className={styles.imageIcon!} />
+              <PhotoSlot
+                photoSrc={photo.path}
+                alt={photo.alt}
+                sizes="(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw"
+                fallback={<CardIcon className={styles.imageIcon!} />}
+              />
             </div>
             <div className={styles.badgeRow}>
               <IconBadge tone="navy">
