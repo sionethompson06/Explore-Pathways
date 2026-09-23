@@ -10,7 +10,7 @@ const ICONS: Record<BrandValue["icon"], (props: { className?: string }) => React
   academic: AcademicIcon,
 };
 
-/** Section 7 (Phase 2B image-integration): brand values band. */
+/** Section 7 (Phase 2B image-integration; copy + descriptions revised Phase 2F): brand values band. */
 export function BrandValues() {
   return (
     <ul className={styles.grid}>
@@ -22,6 +22,7 @@ export function BrandValues() {
               <ValueIcon />
             </IconBadge>
             <p className={styles.label}>{value.label}</p>
+            <p className={styles.description}>{value.description}</p>
           </li>
         );
       })}

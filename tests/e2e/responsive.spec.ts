@@ -46,7 +46,7 @@ test.describe("responsive screenshots (375 / 768 / 1440)", () => {
     });
   });
 
-  test("how-it-works and an audience page at 768px", async ({ page }) => {
+  test("how-it-works at 768px", async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto("/how-it-works");
     await page.waitForLoadState("networkidle");
@@ -54,12 +54,46 @@ test.describe("responsive screenshots (375 / 768 / 1440)", () => {
       path: path.join(SCREENSHOT_DIR, "how-it-works-768.png"),
       fullPage: true,
     });
+  });
 
-    await page.goto("/pathways/athletes");
-    await page.waitForLoadState("networkidle");
+  // Phase 2F QA: all four audience pages plus For Partners, at every
+  // required breakpoint, checked for horizontal overflow the same
+  // way the homepage is above.
+  const PHASE_2F_ROUTES = [
+    { name: "pathways-athletes", path: "/pathways/athletes" },
+    { name: "pathways-homeschool", path: "/pathways/homeschool" },
+    { name: "pathways-flexible-learning", path: "/pathways/flexible-learning" },
+    { name: "pathways-academic-opportunities", path: "/pathways/academic-opportunities" },
+    { name: "for-partners", path: "/for-partners" },
+  ];
+
+  for (const route of PHASE_2F_ROUTES) {
+    for (const viewport of VIEWPORTS) {
+      test(`${route.name} at ${viewport.name}px`, async ({ page }) => {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await page.goto(route.path);
+        await page.waitForLoadState("networkidle");
+        await page.screenshot({
+          path: path.join(SCREENSHOT_DIR, `${route.name}-${viewport.name}.png`),
+          fullPage: true,
+        });
+        const hasHorizontalOverflow = await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+        );
+        expect(
+          hasHorizontalOverflow,
+          `horizontal overflow on ${route.path} at ${viewport.name}px`,
+        ).toBe(false);
+      });
+    }
+  }
+
+  test("desktop Education Pathways dropdown, captured open at 1440px", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Education Pathways" }).click();
     await page.screenshot({
-      path: path.join(SCREENSHOT_DIR, "pathways-athletes-768.png"),
-      fullPage: true,
+      path: path.join(SCREENSHOT_DIR, "nav-dropdown-open-1440.png"),
     });
   });
 

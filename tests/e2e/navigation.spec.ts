@@ -17,7 +17,7 @@ test.describe("public navigation", () => {
 
     await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "For Partners" }).click();
     await expect(page).toHaveURL(/\/for-partners$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(/collaboration model/i);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/coordinate the education/i);
   });
 
   test("every audience route returns a real page, not a dead link", async ({ page }) => {

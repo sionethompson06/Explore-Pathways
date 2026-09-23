@@ -50,7 +50,27 @@ test.describe("mobile navigation", () => {
     await page.goto("/");
     const header = page.locator("header");
     await header.getByRole("button", { name: "Menu" }).click();
-    await header.getByRole("link", { name: "Find My Student's Pathway" }).click();
+    await header.getByRole("link", { name: "Find My Pathway", exact: true }).click();
     await expect(page).toHaveURL(/\/discover$/);
+  });
+
+  test("the four Education Pathways destinations are exposed directly in the mobile panel", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const header = page.locator("header");
+    await header.getByRole("button", { name: "Menu" }).click();
+    // Scoped to a <p>: the desktop dropdown's own trigger button (with
+    // the same "Education Pathways" text) is still present in the DOM
+    // at this viewport, just CSS-hidden, so an unscoped query is ambiguous.
+    await expect(header.locator("p", { hasText: "Education Pathways" })).toBeVisible();
+    for (const label of [
+      "Student Athletes",
+      "Flexible Learning",
+      "Homeschool Support",
+      "Academic Opportunities",
+    ]) {
+      await expect(header.getByRole("link", { name: label, exact: true })).toBeVisible();
+    }
   });
 });

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/marketing/PageHero";
 import { Section } from "@/components/marketing/Section";
-import { Card } from "@/components/marketing/Card";
+import { ThemeGrid } from "@/components/marketing/ThemeGrid";
 import { ButtonLink } from "@/components/marketing/Button";
 import { AUDIENCE_PAGES, getAudiencePage, type AudiencePage } from "@/content/audience-pages";
 import { MARKETING_PHOTOS, type MarketingPhotoKey } from "@/content/marketing-photos";
@@ -66,17 +66,22 @@ export default async function AudiencePathwayPage({
         <p>{page.intro}</p>
       </Section>
 
-      <Section tone="alt" ariaLabelledBy="audience-points-heading">
-        <h2 id="audience-points-heading" className="visually-hidden">
-          What Pathways can help with
+      <Section tone="alt" ariaLabelledBy="audience-themes-heading">
+        <h2 id="audience-themes-heading" style={{ textAlign: "center" }}>
+          How Pathways Can Help
         </h2>
-        <Card>
-          <ul style={{ marginBottom: 0 }}>
-            {page.points.map((point) => (
-              <li key={point}>{point}</li>
-            ))}
-          </ul>
-        </Card>
+        <ThemeGrid items={page.themes} />
+        <p
+          style={{
+            marginTop: "var(--space-5)",
+            marginBottom: 0,
+            textAlign: "center",
+            color: "var(--color-text-muted)",
+            fontSize: "var(--font-size-sm)",
+          }}
+        >
+          {page.caveat}
+        </p>
       </Section>
 
       <Section tone="accent-tint" ariaLabelledBy="audience-cta-heading">

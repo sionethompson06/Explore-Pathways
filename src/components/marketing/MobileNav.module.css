@@ -56,6 +56,11 @@
   gap: var(--space-1);
 }
 
+.panelList + .panelGroupLabel,
+.panelList + .panelList {
+  margin-top: var(--space-3);
+}
+
 .panelLink {
   display: block;
   padding: var(--space-3) var(--space-2);
@@ -66,8 +71,34 @@
   border-radius: var(--radius-sm);
 }
 
-.panelLink:hover {
+.panelLink:hover,
+.panelLink:focus-visible {
   background: var(--color-bg-alt);
+}
+
+.panelGroupLabel {
+  margin: 0 0 var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.panelSubLink {
+  display: block;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  font-weight: 600;
+  color: var(--color-navy-800);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.panelSubLink:hover,
+.panelSubLink:focus-visible {
+  background: var(--color-bg-alt);
+  color: var(--color-accent-strong);
 }
 
 .panelCta {

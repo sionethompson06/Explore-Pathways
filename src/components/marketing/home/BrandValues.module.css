@@ -32,3 +32,10 @@
   font-weight: 700;
   color: var(--color-warm-white);
 }
+
+.description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-inverse-muted);
+  max-width: 22ch;
+}
