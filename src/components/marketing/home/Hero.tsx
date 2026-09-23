@@ -25,6 +25,8 @@ export function Hero() {
           photoSrc={MARKETING_PHOTOS.heroStudentMountain.path}
           alt={MARKETING_PHOTOS.heroStudentMountain.alt}
           priority
+          sizes="100vw"
+          objectPosition="78% 30%"
           fallback={<HeroArt />}
         />
       </div>

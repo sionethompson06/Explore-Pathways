@@ -24,12 +24,24 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    to top,
-    rgba(6, 20, 36, 0.82) 0%,
-    rgba(6, 20, 36, 0.55) 45%,
-    rgba(6, 20, 36, 0.1) 75%
-  );
+  /* Left-anchored for text-safe contrast over the photo's right-third
+     subject, plus a light bottom gradient for the indicator row --
+     deliberately subtle so the mountain/sunset photo stays visible
+     rather than darkened overall. */
+  background:
+    linear-gradient(
+      to top,
+      rgba(6, 20, 36, 0.45) 0%,
+      rgba(6, 20, 36, 0.15) 30%,
+      rgba(6, 20, 36, 0) 55%
+    ),
+    linear-gradient(
+      to right,
+      rgba(6, 20, 36, 0.85) 0%,
+      rgba(6, 20, 36, 0.68) 40%,
+      rgba(6, 20, 36, 0.35) 68%,
+      rgba(6, 20, 36, 0.06) 90%
+    );
 }
 
 .content {

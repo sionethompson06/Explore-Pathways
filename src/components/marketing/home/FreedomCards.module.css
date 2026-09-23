@@ -34,11 +34,12 @@
 }
 
 .imageArea {
-  height: 9.5rem;
+  height: 12rem;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 }
 
 .imageIcon {

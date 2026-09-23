@@ -5,6 +5,8 @@ export interface AudiencePage {
   interest: GoalInterest;
   title: string;
   subtitle: string;
+  /** A short, punchy approved phrase for the page hero -- see docs/pathways/IMAGE_ASSET_MANIFEST.md. */
+  tagline?: string;
   intro: string;
   points: string[];
 }
@@ -21,6 +23,7 @@ export const AUDIENCE_PAGES: AudiencePage[] = [
     interest: "athletics",
     title: "For Student Athletes",
     subtitle: "Fit serious training and competition around a real education.",
+    tagline: "Train. Compete. Learn. Graduate.",
     intro:
       "Families balancing athletics with school often face the same question: what arrangement actually leaves room for both? Pathways helps you explore directions that could support your student's training, travel and competition schedule without treating academics as an afterthought.",
     points: [
@@ -34,6 +37,8 @@ export const AUDIENCE_PAGES: AudiencePage[] = [
     interest: "homeschool_support",
     title: "Homeschool Support",
     subtitle: "Structure and support for families teaching at home.",
+    tagline:
+      "Homeschooling gives families tremendous flexibility — but building the right academic structure can still be complicated.",
     intro:
       "Homeschooling well takes more than a curriculum box -- it takes a workable structure, a support plan, and clarity about what your family is responsible for. Pathways helps you think through what kind of homeschool arrangement could fit your family's life, and what questions to ask before committing to one.",
     points: [
@@ -47,6 +52,7 @@ export const AUDIENCE_PAGES: AudiencePage[] = [
     interest: "flexible_schedule",
     title: "Flexible Learning",
     subtitle: "A school day that fits your family's life, not the other way around.",
+    tagline: "Learning That Fits Real Life.",
     intro:
       "Some families need a schedule that isn't the standard school day -- because of work, travel, health, or how a student learns best. Pathways helps you explore arrangements built around flexibility, and the honest tradeoffs each one involves.",
     points: [

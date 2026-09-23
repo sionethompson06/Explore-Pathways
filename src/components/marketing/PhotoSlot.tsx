@@ -20,12 +20,15 @@ export function PhotoSlot({
   fallback,
   priority = false,
   sizes = "100vw",
+  objectPosition = "center",
 }: {
   photoSrc: string | null;
   alt: string;
   fallback: ReactNode;
   priority?: boolean;
   sizes?: string;
+  /** CSS object-position, e.g. "80% 35%" to keep an off-center subject framed under `cover`. */
+  objectPosition?: string;
 }) {
   if (!photoSrc) {
     return <>{fallback}</>;
@@ -38,7 +41,7 @@ export function PhotoSlot({
       fill
       priority={priority}
       sizes={sizes}
-      style={{ objectFit: "cover" }}
+      style={{ objectFit: "cover", objectPosition }}
     />
   );
 }

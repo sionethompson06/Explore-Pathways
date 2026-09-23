@@ -4,8 +4,17 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { Section } from "@/components/marketing/Section";
 import { Card } from "@/components/marketing/Card";
 import { ButtonLink } from "@/components/marketing/Button";
-import { AUDIENCE_PAGES, getAudiencePage } from "@/content/audience-pages";
+import { AUDIENCE_PAGES, getAudiencePage, type AudiencePage } from "@/content/audience-pages";
+import { MARKETING_PHOTOS, type MarketingPhotoKey } from "@/content/marketing-photos";
 import { DISCOVER_HREF, PRIMARY_CTA_LABEL } from "@/content/nav-links";
+
+/** Maps each audience page to its required page-hero photography slot -- see docs/pathways/IMAGE_ASSET_MANIFEST.md. */
+const PAGE_PHOTO_KEY: Record<AudiencePage["slug"], MarketingPhotoKey> = {
+  athletes: "athletePageHero",
+  homeschool: "homeschoolPageHero",
+  "flexible-learning": "flexibleTravelStudent",
+  "academic-opportunities": "academicPageHero",
+};
 
 export function generateStaticParams() {
   return AUDIENCE_PAGES.map((page) => ({ slug: page.slug }));
@@ -36,13 +45,18 @@ export default async function AudiencePathwayPage({
     notFound();
   }
 
+  const photo = MARKETING_PHOTOS[PAGE_PHOTO_KEY[page.slug]];
+
   return (
     <>
       <PageHero
         headingId="audience-heading"
         eyebrow="Explore"
         title={page.title}
+        tagline={page.tagline}
         subtitle={page.subtitle}
+        photoSrc={photo.path}
+        photoAlt={photo.alt}
       />
 
       <Section tone="default" ariaLabelledBy="audience-intro-heading" narrow>

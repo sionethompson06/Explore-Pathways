@@ -21,6 +21,14 @@ const PHOTO_KEY: Record<FreedomCardData["id"], MarketingPhotoKey> = {
   "take-back-time": "studentLifestyle",
 };
 
+/** Per-manifest crop guidance: keeps each asset's off-center subject framed under `object-fit: cover`. */
+const PHOTO_POSITION: Record<FreedomCardData["id"], string> = {
+  "train-more": "60% 30%",
+  "get-ahead": "center 35%",
+  "learn-anywhere": "center 30%",
+  "take-back-time": "center 25%",
+};
+
 const gradientClass: Record<FreedomCardData["gradient"], string> = {
   green: styles.gradientGreen!,
   blue: styles.gradientBlue!,
@@ -41,6 +49,7 @@ export function FreedomCards() {
                 photoSrc={photo.path}
                 alt={photo.alt}
                 sizes="(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw"
+                objectPosition={PHOTO_POSITION[card.id]}
                 fallback={<CardIcon className={styles.imageIcon!} />}
               />
             </div>

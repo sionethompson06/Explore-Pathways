@@ -4,11 +4,15 @@
  * for the full spec of each slot: aspect ratio, minimum dimensions,
  * focal subject, text-safe area).
  *
- * `path` is `null` until the owner supplies the actual file under
- * `public/pathways/marketing/`. Every consuming component treats
- * `null` as "photography not yet supplied" and renders its existing
- * illustrated fallback instead -- no layout change is required when a
- * path is filled in, only editing the value below.
+ * The owner supplied the approved generated asset pack referenced
+ * below (`pathways_marketing_asset_pack_v1`); every path here now
+ * points at the corresponding file under `public/pathways/marketing/`.
+ * Two of the nine images (01, 02) were corrected before use -- see
+ * docs/pathways/MEDIA_SOURCE_REGISTER.md "Trademark correction" for
+ * why and exactly what changed. Every consuming component still
+ * treats `path: null` as "photography not yet supplied" and renders
+ * its illustrated fallback instead, so a future slot can be filled in
+ * here with no layout change.
  */
 
 export interface MarketingPhotoSlot {
@@ -24,44 +28,44 @@ export interface MarketingPhotoSlot {
 
 export const MARKETING_PHOTOS = {
   heroStudentMountain: {
-    path: null,
-    alt: "A student standing on a scenic mountain overlook at sunrise, looking out toward the horizon.",
+    path: "/pathways/marketing/01-homepage-hero-student-mountain.webp",
+    alt: "A student overlooking a mountain and lake landscape at sunrise.",
   },
   athleteBasketball: {
-    path: null,
-    alt: "A student athlete actively training on an outdoor court.",
+    path: "/pathways/marketing/02-freedom-train-more-athlete.webp",
+    alt: "A student athlete training with a basketball outdoors at sunset.",
   },
   academicStudentLaptop: {
-    path: null,
-    alt: "A student focused on coursework on a laptop in a bright study space.",
+    path: "/pathways/marketing/03-freedom-get-ahead-student-laptop.webp",
+    alt: "A student studying on a laptop in a bright learning space.",
   },
   flexibleTravelStudent: {
-    path: null,
-    alt: "A student studying comfortably in a flexible, travel-friendly setting.",
+    path: "/pathways/marketing/04-freedom-learn-anywhere-travel-student.webp",
+    alt: "A student using a laptop while traveling in a scenic location.",
   },
   studentLifestyle: {
-    path: null,
-    alt: "A student relaxed and confident in an everyday lifestyle moment.",
+    path: "/pathways/marketing/05-freedom-take-back-time-student.webp",
+    alt: "A student outdoors at sunset with a mountain view.",
   },
   advisorFamily: {
-    path: null,
-    alt: "An advisor in a warm conversation with a parent and student.",
+    path: "/pathways/marketing/06-human-support-advisor-parent.webp",
+    alt: "Two adults having a warm conversation over an education plan.",
   },
   finalMountainScenery: {
-    path: null,
-    alt: "A wide, cinematic mountain landscape at dusk.",
+    path: "/pathways/marketing/09-final-cta-mountain-landscape.webp",
+    alt: "A mountain lake landscape at sunset.",
   },
   homeschoolPageHero: {
-    path: null,
-    alt: "A warm, home-based learning moment between a parent and student.",
+    path: "/pathways/marketing/07-homeschool-support-family-learning.webp",
+    alt: "A parent supporting a student learning at home.",
   },
   athletePageHero: {
-    path: null,
-    alt: "A student athlete in focused competition or training.",
+    path: "/pathways/marketing/02-freedom-train-more-athlete.webp",
+    alt: "A student athlete training with a basketball outdoors at sunset.",
   },
   academicPageHero: {
-    path: null,
-    alt: "A student engaged in advanced academic or college-level learning.",
+    path: "/pathways/marketing/08-academic-opportunities-campus-student.webp",
+    alt: "A student carrying a laptop on a college campus.",
   },
 } as const satisfies Record<string, MarketingPhotoSlot>;
 
