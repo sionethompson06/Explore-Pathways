@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./marketing-hint";
 export * from "./registry";
 export * from "./labels";
 export * from "./branching";

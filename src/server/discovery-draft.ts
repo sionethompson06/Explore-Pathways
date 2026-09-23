@@ -18,7 +18,7 @@ import type {
   RawAnswers,
   RawAnswerValue,
 } from "@/lib/discovery/types";
-import { isGoalInterest, type GoalInterest } from "@/content/goals";
+import { mapMarketingInterestToHint } from "@/lib/discovery/marketing-hint";
 
 /**
  * Server-authoritative Discovery draft persistence (Phase 3
@@ -34,20 +34,11 @@ import { isGoalInterest, type GoalInterest } from "@/content/goals";
 // Marketing interest handoff (§6)
 // ---------------------------------------------------------------------------
 
-/** Marketing-level interest id (src/content/goals.ts) -> canonical DISC_006 enum value. Never the reverse; never used to redefine a canonical value's meaning. */
-const INTEREST_HINT_MAP: Record<GoalInterest, string> = {
-  athletics: "ATHLETICS",
-  flexible_schedule: "SCHEDULE_FLEXIBILITY",
-  homeschool_support: "HOMESCHOOL",
-  academic_challenge: "ACADEMIC_ACCELERATION",
-  different_environment: "DIFFERENT_ENVIRONMENT",
-  unsure: "EXPLORING",
-};
-
-export function mapMarketingInterestToHint(interest: string | null | undefined): string | null {
-  if (!interest || !isGoalInterest(interest)) return null;
-  return INTEREST_HINT_MAP[interest];
-}
+// Re-exported for existing callers (app/discover/actions.ts, tests) --
+// the actual mapping now lives in src/lib/discovery/marketing-hint.ts
+// (Phase 3C) so Preview Demo Mode can share it without importing
+// anything DB-touching.
+export { mapMarketingInterestToHint };
 
 // ---------------------------------------------------------------------------
 // Session start

@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/db/client";
-import { GUEST_SESSION_COOKIE_NAME } from "@/server/session";
-import { loadDraftByToken } from "@/server/discovery-draft";
 import {
   buildReviewSections,
   computeProgress,
@@ -30,12 +27,25 @@ export const metadata: Metadata = {
  * page is dynamic-only (it reads cookies()), so Next.js never
  * statically caches it; nothing here is servable from a public/shared
  * cache.
+ *
+ * The database/session modules are imported dynamically, inside this
+ * function, rather than at module scope -- see app/discover/actions.ts's
+ * doc comment for why a static top-level import would make this crash
+ * outright (bypassing app/discover/error.tsx) whenever the database
+ * is misconfigured or unreachable, rather than failing inside this
+ * function's own execution where it is actually caught.
  */
 export default async function DiscoveryProfilePage({
   searchParams,
 }: {
   searchParams: Promise<{ stage?: string }>;
 }) {
+  const [{ GUEST_SESSION_COOKIE_NAME }, { loadDraftByToken }, { db }] = await Promise.all([
+    import("@/server/session"),
+    import("@/server/discovery-draft"),
+    import("@/db/client"),
+  ]);
+
   const cookieStore = await cookies();
   const token = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
 

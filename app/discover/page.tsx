@@ -22,6 +22,17 @@ export const metadata: Metadata = {
  * startDiscoveryAction, which converts it to an editable DISC_006
  * preselection hint server-side -- this page itself never writes it
  * anywhere, and it never becomes part of /discover/profile's URL.
+ *
+ * Phase 3C: reads `process.env.DEPLOYMENT_MODE` directly (the raw,
+ * unvalidated value), never the validated `env` export from
+ * `@/env`. `@/env`'s own loadEnv() throws synchronously, per DEC-G7,
+ * whenever DEPLOYMENT_MODE is not LOCAL and DATABASE_URL is still a
+ * loopback placeholder -- exactly the current Vercel Preview
+ * configuration this feature exists to work around. Importing it
+ * here (even lazily, inside this function) would make this page
+ * crash to error.tsx before the Preview Demo Mode CTA below could
+ * ever render, defeating the point. A plain string compare needs no
+ * validation, so it deliberately never touches that module.
  */
 export default async function DiscoverPage({
   searchParams,
@@ -34,6 +45,10 @@ export default async function DiscoverPage({
     : resolvedParams.interest;
   const selectedGoal =
     rawInterest && isGoalInterest(rawInterest) ? getGoalByInterest(rawInterest) : undefined;
+  const isPreviewDemoAvailable = process.env.DEPLOYMENT_MODE === "PREVIEW";
+  const demoHref = selectedGoal
+    ? `/discover/demo?interest=${selectedGoal.interest}`
+    : "/discover/demo";
 
   return (
     <>
@@ -69,17 +84,38 @@ export default async function DiscoverPage({
             </li>
           </ul>
 
-          <form action={startDiscoveryAction} className={styles.startForm}>
-            {selectedGoal ? (
-              <input type="hidden" name="interest" value={selectedGoal.interest} />
+          {isPreviewDemoAvailable ? (
+            <div className={styles.demoCallout}>
+              <p className={styles.demoCalloutLabel}>Try it without saving anything</p>
+              <p>
+                The hosted database for this Preview environment isn&apos;t configured yet, so
+                real Discovery sessions can&apos;t be saved here. You can still click through the
+                full questionnaire in Preview Demo Mode -- nothing you enter is stored.
+              </p>
+              <ButtonLink href={demoHref} variant="primary">
+                Preview the Discovery Experience
+              </ButtonLink>
+            </div>
+          ) : null}
+
+          <div className={isPreviewDemoAvailable ? styles.realStartBlock : undefined}>
+            {isPreviewDemoAvailable ? (
+              <p className={styles.realStartLabel}>
+                Setting up the real, database-backed Discovery for later?
+              </p>
             ) : null}
-            <button type="submit" className={styles.startButton}>
-              Start My Discovery
-            </button>
-            <ButtonLink href="/how-it-works" variant="secondary">
-              How Pathways Works
-            </ButtonLink>
-          </form>
+            <form action={startDiscoveryAction} className={styles.startForm}>
+              {selectedGoal ? (
+                <input type="hidden" name="interest" value={selectedGoal.interest} />
+              ) : null}
+              <button type="submit" className={styles.startButton}>
+                Start My Discovery
+              </button>
+              <ButtonLink href="/how-it-works" variant="secondary">
+                How Pathways Works
+              </ButtonLink>
+            </form>
+          </div>
 
           <p className={styles.devNotice}>
             Development preview -- please use sample information only while we finish building

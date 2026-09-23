@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/db/client";
-import { GUEST_SESSION_COOKIE_NAME } from "@/server/session";
-import { loadDraftByToken, hasCompletedRevision } from "@/server/discovery-draft";
 import { Section } from "@/components/marketing/Section";
 import { Card } from "@/components/marketing/Card";
 import { Badge } from "@/components/marketing/Badge";
@@ -24,8 +21,21 @@ export const metadata: Metadata = {
  * or implied here; that is Phase 4's report assembler, not built yet.
  * Private/no-store by construction: this page reads cookies(), so
  * Next.js never statically caches or serves it from a shared cache.
+ *
+ * The database/session modules are imported dynamically, inside this
+ * function, rather than at module scope -- see app/discover/actions.ts's
+ * doc comment for why a static top-level import would make this crash
+ * outright (bypassing app/discover/error.tsx) whenever the database
+ * is misconfigured or unreachable.
  */
 export default async function DiscoveryReportPage() {
+  const [{ GUEST_SESSION_COOKIE_NAME }, { loadDraftByToken, hasCompletedRevision }, { db }] =
+    await Promise.all([
+      import("@/server/session"),
+      import("@/server/discovery-draft"),
+      import("@/db/client"),
+    ]);
+
   const cookieStore = await cookies();
   const token = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
   if (!token) {

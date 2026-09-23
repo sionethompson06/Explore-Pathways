@@ -65,6 +65,35 @@
   padding-left: 1.2em;
 }
 
+.noticeHeading {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-strong);
+}
+
+.noticeRestart {
+  margin: var(--space-2) 0 0;
+  font-weight: 600;
+}
+
+.completion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.completionActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
 .hintBanner {
   background: var(--color-bg-alt);
   border-radius: var(--radius-md);
