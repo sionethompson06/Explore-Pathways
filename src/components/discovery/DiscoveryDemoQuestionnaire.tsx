@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { QuestionField } from "./QuestionField";
+import { useScrollStageAnchor } from "./useScrollStageAnchor";
 import type {
   AnswerValue,
   FieldErrorView,
@@ -85,6 +86,15 @@ export function DiscoveryDemoQuestionnaire({
   // read of `rawAnswers` here would let whichever commit's server
   // round trip resolves last silently overwrite the other's answer.
   const rawAnswersRef = useRef<RawAnswers>(rawAnswers);
+  // Guards against a stale response clobbering a newer one: e.g. a
+  // checkbox commit still in flight when Continue is clicked right
+  // after it (no wait in between) would otherwise resolve later and
+  // overwrite the already-navigated `state` with its own, now-stale,
+  // recomputed view for the OLD stage -- discovered while verifying
+  // Phase 3D's scroll fix, which made this pre-existing race visibly
+  // wrong (the page would settle scrolled to the stale stage's
+  // position) rather than a self-correcting flicker.
+  const requestSeqRef = useRef(0);
   const [state, setState] = useState<DemoStateView>(initialState);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -97,6 +107,14 @@ export function DiscoveryDemoQuestionnaire({
   const currentIndex = stageOrder.indexOf(state.stageId);
   const previousStage = currentIndex > 0 ? stageOrder[currentIndex - 1] : undefined;
   const isReview = state.stageId === "REVIEW";
+
+  // Phase 3D: the same anchor ref is attached to whichever of the two
+  // mutually-exclusive branches below is currently rendered (the
+  // stage/Review view, or the Demo Complete screen) -- keying on both
+  // `state.stageId` and `isComplete` together covers Continue/Back/
+  // Edit (stageId changes) and reaching or restarting Demo Complete
+  // (isComplete flips while stageId can stay "REVIEW").
+  const stageAnchorRef = useScrollStageAnchor<HTMLDivElement>(`${state.stageId}|${isComplete}`);
 
   function displayValue(field: string): AnswerValue {
     if (field === "discovery_reasons" && interestHint && rawAnswers.discovery_reasons === undefined) {
@@ -125,7 +143,9 @@ export function DiscoveryDemoQuestionnaire({
     setSaveState("saving");
     setLastFailedPatch(null);
     const patch = { [field]: value };
+    const seq = ++requestSeqRef.current;
     const result = await commitAnswer(priorRaw, patch, state.stageId, interestHint);
+    if (requestSeqRef.current !== seq) return result.ok;
     setState(result.state);
     if (result.ok) {
       setSaveState("saved");
@@ -147,7 +167,9 @@ export function DiscoveryDemoQuestionnaire({
   async function retry() {
     if (!lastFailedPatch) return;
     setSaveState("saving");
+    const seq = ++requestSeqRef.current;
     const result = await commitAnswer(rawAnswersRef.current, lastFailedPatch, state.stageId, interestHint);
+    if (requestSeqRef.current !== seq) return;
     setState(result.state);
     if (result.ok) {
       setSaveState("saved");
@@ -158,7 +180,9 @@ export function DiscoveryDemoQuestionnaire({
   }
 
   async function goToStage(next: StageId) {
+    const seq = ++requestSeqRef.current;
     const nextState = await computeState(rawAnswersRef.current, next, interestHint);
+    if (requestSeqRef.current !== seq) return;
     setState(nextState);
   }
 
@@ -191,7 +215,9 @@ export function DiscoveryDemoQuestionnaire({
     setSubmitErrors([]);
     setSaveState("idle");
     setLastFailedPatch(null);
+    const seq = ++requestSeqRef.current;
     const fresh = await computeState({}, "STUDENT", interestHint);
+    if (requestSeqRef.current !== seq) return;
     setState(fresh);
   }
 
@@ -207,10 +233,16 @@ export function DiscoveryDemoQuestionnaire({
       </div>
 
       {isComplete ? (
-        <CompletionScreen onReview={() => setIsComplete(false)} onRestart={handleRestart} />
+        <CompletionScreen
+          headingRef={stageAnchorRef}
+          onReview={() => setIsComplete(false)}
+          onRestart={handleRestart}
+        />
       ) : (
         <>
-          <ProgressBar stages={state.stages} currentStageId={state.stageId} />
+          <div ref={stageAnchorRef} tabIndex={-1} className={styles.stageAnchor}>
+            <ProgressBar stages={state.stages} currentStageId={state.stageId} />
+          </div>
 
           {saveState !== "idle" ? (
             <p className={styles.saveIndicator} role="status">
@@ -391,15 +423,19 @@ function ReviewScreen({
 }
 
 function CompletionScreen({
+  headingRef,
   onReview,
   onRestart,
 }: {
+  headingRef: React.RefObject<HTMLHeadingElement | null>;
   onReview: () => void;
   onRestart: () => void;
 }) {
   return (
     <div className={styles.completion}>
-      <h2>Discovery Demo Complete</h2>
+      <h2 ref={headingRef} tabIndex={-1} className={styles.stageAnchor}>
+        Discovery Demo Complete
+      </h2>
       <p>
         You&apos;ve reached the end of the current Pathways Discovery experience. In the live
         system, these answers will be securely saved and used to prepare the next stage of your

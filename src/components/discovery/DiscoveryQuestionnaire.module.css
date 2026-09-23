@@ -7,6 +7,13 @@
   margin-bottom: var(--space-6);
 }
 
+/* Phase 3D: the scroll/focus target after a stage change -- purely a
+   behavioral hook, never a visual one; its own focus ring visibility
+   is left entirely to the browser's :focus-visible heuristic. */
+.stageAnchor {
+  outline-offset: 4px;
+}
+
 .progressList {
   list-style: none;
   margin: 0;

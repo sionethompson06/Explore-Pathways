@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { QuestionField } from "./QuestionField";
+import { useScrollStageAnchor } from "./useScrollStageAnchor";
 import type {
   AnswerValue,
   FieldErrorView,
@@ -59,6 +60,13 @@ export function DiscoveryQuestionnaire({
   const currentIndex = stageOrder.indexOf(stageId);
   const previousStage = currentIndex > 0 ? stageOrder[currentIndex - 1] : undefined;
   const isReview = stageId === "REVIEW";
+
+  // Phase 3D: Continue/Back/Edit all resolve to a new `stageId` prop
+  // (via router.push to a new ?stage=), so keying this on `stageId`
+  // covers every navigation path with one deterministic effect --
+  // never a guessed setTimeout, and never fired before the new
+  // stage's own content has actually rendered.
+  const stageAnchorRef = useScrollStageAnchor<HTMLDivElement>(stageId);
 
   async function commit(field: string, value: AnswerValue): Promise<boolean> {
     setLocalAnswers((prev) => ({ ...prev, [field]: value }));
@@ -135,7 +143,9 @@ export function DiscoveryQuestionnaire({
 
   return (
     <div className={styles.wrapper}>
-      <ProgressBar stages={stages} currentStageId={stageId} />
+      <div ref={stageAnchorRef} tabIndex={-1} className={styles.stageAnchor}>
+        <ProgressBar stages={stages} currentStageId={stageId} />
+      </div>
 
       {isStaleQuestionBankVersion ? (
         <p className={styles.notice}>
