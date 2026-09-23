@@ -1,27 +1,33 @@
 /**
- * Pathways marketing design tokens (Phase 2). A single, small token
- * sheet plus base element styles -- deliberately not a visual
- * framework (Tailwind, Chakra, etc.), per the Phase 2 authorization's
- * instruction not to install one without a concrete need. Colors:
- * deep navy for structure/headings, a restrained teal/green accent,
- * warm white/neutral backgrounds -- matching the two supplied
- * homepage mockups' general direction (docs/pathways/pack/
- * reference-assets/), used here as direction only, never as a
- * flattened screenshot or a source of copy/claims.
+ * Pathways marketing design tokens (Phase 2, refined in Phase 2B). A
+ * single, small token sheet plus base element styles -- deliberately
+ * not a visual framework (Tailwind, Chakra, etc.), per the Phase
+ * 2/2B authorizations' instruction not to install one without a
+ * concrete need. Colors: deep navy for structure/headings, a
+ * Pathways-green accent, a bright blue reserved for selective
+ * headline emphasis, warm white/neutral backgrounds -- matching the
+ * supplied Pathways visual reference concepts' general direction
+ * only, never as a flattened screenshot or a source of copy/claims.
  */
 
 :root {
   /* Color: navy (structure, headings, primary surfaces) */
-  --color-navy-900: #0b1f3a;
-  --color-navy-800: #122a4d;
-  --color-navy-700: #1c3a66;
-  --color-navy-600: #2a4d80;
+  --color-navy-900: #082f55;
+  --color-navy-800: #0a315a;
+  --color-navy-700: #123a66;
+  --color-navy-600: #1c4a7a;
 
-  /* Color: teal/green accent (restrained -- CTAs, highlights only) */
-  --color-teal-700: #0b5f5c;
-  --color-teal-600: #0e7c7a;
-  --color-teal-500: #199c96;
-  --color-teal-100: #e2f3f1;
+  /* Color: Pathways green accent (restrained -- CTAs, highlights only) */
+  --color-green-700: #178a57;
+  --color-green-600: #20a866;
+  --color-green-500: #29a96c;
+  --color-green-100: #e3f7ec;
+
+  /* Color: emphasis blue -- selective headline emphasis only
+     (Phase 2B "blue-emphasis headline treatment"), never a large
+     surface fill. */
+  --color-blue-600: #1788c9;
+  --color-blue-500: #198bd2;
 
   /* Color: warm neutrals (backgrounds, body text) */
   --color-warm-white: #fbf9f5;
@@ -43,9 +49,10 @@
   --color-text-inverse: var(--color-warm-white);
   --color-text-inverse-muted: #c7d2e2;
   --color-border: var(--color-neutral-200);
-  --color-accent: var(--color-teal-600);
-  --color-accent-strong: var(--color-teal-700);
-  --color-accent-tint: var(--color-teal-100);
+  --color-accent: var(--color-green-600);
+  --color-accent-strong: var(--color-green-700);
+  --color-accent-tint: var(--color-green-100);
+  --color-emphasis: var(--color-blue-600);
   --color-focus-ring: #2a7de1;
 
   /* Type scale */
@@ -59,6 +66,7 @@
   --font-size-2xl: 1.875rem;
   --font-size-3xl: 2.375rem;
   --font-size-4xl: 3rem;
+  --font-size-5xl: 3.75rem;
   --line-height-tight: 1.15;
   --line-height-snug: 1.35;
   --line-height-normal: 1.6;

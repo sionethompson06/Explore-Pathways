@@ -1,36 +1,57 @@
 .hero {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: var(--space-7);
-  align-items: center;
-  padding-block: var(--space-5) var(--space-4);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 44rem;
+  display: flex;
+  align-items: flex-end;
+  color: var(--color-warm-white);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 640px) {
   .hero {
-    grid-template-columns: 1fr;
+    min-height: 38rem;
   }
+}
 
-  .art {
-    order: -1;
-    max-width: 20rem;
-    margin-inline: auto;
-  }
+.art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to top,
+    rgba(6, 20, 36, 0.82) 0%,
+    rgba(6, 20, 36, 0.55) 45%,
+    rgba(6, 20, 36, 0.1) 75%
+  );
+}
+
+.content {
+  padding-block: var(--space-8) var(--space-7);
+  max-width: 40rem;
 }
 
 .eyebrow {
   display: inline-block;
   font-weight: 700;
   font-size: var(--font-size-sm);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-accent-strong);
+  color: var(--color-green-100);
   margin-bottom: var(--space-3);
 }
 
 .headline {
-  font-size: var(--font-size-4xl);
-  max-width: 16ch;
+  font-size: var(--font-size-5xl);
+  line-height: var(--line-height-tight);
+  color: var(--color-warm-white);
+  letter-spacing: -0.01em;
 }
 
 @media (max-width: 640px) {
@@ -39,10 +60,15 @@
   }
 }
 
+.emphasis {
+  color: var(--color-blue-500);
+}
+
 .supporting {
   font-size: var(--font-size-lg);
-  color: var(--color-text-muted);
-  max-width: 46ch;
+  color: var(--color-text-inverse-muted);
+  max-width: 42ch;
+  margin-top: var(--space-4);
 }
 
 .ctaRow {
@@ -50,4 +76,43 @@
   flex-wrap: wrap;
   gap: var(--space-4);
   margin-top: var(--space-5);
+}
+
+.gradeLabel {
+  margin-top: var(--space-5);
+  margin-bottom: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-inverse-muted);
+}
+
+.indicators {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.handwrittenTop {
+  position: absolute;
+  top: var(--space-6);
+  right: var(--space-6);
+  z-index: 1;
+  max-width: 14rem;
+  text-align: right;
+}
+
+.handwrittenBottom {
+  position: absolute;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .handwrittenTop,
+  .handwrittenBottom {
+    display: none;
+  }
 }

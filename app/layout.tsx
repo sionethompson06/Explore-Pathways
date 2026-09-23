@@ -1,6 +1,22 @@
 import type { Metadata } from "next";
+import { Caveat } from "next/font/google";
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import "./globals.css";
+
+/**
+ * The sole decorative "handwritten accent" typeface (Phase 2B visual
+ * direction) -- Caveat, SIL Open Font License, served from Google
+ * Fonts and self-hosted by Next.js at build time (no client-side
+ * request to Google). Never used for buttons, instructions, or any
+ * accessibility-critical text -- see components that use
+ * var(--font-handwritten).
+ */
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-handwritten",
+  display: "swap",
+});
 
 /**
  * Phase 2 marketing site shell. `robots: { index: false, follow:
@@ -30,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={caveat.variable}>
       <body>
         <MarketingLayout>{children}</MarketingLayout>
       </body>
