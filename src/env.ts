@@ -200,7 +200,23 @@ function loadEnv(): Env {
   // actionable message (Phase 3B: this is exactly the failure mode the
   // owner hit testing the Vercel preview). LOCAL is exempt -- a
   // developer's own machine legitimately runs Postgres on localhost.
-  if (env.DEPLOYMENT_MODE !== "LOCAL" && isLoopbackDatabaseUrl(env.DATABASE_URL)) {
+  //
+  // Runtime-only, via `NEXT_PHASE` (Next.js sets this to
+  // "phase-production-build" during `next build` and
+  // "phase-production-server" once the built app is actually serving
+  // requests): `next build` evaluates every route module -- including
+  // this one -- during its page-data-collection step even though no
+  // route is actually handling a request yet, so a build-time-only
+  // placeholder DATABASE_URL (which never attempts a real connection
+  // during the build, exactly like the pre-existing checks above) must
+  // not fail the build itself. Confirmed against a real Vercel Preview
+  // build: without this guard, this check fails the build for every
+  // route in the app, not just the ones that touch the database.
+  if (
+    env.DEPLOYMENT_MODE !== "LOCAL" &&
+    process.env.NEXT_PHASE !== "phase-production-build" &&
+    isLoopbackDatabaseUrl(env.DATABASE_URL)
+  ) {
     throw new Error(
       `DATABASE_URL points at a loopback host, which is not reachable from a ` +
         `deployed ${env.DEPLOYMENT_MODE} environment. Configure a remotely ` +

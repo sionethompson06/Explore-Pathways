@@ -290,5 +290,25 @@ describe("environment validation", () => {
       vi.resetModules();
       await expect(import("@/env")).rejects.toThrow(/loopback host/);
     });
+
+    it("does not reject a loopback DATABASE_URL while next build itself is evaluating this module (NEXT_PHASE=phase-production-build)", async () => {
+      // A real Vercel Preview build failed with exactly this combination
+      // before this exemption existed: `next build` imports every route
+      // module (including this one) during its page-data-collection
+      // step even though nothing is actually serving a request yet, so
+      // a build-time-only placeholder DATABASE_URL must not fail the
+      // build itself -- only a genuine runtime request should ever hit
+      // this check. See DECISION_LOG.md DEC-G7.
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "PREVIEW",
+        NEXT_PHASE: "phase-production-build",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("PREVIEW");
+    });
   });
 });
