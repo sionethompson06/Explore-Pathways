@@ -28,43 +28,43 @@ export interface MarketingPhotoSlot {
 
 export const MARKETING_PHOTOS = {
   heroStudentMountain: {
-    path: "/pathways/marketing/01-homepage-hero-student-mountain.webp",
+    path: "/pathways/marketing/photography/01-homepage-hero-student-mountain.webp",
     alt: "A student overlooking a mountain and lake landscape at sunrise.",
   },
   athleteBasketball: {
-    path: "/pathways/marketing/02-freedom-train-more-athlete.webp",
+    path: "/pathways/marketing/photography/02-freedom-train-more-athlete.webp",
     alt: "A student athlete training with a basketball outdoors at sunset.",
   },
   academicStudentLaptop: {
-    path: "/pathways/marketing/03-freedom-get-ahead-student-laptop.webp",
+    path: "/pathways/marketing/photography/03-freedom-get-ahead-student-laptop.webp",
     alt: "A student studying on a laptop in a bright learning space.",
   },
   flexibleTravelStudent: {
-    path: "/pathways/marketing/04-freedom-learn-anywhere-travel-student.webp",
+    path: "/pathways/marketing/photography/04-freedom-learn-anywhere-travel-student.webp",
     alt: "A student using a laptop while traveling in a scenic location.",
   },
   studentLifestyle: {
-    path: "/pathways/marketing/05-freedom-take-back-time-student.webp",
+    path: "/pathways/marketing/photography/05-freedom-take-back-time-student.webp",
     alt: "A student outdoors at sunset with a mountain view.",
   },
   advisorFamily: {
-    path: "/pathways/marketing/06-human-support-advisor-parent.webp",
+    path: "/pathways/marketing/photography/06-human-support-advisor-parent.webp",
     alt: "Two adults having a warm conversation over an education plan.",
   },
   finalMountainScenery: {
-    path: "/pathways/marketing/09-final-cta-mountain-landscape.webp",
+    path: "/pathways/marketing/photography/09-final-cta-mountain-landscape.webp",
     alt: "A mountain lake landscape at sunset.",
   },
   homeschoolPageHero: {
-    path: "/pathways/marketing/07-homeschool-support-family-learning.webp",
+    path: "/pathways/marketing/photography/07-homeschool-support-family-learning.webp",
     alt: "A parent supporting a student learning at home.",
   },
   athletePageHero: {
-    path: "/pathways/marketing/02-freedom-train-more-athlete.webp",
+    path: "/pathways/marketing/photography/02-freedom-train-more-athlete.webp",
     alt: "A student athlete training with a basketball outdoors at sunset.",
   },
   academicPageHero: {
-    path: "/pathways/marketing/08-academic-opportunities-campus-student.webp",
+    path: "/pathways/marketing/photography/08-academic-opportunities-campus-student.webp",
     alt: "A student carrying a laptop on a college campus.",
   },
 } as const satisfies Record<string, MarketingPhotoSlot>;

@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/marketing/Section";
 import { Faq } from "@/components/marketing/Faq";
+import { InfographicImage } from "@/components/marketing/InfographicImage";
 import { Hero } from "@/components/marketing/home/Hero";
 import { FreedomCards } from "@/components/marketing/home/FreedomCards";
 import { GoalGrid } from "@/components/marketing/home/GoalGrid";
 import { WhyExplore } from "@/components/marketing/home/WhyExplore";
 import { JourneyList } from "@/components/marketing/home/JourneyList";
-import { ReportPreviewCard } from "@/components/marketing/home/ReportPreviewCard";
+import { DiscoveryShowcase } from "@/components/marketing/home/DiscoveryShowcase";
+import { FindYourPath } from "@/components/marketing/home/FindYourPath";
 import { HumanSupport } from "@/components/marketing/home/HumanSupport";
 import { BrandValues } from "@/components/marketing/home/BrandValues";
 import { FinalCta } from "@/components/marketing/home/FinalCta";
 import { HOMEPAGE_FAQ } from "@/content/faq";
+import { MARKETING_INFOGRAPHICS } from "@/content/marketing-infographics";
 
 export const metadata: Metadata = {
   title: "Pathways — Explore Education Possibilities for Your Student",
@@ -35,8 +38,15 @@ export default function Home() {
         <FreedomCards />
       </Section>
 
-      {/* B. Family goals */}
+      {/* What Are You Hoping to Make Possible? (Phase 2C, Asset Pack 2 P2-04) */}
       <Section tone="alt" ariaLabelledBy="goals-heading">
+        <div style={{ marginBottom: "var(--space-6)" }}>
+          <InfographicImage
+            src={MARKETING_INFOGRAPHICS.whatAreYouHopingToMakePossible.path}
+            width={1672}
+            height={740}
+          />
+        </div>
         <h2 id="goals-heading">What are you hoping to make possible?</h2>
         <p>Choose whatever fits best today -- you can always explore more later.</p>
         <GoalGrid />
@@ -54,20 +64,18 @@ export default function Home() {
         <WhyExplore />
       </Section>
 
-      {/* Section 4 (Phase 2B image-integration): Discovery Report preview */}
+      {/* Discovery Report showcase (Phase 2C, Asset Pack 2 P2-02 direction) */}
       <Section tone="alt" ariaLabelledBy="report-heading">
-        <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
-          <h2 id="report-heading">See what a Discovery Report helps you understand</h2>
-          <p style={{ marginInline: "auto" }}>
-            What matters most to your family, directions worth exploring, relevant
-            possibilities, and questions for a planning conversation.
-          </p>
-        </div>
-        <ReportPreviewCard />
+        <DiscoveryShowcase />
+      </Section>
+
+      {/* Find Your Path in Minutes (Phase 2C, Asset Pack 2 P2-01) */}
+      <Section tone="default" ariaLabelledBy="find-your-path-heading">
+        <FindYourPath />
       </Section>
 
       {/* Section 5 (Phase 2B image-integration): How Pathways Works */}
-      <Section tone="default" ariaLabelledBy="how-heading">
+      <Section tone="alt" ariaLabelledBy="how-heading">
         <h2 id="how-heading">A Clear Path From Possibility to Progress</h2>
         <p>
           A preliminary Discovery Report is available to every family. Deeper services --
@@ -75,10 +83,17 @@ export default function Home() {
           depend on availability and staffing, and are never presented as automatic.
         </p>
         <JourneyList />
+        <div style={{ marginTop: "var(--space-7)" }}>
+          <InfographicImage
+            src={MARKETING_INFOGRAPHICS.possibilityToProgress.path}
+            width={1672}
+            height={820}
+          />
+        </div>
       </Section>
 
       {/* Section 6 (Phase 2B image-integration): Human support */}
-      <Section tone="alt" ariaLabelledBy="human-support-heading">
+      <Section tone="default" ariaLabelledBy="human-support-heading">
         <HumanSupport />
       </Section>
 

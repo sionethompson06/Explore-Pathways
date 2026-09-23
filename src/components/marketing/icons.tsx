@@ -131,3 +131,12 @@ export function AdvanceIcon(props: SVGProps<SVGSVGElement>) {
     </Icon>
   );
 }
+
+export function CheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="m8.3 12.3 2.6 2.6 4.8-5.4" />
+    </Icon>
+  );
+}
