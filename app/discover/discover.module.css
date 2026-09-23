@@ -14,6 +14,56 @@
   color: var(--color-navy-900);
 }
 
+.explainerList {
+  margin: var(--space-4) 0;
+  padding-left: 1.2em;
+  color: var(--color-text-muted);
+}
+
+.explainerList li {
+  margin-bottom: var(--space-2);
+}
+
+.startForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.startButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background: var(--color-accent);
+  color: var(--color-white);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.startButton:hover {
+  background: var(--color-accent-strong);
+  transform: translateY(-1px);
+}
+
+.devNotice {
+  margin-top: var(--space-4);
+  margin-bottom: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startButton {
+    transition: none;
+  }
+}
+
 .goalList {
   list-style: none;
   margin: 0;

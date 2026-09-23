@@ -103,10 +103,16 @@ test.describe("Discovery entry point routing", () => {
     ).toBeVisible();
   });
 
-  test("the Discovery page states the questionnaire is not enabled yet", async ({ page }) => {
+  test("the Discovery page is a real entry point that starts a session and reaches the questionnaire", async ({
+    page,
+  }) => {
     await page.goto("/discover");
-    await expect(
-      page.getByText(/Discovery questionnaire is not enabled yet/i),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Start My Discovery" })).toBeVisible();
+    await expect(page.getByText(/use sample information only/i)).toBeVisible();
+
+    await page.getByRole("button", { name: "Start My Discovery" }).click();
+    await expect(page).toHaveURL(/\/discover\/profile$/);
+    const cookies = await page.context().cookies();
+    expect(cookies.some((c) => c.name === "pathways_guest_session" && c.httpOnly)).toBe(true);
   });
 });

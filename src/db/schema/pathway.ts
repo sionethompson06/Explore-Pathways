@@ -8,7 +8,7 @@ import {
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { user } from "./auth";
 
 /**
@@ -102,6 +102,35 @@ export const discoverySession = pgTable(
       .notNull()
       .defaultNow(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+
+    // --- Phase 3: server-backed Discovery draft --------------------
+    // The parent's in-progress raw answers, keyed by canonical
+    // question-bank field. This is the ONLY place a Discovery draft
+    // lives -- never localStorage/sessionStorage/URL (Specification 02,
+    // Phase 3 instruction section 8). "Resume position" is
+    // deliberately NOT a separate stored column: it is always
+    // recomputed from draftAnswers via computeActiveFlow +
+    // validateCompletedProfile (first active question with no valid
+    // answer), so it can never drift out of sync with the answers
+    // that actually determine it. Likewise no separate
+    // visited/skipped bookkeeping exists -- "optional and unanswered"
+    // is fully represented by the field's simple absence from this
+    // JSON object.
+    draftAnswers: jsonb("draft_answers").notNull().default({}),
+    // The contracts/question-bank.json `version` this draft was last
+    // saved against (see src/lib/discovery/registry.ts). Lets a
+    // resumed session detect a question-bank upgrade rather than
+    // silently submit an old-shape draft under new semantics.
+    draftQuestionBankVersion: text("draft_question_bank_version"),
+    // The mapped, EDITABLE preselection carried over from a homepage
+    // marketing `?interest=` click (Phase 3 instruction section 6) --
+    // e.g. "ATHLETICS" for DISC_006. Never written into draftAnswers
+    // directly; only ever offered by the UI as a pre-checked-but-
+    // changeable option for DISC_006 until the parent actually saves
+    // that screen, at which point it becomes an ordinary answer like
+    // any other and this hint is cleared.
+    draftInterestHint: text("draft_interest_hint"),
+    draftUpdatedAt: timestamp("draft_updated_at", { withTimezone: true }),
   },
   (table) => [
     uniqueIndex("discovery_session_token_hash_unique_idx").on(
@@ -137,6 +166,18 @@ export const profileRevision = pgTable(
     effectiveAnswers: jsonb("effective_answers").notNull(),
     gradeBand: text("grade_band"),
     questionBankVersion: text("question_bank_version").notNull(),
+    // A client-generated token, unique per submission attempt (Phase 3
+    // instruction section 37). The unique index below is the actual
+    // idempotency guarantee -- a concurrent or retried submission with
+    // the same (session, key) pair is rejected at the database level
+    // (23505 unique_violation), and the caller re-selects the row that
+    // already exists instead of creating a second one, closing the
+    // check-then-act race a purely application-level check would
+    // leave open. Null for any revision created outside this submit
+    // path (none exist yet in this phase, but the column stays
+    // nullable rather than assuming every future revision source uses
+    // this same key scheme).
+    submissionIdempotencyKey: text("submission_idempotency_key"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -147,6 +188,9 @@ export const profileRevision = pgTable(
       table.revisionNumber,
     ),
     index("profile_revision_record_idx").on(table.studentPathwayRecordId),
+    uniqueIndex("profile_revision_session_idempotency_unique_idx")
+      .on(table.discoverySessionId, table.submissionIdempotencyKey)
+      .where(sql`${table.submissionIdempotencyKey} IS NOT NULL`),
   ],
 );
 

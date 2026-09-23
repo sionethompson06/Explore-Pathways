@@ -1,0 +1,216 @@
+.wrapper {
+  max-width: var(--max-prose-width);
+  margin-inline: auto;
+}
+
+.progress {
+  margin-bottom: var(--space-6);
+}
+
+.progressList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.progressItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.progressDot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.progressItem[data-complete="true"] .progressDot {
+  background: var(--color-accent);
+}
+
+.progressItem[data-current="true"] {
+  color: var(--color-navy-900);
+}
+
+.progressItem[data-current="true"] .progressDot {
+  background: var(--color-navy-900);
+}
+
+.progressCaption {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.notice {
+  background: var(--color-accent-tint);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  color: var(--color-navy-900);
+}
+
+.notice ul {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.2em;
+}
+
+.hintBanner {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  font-size: var(--font-size-sm);
+  color: var(--color-navy-800);
+}
+
+.saveIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.retryButton {
+  background: none;
+  border: 1px solid var(--color-navy-700);
+  border-radius: var(--radius-full);
+  padding: 0.2rem 0.75rem;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-navy-800);
+  cursor: pointer;
+}
+
+.questions {
+  margin-bottom: var(--space-6);
+}
+
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.75rem;
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background: var(--color-accent);
+  color: var(--color-white);
+  font-weight: 700;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--color-accent-strong);
+  transform: translateY(-1px);
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-navy-700);
+  background: transparent;
+  color: var(--color-navy-900);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: var(--color-navy-900);
+  color: var(--color-warm-white);
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.reviewSection {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.reviewSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.reviewSectionHeader h3 {
+  margin: 0;
+}
+
+.editLink {
+  background: none;
+  border: none;
+  color: var(--color-accent-strong);
+  font-weight: 700;
+  cursor: pointer;
+  padding: var(--space-2);
+}
+
+.reviewList {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.reviewItem dt {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.reviewItem dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-navy-900);
+}
+
+@media (max-width: 480px) {
+  .navRow {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton {
+    transition: none;
+  }
+}

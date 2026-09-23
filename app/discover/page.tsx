@@ -3,23 +3,25 @@ import Link from "next/link";
 import { PageHero } from "@/components/marketing/PageHero";
 import { Section } from "@/components/marketing/Section";
 import { Card } from "@/components/marketing/Card";
-import { Badge } from "@/components/marketing/Badge";
+import { ButtonLink } from "@/components/marketing/Button";
 import { FAMILY_GOALS, isGoalInterest, getGoalByInterest } from "@/content/goals";
+import { startDiscoveryAction } from "./actions";
 import styles from "./discover.module.css";
 
 export const metadata: Metadata = {
   title: "Discover",
-  description: "Start exploring your student's education pathway.",
+  description: "Start your student's Pathways Discovery profile.",
+  robots: { index: false, follow: false },
 };
 
 /**
- * The honest Phase 2 entry point for Discovery -- not the Phase 3
- * questionnaire. It may show and let a visitor change an allowlisted
- * interest, and must state plainly that the real questionnaire isn't
- * enabled yet. It collects nothing: the "interest" lives only in the
- * URL query string, is validated against a closed allowlist before
- * ever being rendered, and an unrecognized value is silently ignored
- * rather than reflected into the page -- never trust `?interest=`.
+ * The real Discovery entry point (Phase 3 instruction §5) -- replaces
+ * the Phase 2 "questionnaire is not enabled yet" preview. An
+ * allowlisted `?interest=` is still read here (marketing handoff,
+ * §6), but it is only ever passed along as a hidden form field to
+ * startDiscoveryAction, which converts it to an editable DISC_006
+ * preselection hint server-side -- this page itself never writes it
+ * anywhere, and it never becomes part of /discover/profile's URL.
  */
 export default async function DiscoverPage({
   searchParams,
@@ -38,19 +40,15 @@ export default async function DiscoverPage({
       <PageHero
         headingId="discover-heading"
         eyebrow="Discover"
-        title="Let's start with what you're hoping to make possible"
-        subtitle="This preview shows how Discovery will begin. The full questionnaire isn't enabled in this development version yet."
+        title="Let's Start With What You're Hoping to Make Possible"
+        subtitle="Answer a few questions about your student, your family's priorities, and what you'd like education to make possible."
       />
 
       <Section tone="default" ariaLabelledBy="discover-status-heading" narrow>
         <h2 id="discover-status-heading" className="visually-hidden">
-          Status
+          Start Discovery
         </h2>
         <Card>
-          <div style={{ marginBottom: "var(--space-4)" }}>
-            <Badge>Development preview — the Discovery questionnaire is not enabled yet</Badge>
-          </div>
-
           {selectedGoal ? (
             <>
               <p className={styles.selectedLabel}>You selected:</p>
@@ -61,10 +59,31 @@ export default async function DiscoverPage({
             <p>Choose the starting point that fits best -- you can always change this.</p>
           )}
 
-          <p style={{ marginBottom: 0 }}>
-            Nothing you select here is saved, submitted, or turned into a student record.
-            No email or account is required to look around, and no consultation is
-            requested by visiting this page.
+          <ul className={styles.explainerList}>
+            <li>Your answers adapt the questions we show next -- nobody answers every question.</li>
+            <li>You can go back and change an earlier answer at any point before you finish.</li>
+            <li>No account or email is required to complete Discovery.</li>
+            <li>
+              Discovery is exploratory -- it does not determine school eligibility or make a
+              placement decision.
+            </li>
+          </ul>
+
+          <form action={startDiscoveryAction} className={styles.startForm}>
+            {selectedGoal ? (
+              <input type="hidden" name="interest" value={selectedGoal.interest} />
+            ) : null}
+            <button type="submit" className={styles.startButton}>
+              Start My Discovery
+            </button>
+            <ButtonLink href="/how-it-works" variant="secondary">
+              How Pathways Works
+            </ButtonLink>
+          </form>
+
+          <p className={styles.devNotice}>
+            Development preview -- please use sample information only while we finish building
+            Pathways.
           </p>
         </Card>
       </Section>
