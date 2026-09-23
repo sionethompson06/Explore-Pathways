@@ -23,7 +23,11 @@ afterEach(() => {
 
 async function freshSessionConfig(overrides: Record<string, string | undefined>) {
   setEnv({
-    DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+    // A remote host: some of these cases exercise DEPLOYMENT_MODE=PREVIEW/LIVE,
+    // which src/env.ts now refuses to start with a loopback DATABASE_URL
+    // (Phase 3B) -- this module isn't testing that check, so it uses a
+    // host that satisfies it regardless of which mode a given case sets.
+    DATABASE_URL: "postgresql://user:pass@db.example.internal:5432/db",
     BETTER_AUTH_SECRET: "x".repeat(32),
     ...overrides,
   });

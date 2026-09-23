@@ -108,6 +108,24 @@ const rawEnvSchema = z.object({
 // explicitly and is refused below if it does not.
 const ILLUSTRATIVE_DEV_SESSION_TTL_MINUTES = 60;
 
+const LOOPBACK_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+
+/**
+ * Best-effort loopback-host check; an unparseable string is not this
+ * function's concern -- the DATABASE_URL shape refine above already
+ * rejects anything that isn't a postgres connection string. The
+ * WHATWG URL parser returns a bracketed IPv6 hostname (`[::1]`), so
+ * that's normalized to bare `::1` before the Set lookup.
+ */
+function isLoopbackDatabaseUrl(databaseUrl: string): boolean {
+  try {
+    const hostname = new URL(databaseUrl).hostname.replace(/^\[|\]$/g, "");
+    return LOOPBACK_DATABASE_HOSTS.has(hostname);
+  } catch {
+    return false;
+  }
+}
+
 export type Env = z.infer<typeof rawEnvSchema> & {
   isProduction: boolean;
   /** Resolved, always-present TTL in minutes: the configured value, or the illustrative LOCAL/PREVIEW default. Never used to silently supply a default in LIVE mode -- that is refused below instead. */
@@ -172,6 +190,22 @@ function loadEnv(): Env {
           "decision, not a code default.",
       );
     }
+  }
+
+  // A deployed, non-LOCAL environment (PREVIEW or LIVE) must never
+  // silently fall back to a loopback database host: that host simply
+  // does not exist inside a deployed serverless function, and the
+  // failure would otherwise surface only at request time as an opaque
+  // "ECONNREFUSED 127.0.0.1:5432" rather than at startup with an
+  // actionable message (Phase 3B: this is exactly the failure mode the
+  // owner hit testing the Vercel preview). LOCAL is exempt -- a
+  // developer's own machine legitimately runs Postgres on localhost.
+  if (env.DEPLOYMENT_MODE !== "LOCAL" && isLoopbackDatabaseUrl(env.DATABASE_URL)) {
+    throw new Error(
+      `DATABASE_URL points at a loopback host, which is not reachable from a ` +
+        `deployed ${env.DEPLOYMENT_MODE} environment. Configure a remotely ` +
+        "accessible PostgreSQL connection string for this environment.",
+    );
   }
 
   const resolvedGuestSessionTtlMinutes =

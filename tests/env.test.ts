@@ -177,7 +177,9 @@ describe("environment validation", () => {
 
     it("accepts DEPLOYMENT_MODE=LIVE only with both LIVE_DEPLOYMENT_APPROVED=true and an explicit TTL", async () => {
       setEnv({
-        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        // A remote host -- see the loopback-rejection tests below for
+        // why LIVE cannot use a localhost DATABASE_URL either.
+        DATABASE_URL: "postgresql://user:pass@db.example.internal:5432/db",
         BETTER_AUTH_SECRET: "x".repeat(32),
         DEPLOYMENT_MODE: "LIVE",
         LIVE_DEPLOYMENT_APPROVED: "true",
@@ -192,7 +194,9 @@ describe("environment validation", () => {
 
     it("PREVIEW mode uses the illustrative default without requiring approval or an explicit TTL", async () => {
       setEnv({
-        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        // A remote host -- see the loopback-rejection tests below for
+        // why PREVIEW cannot use a localhost DATABASE_URL.
+        DATABASE_URL: "postgresql://user:pass@db.example.internal:5432/db",
         BETTER_AUTH_SECRET: "x".repeat(32),
         DEPLOYMENT_MODE: "PREVIEW",
       });
@@ -201,6 +205,90 @@ describe("environment validation", () => {
       const { env } = await import("@/env");
       expect(env.DEPLOYMENT_MODE).toBe("PREVIEW");
       expect(env.resolvedGuestSessionTtlMinutes).toBe(60);
+    });
+  });
+
+  describe("loopback DATABASE_URL rejection in deployed environments (Phase 3B repair)", () => {
+    it("LOCAL + a localhost DATABASE_URL is allowed", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "LOCAL",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("LOCAL");
+    });
+
+    it("LOCAL + a 127.0.0.1 DATABASE_URL is allowed", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@127.0.0.1:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "LOCAL",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("LOCAL");
+    });
+
+    it("PREVIEW + a localhost DATABASE_URL is rejected", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "PREVIEW",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/loopback host/);
+    });
+
+    it("PREVIEW + a 127.0.0.1 DATABASE_URL is rejected", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@127.0.0.1:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "PREVIEW",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/loopback host/);
+    });
+
+    it("PREVIEW + a ::1 DATABASE_URL is rejected", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@[::1]:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "PREVIEW",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/loopback host/);
+    });
+
+    it("PREVIEW + a remote PostgreSQL DATABASE_URL is accepted", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@db.example.internal:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "PREVIEW",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      const { env } = await import("@/env");
+      expect(env.DEPLOYMENT_MODE).toBe("PREVIEW");
+    });
+
+    it("LIVE + a localhost DATABASE_URL is rejected (even before the LIVE-approval gate)", async () => {
+      setEnv({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+        BETTER_AUTH_SECRET: "x".repeat(32),
+        DEPLOYMENT_MODE: "LIVE",
+        LIVE_DEPLOYMENT_APPROVED: "true",
+        GUEST_SESSION_TTL_MINUTES: "120",
+      });
+      const { vi } = await import("vitest");
+      vi.resetModules();
+      await expect(import("@/env")).rejects.toThrow(/loopback host/);
     });
   });
 });
