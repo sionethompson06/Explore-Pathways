@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0-phase0-corrected",
+  "version": "1.2.0-phase3e-discovery-calibrated",
   "status": "PILOT_UNVALIDATED",
-  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C2, C4, C6. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/rules.json). RETIRED rules are kept in this array for explainability but must be skipped during evaluation by the Phase 4 engine; only rules without a status of RETIRED are evaluated.",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C2, C4, C6, DEC-H2, DEC-H3+. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/rules.json). RETIRED rules are kept in this array for explainability but must be skipped during evaluation by the Phase 4 engine; only rules without a status of RETIRED are evaluated. Phase 3E retired ADV_003 (replaced by ADV_004) and COST_001 (cost is feasibility, not an educational-alignment score input -- DEC-H2), added ADV_009-013 to reach previously dead-end DISC_022 options, and updated ADV_004/ADV_006/ENV_001's conditions for the calibrated question-bank's canonical enum values.",
   "normalized_fact_fields": [
     "grade_band",
     "athletics_interest",
@@ -1333,11 +1333,14 @@
       },
       "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
       "reason_type": "ALIGNMENT",
-      "status": "PILOT_UNVALIDATED"
+      "status": "RETIRED",
+      "retired_at": "phase3e-discovery-calibration",
+      "retired_reason": "DISC_022's DUAL_ENROLLMENT and COLLEGE_COURSES are merged into one family-facing concept, canonical value COLLEGE_LEVEL_COURSES (DISCOVERY_CALIBRATION_SPEC_V2.md section 9) -- both legacy values normalize to it in effective answers (contracts/legacy-aliases.json), so this rule's DUAL_ENROLLMENT-only condition can never again be met by a current submission. Kept for explainability of any prior run recorded against it; ADV_004 (updated to match on COLLEGE_LEVEL_COURSES) is the sole rule for this concept going forward.",
+      "replacement_rule_id": "ADV_004"
     },
     {
       "id": "ADV_004",
-      "version": "1.0.0-candidate",
+      "version": "1.1.0-phase3e-discovery-calibration",
       "group": "future",
       "when": {
         "all": [
@@ -1353,7 +1356,7 @@
             "field": "advancement_interests",
             "op": "contains_any",
             "value": [
-              "COLLEGE_COURSES"
+              "COLLEGE_LEVEL_COURSES"
             ]
           }
         ]
@@ -1413,7 +1416,7 @@
     },
     {
       "id": "ADV_006",
-      "version": "1.0.0-candidate",
+      "version": "1.1.0-phase3e-discovery-calibration",
       "group": "academic",
       "when": {
         "all": [
@@ -1423,6 +1426,7 @@
             "value": [
               "ADVANCED_MATH",
               "ADVANCED_SCIENCE",
+              "ADVANCED_ELA",
               "HIGH_SCHOOL_EARLY"
             ]
           }
@@ -1610,8 +1614,15 @@
         "reviews": []
       },
       "reason_template": "Your family would prefer to explore publicly funded schooling options; eligibility and any separate service costs still need review.",
-      "reason_type": "ALIGNMENT",
-      "status": "PILOT_UNVALIDATED"
+      "reason_type": "FEASIBILITY",
+      "status": "RETIRED",
+      "retired_at": "phase3e-discovery-calibration",
+      "retired_reason": "DEC-H2 (docs/pathways/DECISION_LOG.md): cost belongs to PRACTICAL FEASIBILITY, not EDUCATIONAL ALIGNMENT (DISCOVERY_CALIBRATION_SPEC_V2.md section 12) -- a family preferring tuition-free options is not evidence that a tuition-free base model is a better educational fit for their student, so this rule's direct score_effects on B02/B03/B04 is exactly the anti-pattern the architectural change forbids. Cost still reaches the report through REV_COST_ALIGNMENT (scoring-policy.json postprocess_rules / material_review_mapping), which surfaces cost as a discussion point rather than inflating a base model's score. No replacement rule: this concern is deliberately not re-implemented as a scoring rule.",
+      "review_model_scope": [
+        "B02",
+        "B03",
+        "B04"
+      ]
     },
     {
       "id": "CURR_001",
@@ -1675,7 +1686,7 @@
     },
     {
       "id": "ENV_001",
-      "version": "1.0.0-candidate",
+      "version": "1.1.0-phase3e-discovery-calibration",
       "group": "context",
       "when": {
         "all": [
@@ -1683,9 +1694,7 @@
             "field": "discovery_reasons",
             "op": "contains_any",
             "value": [
-              "ENVIRONMENT_CONCERN",
-              "CURRENT_SCHOOL_CONCERN",
-              "DIFFERENT_ENVIRONMENT"
+              "BETTER_FIT_ENVIRONMENT"
             ]
           }
         ]
@@ -1928,6 +1937,176 @@
         "reviews": []
       },
       "reason_template": "College is part of your family's future plan; college planning support is one possible service to explore. This does not imply AP, dual-enrollment, admissions or college readiness.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_009",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "academic",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022's ENRICHMENT (the grade-tiered option shown to elementary families) previously activated no overlay, opportunity or review -- a genuine dead end (DISCOVERY_CALIBRATION_SPEC_V2.md section 9). Wired to the same foundational challenge/enrichment opportunity (OP18) already used for elementary foundational-priorities, since both express 'more than the standard curriculum' at an elementary level; not a new opportunity.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "ENRICHMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP18"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore enrichment beyond the standard curriculum; this is an interest signal, not evidence of readiness.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_010",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "academic",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022's CHALLENGING_COURSEWORK (the grade-tiered option shown to middle/undetermined families who are not yet ready for HONORS/AP-specific language) previously activated nothing, another dead end DISCOVERY_CALIBRATION_SPEC_V2.md section 9 requires fixing. Shares OP01 with ADV_006 rather than a new opportunity -- both express general academic challenge.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "CHALLENGING_COURSEWORK"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP01"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore more challenging coursework; this is an interest signal, not evidence of readiness.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_011",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "future",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022 now captures work-based learning/internship interest directly (DISCOVERY_CALIBRATION_SPEC_V2.md section 9), so OP07 (previously RESERVED at Phase 0 because no question captured it -- DEC-C3) can move to ACTIVE and become reachable without speculative wiring.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "WORK_BASED_LEARNING"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP07"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore work-based learning or internship opportunities; this is an interest signal, not a placement or employer commitment.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_012",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "future",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022 now captures industry-credential interest directly, so OP09 (previously RESERVED, same DEC-C3 reasoning as OP07) can move to ACTIVE.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "INDUSTRY_CREDENTIALS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP09"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore industry certifications or credentials; this is an interest signal, not a qualification determination.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_013",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "future",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022 now captures entrepreneurship interest directly, so OP12 (previously RESERVED, same DEC-C3 reasoning as OP07) can move to ACTIVE.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "ENTREPRENEURSHIP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP12"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore entrepreneurship opportunities; this is an interest signal, not a program guarantee.",
       "reason_type": "ALIGNMENT",
       "status": "PILOT_UNVALIDATED"
     },

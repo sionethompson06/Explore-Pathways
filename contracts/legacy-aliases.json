@@ -20,5 +20,20 @@
     "P01-P13 combined base-model/overlay list",
     "S09 used inconsistently for NCAA-only versus college-athletics services",
     "generic OPP or SUP values not explicitly mapped here"
-  ]
+  ],
+  "question_value_aliases": {
+    "discovery_reasons": {
+      "CURRENT_SCHOOL_CONCERN": "BETTER_FIT_ENVIRONMENT",
+      "DIFFERENT_ENVIRONMENT": "BETTER_FIT_ENVIRONMENT",
+      "ENVIRONMENT_CONCERN": "BETTER_FIT_ENVIRONMENT"
+    },
+    "advancement_interests": {
+      "DUAL_ENROLLMENT": "COLLEGE_LEVEL_COURSES",
+      "COLLEGE_COURSES": "COLLEGE_LEVEL_COURSES"
+    }
+  },
+  "question_value_removals": {
+    "preferred_learning_environment": ["BOOKS", "TECHNOLOGY"],
+    "family_priorities": ["ACADEMIC_QUALITY"]
+  }
 }

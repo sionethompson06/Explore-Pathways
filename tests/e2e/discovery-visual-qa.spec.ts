@@ -77,10 +77,10 @@ test.describe("Discovery visual QA: breakpoints", () => {
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=LEARNING/);
         await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-        await page.getByRole("radio", { name: "Occasional check-ins", exact: true }).check();
+        await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=SCHEDULE/);
-        await page.getByRole("radio", { name: "Not important", exact: true }).check();
+        await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=ATHLETICS/);
         await page.getByRole("button", { name: "Continue" }).click();
@@ -107,10 +107,10 @@ test.describe("Discovery visual QA: breakpoints", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=LEARNING/);
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=SCHEDULE/);
-    await page.getByRole("radio", { name: "Not important", exact: true }).check();
+    await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=ATHLETICS/);
     await page.getByRole("button", { name: "Continue" }).click();
@@ -196,7 +196,7 @@ test.describe("Discovery visual QA: interaction states", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=ATHLETICS/);
     await page.getByRole("radio", { name: "Definitely", exact: true }).check();
-    await expect(page.getByText(/Would you like help understanding NCAA/)).toBeVisible();
+    await expect(page.getByText(/Would it be helpful to include NCAA/)).toBeVisible();
     await page.waitForLoadState("networkidle");
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, "state-conditional-branch-expanded.png"),

@@ -24,6 +24,8 @@ const TEXT_MAX_LENGTH: Record<string, number> = {
 /** Multi-select values that deselect every other choice when picked, per field. Defaults to whichever of NONE/UNKNOWN the question's own allowed_values contains. */
 const EXTRA_EXCLUSIVE_VALUES: Record<string, string[]> = {
   discovery_reasons: ["EXPLORING"],
+  /** Phase 3E: DISC_022's NONE_CURRENTLY is exclusive of every other advancement interest. */
+  advancement_interests: ["NONE_CURRENTLY"],
 };
 
 function exclusiveValuesFor(question: Question): string[] {

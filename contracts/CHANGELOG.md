@@ -69,3 +69,62 @@ print('OK')
 ```
 
 This is a structural/reference check equivalent in spirit to the original pack's `checks/PACK_VALIDATION.json`, run against the corrected contracts. It is not a test of a built application (none exists in this repository yet) and is superseded by the real automated Zod-based contract validator once Phase 1 builds it.
+
+## Phase 3E — Discovery calibration (question-bank.json 1.1.0-phase0-corrected -> 2.0.0-discovery-calibrated)
+
+Owner-approved revision documented in full at `docs/pathways/DISCOVERY_CALIBRATION_SPEC_V2.md` and `docs/pathways/DECISION_LOG.md` section K (DEC-H1 through DEC-H3+). This is a controlled enhancement of the Phase 3 Discovery build, not Phase 4: no recommendation engine, final Discovery Report, or scoring evaluator was implemented or started.
+
+### question-bank.json (still 39 questions -- no question ID added, removed, or renamed)
+
+- Reworded nearly every `parent_wording` to positive/possibility-oriented language, per the hard owner decision that Discovery must never read as diagnostic, anxiety-inducing, or presuming eligibility/availability. No interpretive "what we're hearing" card was inserted anywhere in the flow -- it remains Questions -> adaptive questions -> Review -> Complete.
+- Added optional `helper_text` (a question-level reassuring line) and `option_helpers` (per-option clarifying text, e.g. DISC_031's STAY_CURRENT/OPEN_TO_CHANGE/SEEKING_CHANGE) to the schema (`src/lib/contracts/schemas.ts`) and to the questions that use them; threaded through `present.ts` -> `QuestionDescriptor`/`OptionDescriptor` -> `QuestionField.tsx` (new `.optionHelper` CSS class, reusing `.hint` for the question-level line).
+- Added a new, generic `grade_band_allowed_values` mechanism (schema + `present.ts`) so a question's *new-entry* option set can differ by grade band while `allowed_values` keeps every legacy/retired value so historical raw answers keep validating. Used by DISC_006, DISC_008, DISC_012, DISC_022, DISC_026, DISC_034.
+- **DISC_003** (`student_age`) changed from universal to conditional: active only when `current_grade` is `OTHER`/`UNKNOWN`, or when `GRADE_PLANNING` is among the family's discovery reasons. New branch `AGE_CONTEXT_USEFUL` (`branching.ts`), replacing an implicit "always ask" assumption.
+- **DISC_006** (`discovery_reasons`): retired `CURRENT_SCHOOL_CONCERN`/`DIFFERENT_ENVIRONMENT`/`ENVIRONMENT_CONCERN` from new-entry use, replaced by one canonical `BETTER_FIT_ENVIRONMENT` (`SMALLER_ENVIRONMENT` stays separate). All three legacy values remain valid historical answers and alias to `BETTER_FIT_ENVIRONMENT` in *effective* answers only (`contracts/legacy-aliases.json` `question_value_aliases`); raw stored records and Review are never rewritten.
+- **DISC_008** (`desired_primary_change`): broadened from `PRIMARY_REASON_UNCLEAR`-only to `show_when: "ALL"`; kept optional; `COLLEGE_COURSES` hidden for elementary via `grade_band_allowed_values`.
+- **DISC_026** (`family_priorities`): retired `ACADEMIC_QUALITY` from new-entry use (`question_value_removals`, not aliased -- not semantically equivalent to anything); added canonical `STRUCTURE_ACCOUNTABILITY`.
+- **DISC_012** (`preferred_learning_environment`): retired `BOOKS`/`TECHNOLOGY` from new-entry use (`question_value_removals`).
+- **DISC_014** (`flexibility_reasons`): added `max_selections: 3`.
+- **DISC_032** (`unavailable_academic_times`): retired branch `FLEXIBILITY_VERY_OR_ESSENTIAL`, replaced by new `SCHEDULE_CONSTRAINT_CONTEXT` (`isFlexibilitySomewhatOrHigher` OR an already-stated schedule-intensive discovery reason -- `ATHLETICS`/`TRAVEL`/`ARTS` -- so a family who hasn't rated flexibility highly, or hasn't answered DISC_013 at all, can still be asked when a real potential conflict is already on record).
+- **DISC_033** (`desired_delivery`): added canonical `OPEN_TO_RECOMMENDATIONS`, distinct from `UNKNOWN`; must never default to any model or receive an automatic bonus (verified in `tests/discovery-calibration.test.ts`).
+- **DISC_E02/DISC_E04** (`daytime_support_person`/`daytime_support_availability`): retired branch `ELEMENTARY_OR_HOME_BASED_INTEREST_WITH_SUPPORT_NEED` (asked every elementary family about daytime supervision regardless of interest), replaced by new `HOME_OR_REMOTE_SUPPORT_CONTEXT`, which requires home/remote learning to actually be under consideration (homeschool/online discovery reason, or a home/remote value in `desired_delivery`) AND (elementary grade band OR a regular/close/difficult support-need signal).
+- **DISC_022** (`advancement_interests`): major rework. Grade-tiered option sets for K-4/5-8/9-12. Added canonical `NONE_CURRENTLY` (exclusive, added to `EXTRA_EXCLUSIVE_VALUES` in `validation.ts`), `WORK_BASED_LEARNING`, `INDUSTRY_CREDENTIALS`, `ENTREPRENEURSHIP` -- connecting to previously-`RESERVED` taxonomy opportunities `OP07`/`OP09`/`OP12` (see taxonomy.json below). Merged `DUAL_ENROLLMENT`/`COLLEGE_COURSES` into one canonical `COLLEGE_LEVEL_COURSES` (both legacy values alias to it in effective answers; no duplicate opportunity card results). `ENRICHMENT` and `CHALLENGING_COURSEWORK` are no longer dead ends (see `ADV_009`/`ADV_010` below).
+- **DISC_034** (`subject_advancement_interests`): added canonical `ELA` and `SOCIAL_STUDIES_HUMANITIES` for older students (K-4 keeps its existing age-appropriate value set).
+
+### legacy-aliases.json (new `question_value_aliases`/`question_value_removals` sections)
+
+Two new optional sections, applied only inside `computeEffectiveAnswers` (`src/lib/discovery/normalization.ts`), never to raw storage or Review's own display of history:
+
+- `question_value_aliases.discovery_reasons`: `CURRENT_SCHOOL_CONCERN`/`DIFFERENT_ENVIRONMENT`/`ENVIRONMENT_CONCERN` -> `BETTER_FIT_ENVIRONMENT`.
+- `question_value_aliases.advancement_interests`: `DUAL_ENROLLMENT`/`COLLEGE_COURSES` -> `COLLEGE_LEVEL_COURSES`.
+- `question_value_removals.preferred_learning_environment`: `BOOKS`, `TECHNOLOGY`.
+- `question_value_removals.family_priorities`: `ACADEMIC_QUALITY`.
+
+### New Phase 3E derived facts (`src/lib/discovery/types.ts` `DerivedFacts`, computed in `normalization.ts`)
+
+Deterministic, conservative, never a public score and never Phase 4 output: `support_structure_need`, `schedule_flexibility_need`, `athletic_schedule_demand`, `family_management_preference` (each a small closed enum with `UNKNOWN` as a valid non-derivable state), and `advancement_opportunities` (10 independent, non-mutually-exclusive booleans: `subject_challenge`, `advanced_coursework`, `early_high_school_coursework`, `college_level_learning`, `research_projects`, `career_cte`, `work_based_learning`, `industry_credentials`, `entrepreneurship`, `accelerated_graduation`). `athletic_schedule_demand` is derived only from weekly hours, travel frequency and academic-time conflicts -- never from `athletic_level` (prestige). `cost_preference` and `desired_start_timeline` and `parent_context` (free text) feed no derived fact (verified in `tests/discovery-calibration.test.ts`).
+
+### rules.json (55 -> 60 rule entries; 3 retired: `HOME_003` from Phase 0, plus `ADV_003` and `COST_001` from Phase 3E)
+
+- **Retired `ADV_003`** (`advancement_interests contains DUAL_ENROLLMENT` -> `OP04`), `replacement_rule_id: "ADV_004"`: its condition can never again be met once `DUAL_ENROLLMENT` normalizes to `COLLEGE_LEVEL_COURSES` in effective answers.
+- **Updated `ADV_004`**'s condition from `COLLEGE_COURSES` to `COLLEGE_LEVEL_COURSES`, making it the sole rule for the merged college-course concept, targeting `OP05`.
+- **Updated `ADV_006`**'s condition to add `ADVANCED_ELA` alongside `ADVANCED_MATH`/`ADVANCED_SCIENCE`/`HIGH_SCHOOL_EARLY`.
+- **Updated `ENV_001`**'s condition from the three retired environment values to `BETTER_FIT_ENVIRONMENT` only (a rule reads *effective*, already-normalized answers).
+- **Retired `COST_001`** (`cost_preference = PREFER_TUITION_FREE` -> `score_effects: {B02: 2, B03: 3, B04: 3}`), no replacement: DEC-H2's architectural decision that cost belongs to PRACTICAL FEASIBILITY, never EDUCATIONAL ALIGNMENT -- a tuition-free preference must never itself raise a base model's score or be presented as proof of better educational fit. Cost still reaches the report only through the existing `REV_COST_ALIGNMENT` postprocess signal.
+- **Added `ADV_009`** (`ENRICHMENT` -> `O02`/`OP18`/`REV_ADVANCEMENT_READINESS`), **`ADV_010`** (`CHALLENGING_COURSEWORK` -> `O02`/`OP01`/`REV_ADVANCEMENT_READINESS`), **`ADV_011`** (`WORK_BASED_LEARNING` -> `O09`/`OP07`), **`ADV_012`** (`INDUSTRY_CREDENTIALS` -> `O09`/`OP09`), **`ADV_013`** (`ENTREPRENEURSHIP` -> `O09`/`OP12`) -- reaching DISC_022 options that previously activated nothing. All empty `score_effects` (interest signals only).
+
+### taxonomy.json
+
+- **`OP04`** (Dual-enrollment exploration) moved `ACTIVE` -> `RETIRED`: no rule targets it any longer (its sole rule, `ADV_003`, is retired above).
+- **`OP07`/`OP09`/`OP12`** (Internship / Industry-credential / Entrepreneurship exploration) moved `RESERVED` -> `ACTIVE`: DISC_022 now genuinely captures these interests and `ADV_011`/`ADV_012`/`ADV_013` reach them.
+- Updated the `constraints` array's forever-RESERVED list to `OP13`, `OP15` only.
+
+### scoring-policy.json
+
+- Added `BETTER_FIT_ENVIRONMENT: ["context"]` to `primary_reason_groups` (legacy keys kept, unchanged).
+- Added `STRUCTURE_ACCOUNTABILITY: ["support_structure"]` to `family_priority_groups`.
+- Added a `postprocess_rules` entry documenting DEC-H2: cost is feasibility context, never a base-model score input; `REV_COST_ALIGNMENT` is the only mechanism by which it reaches a candidate.
+
+### fixtures/golden-profiles.json, report-contract.json, content-library.json
+
+**Unchanged.** `golden-profiles.json` remains dormant/unexecuted by any current code (confirmed by inspection: only exposed as a path constant in `loader.ts`); rewriting it was deliberately out of scope for a phase that does not implement the engine that would consume it.

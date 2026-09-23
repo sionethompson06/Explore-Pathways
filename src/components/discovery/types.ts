@@ -18,6 +18,8 @@ export type QuestionInputType =
 export interface OptionDescriptor {
   value: string;
   label: string;
+  /** Phase 3E: a short clarifying line shown under this specific option (e.g. DISC_031's STAY_CURRENT/OPEN_TO_CHANGE/SEEKING_CHANGE). */
+  helper?: string;
 }
 
 export interface QuestionDescriptor {
@@ -31,6 +33,8 @@ export interface QuestionDescriptor {
   textMaxLength?: number;
   /** For "location" only: the list of state/territory options. */
   locationStates?: OptionDescriptor[];
+  /** Phase 3E: a short, reassuring line shown under the question wording, before its options. */
+  helperText?: string;
 }
 
 export type AnswerValue =

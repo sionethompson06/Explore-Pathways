@@ -55,7 +55,7 @@ describe("Preview Demo Mode sources every question from the same canonical regis
   it("reports the exact same QUESTION_BANK_VERSION as the real flow", async () => {
     const state = await computeDemoState({}, "STUDENT", null);
     expect(state.questionBankVersion).toBe(QUESTION_BANK_VERSION);
-    expect(QUESTION_BANK_VERSION).toBe("1.1.0-phase0-corrected");
+    expect(QUESTION_BANK_VERSION).toBe("2.0.0-discovery-calibrated");
   });
 
   it("every question the demo renders exists in the canonical QUESTIONS array (no second question bank)", async () => {

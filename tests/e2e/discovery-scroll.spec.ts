@@ -79,18 +79,18 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await fillGoalsStage(page, "Academic support");
     await page.getByRole("button", { name: "Continue" }).click();
 
-    await expect(page.getByText(/how would you describe your student academically/i)).toBeVisible();
+    await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
     await scrollToBottom(page);
     await page.getByRole("button", { name: "Continue" }).click();
 
-    await expect(page.getByText("How important is a flexible school schedule?")).toBeVisible();
-    await page.getByRole("radio", { name: "Not important", exact: true }).check();
+    await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+    await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await scrollToBottom(page);
     await page.getByRole("button", { name: "Continue" }).click();
 
-    await expect(page.getByText("How involved would you like to be in day-to-day learning?")).toBeVisible();
+    await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
     await scrollToBottom(page);
     await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
@@ -105,14 +105,14 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await fillGoalsStage(page, "Academic support");
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText(/how would you describe your student academically/i)).toBeVisible();
+    await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText("How important is a flexible school schedule?")).toBeVisible();
-    await page.getByRole("radio", { name: "Not important", exact: true }).check();
+    await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+    await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText("How involved would you like to be in day-to-day learning?")).toBeVisible();
+    await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
     await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
 
@@ -132,14 +132,14 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await fillGoalsStage(page, "Academic support");
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText(/how would you describe your student academically/i)).toBeVisible();
+    await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText("How important is a flexible school schedule?")).toBeVisible();
-    await page.getByRole("radio", { name: "Not important", exact: true }).check();
+    await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+    await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText("How involved would you like to be in day-to-day learning?")).toBeVisible();
+    await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
     await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
     await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();

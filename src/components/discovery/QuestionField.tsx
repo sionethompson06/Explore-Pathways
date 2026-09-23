@@ -49,6 +49,7 @@ export function QuestionField({
         {question.wording}
         {question.required ? null : <span className={styles.optional}> (optional)</span>}
       </legend>
+      {question.helperText ? <p className={styles.hint}>{question.helperText}</p> : null}
 
       {question.inputType === "single" || question.inputType === "single_from_previous" ? (
         <SingleChoice question={question} value={value} onCommit={onCommit} />
@@ -99,7 +100,10 @@ function SingleChoice({
               onChange={() => onCommit(question.field, option.value)}
             />
             <span className={styles.checkMark} aria-hidden="true" />
-            <span className={styles.optionLabel}>{option.label}</span>
+            <span className={styles.optionLabel}>
+              {option.label}
+              {option.helper ? <span className={styles.optionHelper}>{option.helper}</span> : null}
+            </span>
           </label>
         );
       })}
@@ -120,8 +124,13 @@ function MultiChoice({
   const maxSelections = question.maxSelections;
   const atLimit = Boolean(maxSelections && current.length >= maxSelections);
 
+  // Phase 3E: DISC_022's NONE_CURRENTLY joins the existing client-side
+  // exclusive set (mirrors EXTRA_EXCLUSIVE_VALUES in validation.ts, the
+  // server-authoritative source of truth this only shadows for UX).
+  const EXCLUSIVE_VALUES = ["NONE", "UNKNOWN", "EXPLORING", "NONE_CURRENTLY"];
+
   function toggle(optionValue: string) {
-    const exclusive = optionValue === "NONE" || optionValue === "UNKNOWN" || optionValue === "EXPLORING";
+    const exclusive = EXCLUSIVE_VALUES.includes(optionValue);
     const alreadySelected = current.includes(optionValue);
 
     let next: string[];
@@ -131,7 +140,7 @@ function MultiChoice({
       next = [optionValue];
     } else {
       // Selecting a substantive choice removes any exclusive value already selected.
-      next = [...current.filter((v) => v !== "NONE" && v !== "UNKNOWN" && v !== "EXPLORING"), optionValue];
+      next = [...current.filter((v) => !EXCLUSIVE_VALUES.includes(v)), optionValue];
     }
     onCommit(question.field, next);
   }
@@ -161,7 +170,10 @@ function MultiChoice({
               onChange={() => toggle(option.value)}
             />
             <span className={styles.checkMark} aria-hidden="true" />
-            <span className={styles.optionLabel}>{option.label}</span>
+            <span className={styles.optionLabel}>
+              {option.label}
+              {option.helper ? <span className={styles.optionHelper}>{option.helper}</span> : null}
+            </span>
           </label>
         );
       })}

@@ -25,20 +25,23 @@ async function fillGoalsStage(page: Page, reason: string) {
 }
 
 async function fillLearningStage(page: Page) {
-  await expect(page.getByText(/how would you describe your student academically/i)).toBeVisible();
+  await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
   await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-  await page.getByRole("radio", { name: "Occasional check-ins", exact: true }).check();
+  await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }
 
-async function fillScheduleStage(page: Page, flexibility: "Not important" | "Essential" = "Not important") {
-  await expect(page.getByText("How important is a flexible school schedule?")).toBeVisible();
+async function fillScheduleStage(
+  page: Page,
+  flexibility: "Not important -- our schedule already works well" | "Essential for our family" = "Not important -- our schedule already works well",
+) {
+  await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
   await page.getByRole("radio", { name: flexibility, exact: true }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }
 
 async function fillFamilyStage(page: Page) {
-  await expect(page.getByText("How involved would you like to be in day-to-day learning?")).toBeVisible();
+  await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
   await page.getByRole("radio", { name: "Regular support", exact: true }).check();
   await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
 }
@@ -107,7 +110,7 @@ test.describe("Preview Demo Mode: K-4 sample profile", () => {
 
     await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
     const bodyText = await page.locator("body").innerText();
-    expect(bodyText).not.toContain("Might college athletics be a future interest?");
+    expect(bodyText).not.toContain("Is competing in college something your student may want to explore in the future?");
     expect(bodyText).not.toContain("is your student on track for graduation?");
 
     await page.getByRole("button", { name: "Complete My Discovery Profile" }).click();
@@ -136,13 +139,13 @@ test.describe("Preview Demo Mode: middle-school athlete sample profile", () => {
     await fillLearningStage(page);
     await fillScheduleStage(page);
 
-    await expect(page.getByText("What is your student's main sport?")).toBeVisible();
+    await expect(page.getByText("What sport or athletic activity is your student most involved in?")).toBeVisible();
     await page.getByRole("textbox").first().fill("Soccer");
-    await expect(page.getByText("Might college athletics be a future interest?")).toBeVisible();
+    await expect(page.getByText("Is competing in college something your student may want to explore in the future?")).toBeVisible();
     expect(await page.locator("body").innerText()).not.toContain("How much do you know about NCAA");
 
     await page.getByRole("radio", { name: "Definitely", exact: true }).check();
-    await expect(page.getByText(/NCAA/i)).toBeVisible();
+    await expect(page.getByText(/NCAA/i).first()).toBeVisible();
     await page.getByRole("button", { name: "Continue" }).click();
 
     await fillFamilyStage(page);
@@ -163,11 +166,11 @@ test.describe("Preview Demo Mode: high-school sample profile", () => {
     await fillLearningStage(page);
     await fillScheduleStage(page);
 
-    await expect(page.getByText("As far as you know, is your student on track for graduation?")).toBeVisible();
-    const graduationGroup = page.getByRole("group", { name: /is your student on track for graduation/ });
-    await graduationGroup.getByLabel("No", { exact: true }).check();
-    await expect(page.getByText("Are missing credits part of what you want to address?")).toBeVisible();
-    const creditGroup = page.getByRole("group", { name: /missing credits part of/ });
+    await expect(page.getByText("How clear does your student's path to graduation feel right now?")).toBeVisible();
+    const graduationGroup = page.getByRole("group", { name: /how clear does your student.s path to graduation feel/i });
+    await graduationGroup.getByLabel("We may need help getting back on track", { exact: true }).check();
+    await expect(page.getByText("Would reviewing or recovering credits be helpful as part of the plan?")).toBeVisible();
+    const creditGroup = page.getByRole("group", { name: /reviewing or recovering credits/i });
     await creditGroup.getByLabel("Yes", { exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
 
@@ -184,6 +187,6 @@ test.describe("Preview Demo Mode: high-school sample profile", () => {
     await page.getByRole("button", { name: "Continue" }).click(); // Schedule (unchanged)
 
     const bodyText = await page.locator("body").innerText();
-    expect(bodyText).not.toContain("Are missing credits part of what you want to address?");
+    expect(bodyText).not.toContain("Would reviewing or recovering credits be helpful as part of the plan?");
   });
 });

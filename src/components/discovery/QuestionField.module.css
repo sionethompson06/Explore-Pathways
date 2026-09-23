@@ -99,6 +99,15 @@
   color: var(--color-text-muted);
 }
 
+/** Phase 3E: a per-option clarifying line (option_helpers), nested inside .optionLabel -- deliberately its own class rather than reusing .hint's <p>-level spacing, since this sits inline inside a label. */
+.optionHelper {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
 .error {
   margin: var(--space-2) 0 0;
   font-size: var(--font-size-sm);

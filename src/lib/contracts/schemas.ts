@@ -32,6 +32,8 @@ const questionInputTypeSchema = z.enum([
   "single_from_previous",
 ]);
 
+const gradeBandKeySchema = z.enum(["ELEMENTARY", "MIDDLE", "HIGH_SCHOOL", "UNDETERMINED"]);
+
 const questionSchema = z.object({
   id: z.string().min(1),
   field: z.string().min(1),
@@ -43,6 +45,19 @@ const questionSchema = z.object({
   allowed_values: z.array(z.string()).optional(),
   max_selections: z.number().int().positive().optional(),
   display_labels: z.record(z.string(), z.string()).optional(),
+  /** Phase 3E: a short, reassuring line shown under the question wording, before its options. Never a second source of truth for a value -- presentation only. */
+  helper_text: z.string().min(1).optional(),
+  /** Phase 3E: per-option clarifying text (e.g. DISC_031's STAY_CURRENT/OPEN_TO_CHANGE/SEEKING_CHANGE). Keyed by allowed_value. */
+  option_helpers: z.record(z.string(), z.string()).optional(),
+  /**
+   * Phase 3E: when present, the NEW-entry option set actually rendered
+   * to a family is `grade_band_allowed_values[gradeBand]` instead of
+   * the full `allowed_values` list -- `allowed_values` still lists
+   * every value (including legacy/retired ones) so historical raw
+   * answers keep validating. Absent for every question that renders
+   * the same options regardless of grade band.
+   */
+  grade_band_allowed_values: z.record(gradeBandKeySchema, z.array(z.string())).optional(),
 });
 
 export const questionBankSchema = z.object({
@@ -140,7 +155,15 @@ const ruleSchema = z.object({
   score_effects: z.record(z.string(), z.number()),
   activate: ruleActivateSchema,
   reason_template: z.string().min(1),
-  reason_type: z.enum(["ALIGNMENT", "CONSIDERATION"]),
+  /**
+   * FEASIBILITY added at Phase 3E (see docs/pathways/DECISION_LOG.md
+   * DEC-H2): a rule whose condition is about whether a direction can
+   * practically work (cost, location, provider availability) rather
+   * than whether it fits the student educationally. Keeps EDUCATIONAL
+   * ALIGNMENT and PRACTICAL FEASIBILITY from being collapsed into one
+   * undifferentiated "score" once a Phase 4 evaluator exists.
+   */
+  reason_type: z.enum(["ALIGNMENT", "CONSIDERATION", "FEASIBILITY"]),
   status: z.string().min(1),
   review_model_scope: z.array(z.string()).optional(),
   dedup_key: z.string().optional(),
@@ -215,6 +238,16 @@ export const legacyAliasesSchema = z.object({
   policy: z.string(),
   aliases: z.record(z.string(), z.string()),
   retired_ambiguous_ids: z.array(z.string()),
+  /**
+   * Phase 3E: field-scoped ANSWER VALUE aliases (distinct from the
+   * taxonomy-ID `aliases` map above). Applied only when computing
+   * EFFECTIVE answers (src/lib/discovery/normalization.ts) -- never to
+   * stored raw answers, and never to the Review screen's own display
+   * of what a family actually selected historically.
+   */
+  question_value_aliases: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  /** Phase 3E: legacy values that carry no forward-compatible replacement and are simply dropped from EFFECTIVE evaluation (kept, unmodified, in raw storage and Review). */
+  question_value_removals: z.record(z.string(), z.array(z.string())).optional(),
 });
 
 export type LegacyAliases = z.infer<typeof legacyAliasesSchema>;

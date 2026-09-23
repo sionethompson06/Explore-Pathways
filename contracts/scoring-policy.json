@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-candidate",
+  "version": "1.1.0-phase3e-discovery-calibrated",
   "baseline": 50,
   "primary_multiplier": 1.75,
   "top_priority_multiplier": 1.5,
@@ -83,6 +83,9 @@
     ],
     "ENVIRONMENT_CONCERN": [
       "context"
+    ],
+    "BETTER_FIT_ENVIRONMENT": [
+      "context"
     ]
   },
   "family_priority_groups": {
@@ -120,6 +123,9 @@
       "future"
     ],
     "SMALL_ENVIRONMENT": [
+      "support_structure"
+    ],
+    "STRUCTURE_ACCOUNTABILITY": [
       "support_structure"
     ]
   },
@@ -174,6 +180,7 @@
     "Do not infer blanket incompatibility when a specific school capability has not been verified.",
     "Other/unknown grade keeps universal questions and neutral review; do not force an age-derived grade band.",
     "For K-4 suppress college/credit/athletic eligibility report modules and use foundational enrichment wording.",
-    "For middle grades, college-related opportunity stage is LONGER_TERM_EXPLORATION; for HS it remains EXPLORE_NOT_ELIGIBLE."
+    "For middle grades, college-related opportunity stage is LONGER_TERM_EXPLORATION; for HS it remains EXPLORE_NOT_ELIGIBLE.",
+    "DEC-H2 (Phase 3E): cost_preference is PRACTICAL FEASIBILITY context, never a base-model score input -- a preference for tuition-free options must not itself raise a tuition-free model's score or be presented as proof it is the better educational fit. REV_COST_ALIGNMENT (above) is the only mechanism by which cost reaches a candidate; there is no separate cost score_effects rule."
   ]
 }

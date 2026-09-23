@@ -22,9 +22,17 @@ function describeQuestion(field: string, gradeBand: GradeBand): QuestionDescript
   const question = getQuestionByField(field);
   if (!question) return undefined;
 
-  const options: OptionDescriptor[] | undefined = question.allowed_values?.map((value) => ({
+  // Phase 3E: when the registry defines a grade-tiered option set, the
+  // NEW-entry list a family actually sees is that tier's list, not the
+  // full `allowed_values` (which still includes every legacy/retired
+  // value so historical raw answers keep validating and Review keeps
+  // reading back correctly).
+  const allowedValues = question.grade_band_allowed_values?.[gradeBand] ?? question.allowed_values;
+
+  const options: OptionDescriptor[] | undefined = allowedValues?.map((value) => ({
     value,
     label: getOptionLabelForQuestion(field, value, gradeBand),
+    ...(question.option_helpers?.[value] ? { helper: question.option_helpers[value] } : {}),
   }));
 
   const locationStates =
@@ -51,6 +59,7 @@ function describeQuestion(field: string, gradeBand: GradeBand): QuestionDescript
     ...(question.max_selections ? { maxSelections: question.max_selections } : {}),
     ...(textMaxLength ? { textMaxLength } : {}),
     ...(locationStates ? { locationStates } : {}),
+    ...(question.helper_text ? { helperText: question.helper_text } : {}),
   };
 }
 

@@ -89,11 +89,6 @@ export function isFlexibilitySomewhatOrHigher(ctx: BranchContext): boolean {
   return value === "SOMEWHAT" || value === "VERY_IMPORTANT" || value === "ESSENTIAL";
 }
 
-export function isFlexibilityVeryOrEssential(ctx: BranchContext): boolean {
-  const value = asStringValue(ctx.raw.flexibility_importance);
-  return value === "VERY_IMPORTANT" || value === "ESSENTIAL";
-}
-
 const ATHLETIC_FLEXIBILITY_REASONS = ["ATHLETIC_TRAINING", "COMPETITION", "ATHLETIC_TRAVEL"] as const;
 
 export function isAthleticsInterest(ctx: BranchContext): boolean {
@@ -172,36 +167,110 @@ const HOME_BASED_SUPPORT_LEVELS = [
   "INDEPENDENT_WORK_DIFFICULT",
 ] as const;
 
+const HOME_OR_REMOTE_DELIVERY_VALUES = [
+  "HOMESCHOOL",
+  "ONLINE_SELF_PACED",
+  "ONLINE_TEACHER_SUPPORTED",
+  "HYBRID",
+] as const;
+
 // desired_delivery (DISC_033) and learning_support_pattern (DISC_011)
 // are both show_when: "ALL", i.e. unconditionally active regardless of
 // EVALUATION_ORDER position -- reading ctx.raw directly for them
 // (rather than through rawIfActive) is correct, not a shortcut around
 // the ordering rule, since there is no "inactive" state to guard
 // against for an always-shown question.
-function isHomeBasedInterest(ctx: BranchContext): boolean {
+//
+// Phase 3E: broadened beyond homeschool alone to "home or remote
+// learning is actually being considered" (homeschool, online, or
+// hybrid interest), since DISC_E02/DISC_E04 are about daytime support
+// for learning happening at least partly at home -- an online or
+// hybrid family faces the same daytime-support question a homeschool
+// family does.
+function isHomeOrRemoteLearningConsidered(ctx: BranchContext): boolean {
   if (asStringArray(ctx.raw.discovery_reasons).includes("HOMESCHOOL")) return true;
-  return asStringArray(ctx.raw.desired_delivery).includes("HOMESCHOOL");
+  if (asStringArray(ctx.raw.discovery_reasons).includes("ONLINE")) return true;
+  return includesAny(asStringArray(ctx.raw.desired_delivery), HOME_OR_REMOTE_DELIVERY_VALUES);
 }
 
-export function isElementaryOrHomeBasedInterestWithSupportNeed(ctx: BranchContext): boolean {
+/**
+ * Phase 3E (docs/pathways/DISCOVERY_CALIBRATION_SPEC_V2.md section 3):
+ * replaces the retired ELEMENTARY_OR_HOME_BASED_INTEREST_WITH_SUPPORT_NEED,
+ * whose first branch ("every ELEMENTARY family, unconditionally") asked
+ * a traditional-school elementary family enrolled purely for enrichment
+ * about daytime home supervision it had no reason to need. Home/remote
+ * learning must actually be under consideration before this branch
+ * opens; grade band or an existing regular/close/difficult support
+ * signal then decides whether the daytime-support questions are the
+ * relevant next step.
+ */
+export function isHomeOrRemoteSupportContext(ctx: BranchContext): boolean {
+  if (!isHomeOrRemoteLearningConsidered(ctx)) return false;
   if (ctx.gradeBand === "ELEMENTARY") return true;
-  if (!isHomeBasedInterest(ctx)) return false;
   const supportPattern = asStringValue(ctx.raw.learning_support_pattern);
   return Boolean(supportPattern && (HOME_BASED_SUPPORT_LEVELS as readonly string[]).includes(supportPattern));
+}
+
+/**
+ * Phase 3E: DISC_003 (student_age) no longer renders universally --
+ * only when age context is genuinely useful. current_grade is
+ * evaluated before this in EVALUATION_ORDER, and discovery_reasons is
+ * now evaluated immediately after current_grade (moved up specifically
+ * so this predicate can read it) for the grade-planning signal.
+ */
+export function isAgeContextUseful(ctx: BranchContext): boolean {
+  const grade = asStringValue(ctx.raw.current_grade);
+  if (grade === undefined || grade === "OTHER" || grade === "UNKNOWN") return true;
+  return asStringArray(ctx.raw.discovery_reasons).includes("GRADE_PLANNING");
+}
+
+/**
+ * discovery_reasons is show_when: "ALL" (always active/readable via
+ * ctx.raw directly), unlike flexibility_reasons (DISC_014), which is
+ * itself gated behind isFlexibilitySomewhatOrHigher and so can never
+ * supply an independent "already-stated schedule-intensive context"
+ * signal -- its raw value simply doesn't exist yet for a family who
+ * rated flexibility NOT_IMPORTANT. ATHLETICS/TRAVEL/ARTS are DISC_006's
+ * own top-level reason values, always readable regardless of the
+ * flexibility-importance answer.
+ */
+const SCHEDULE_INTENSIVE_DISCOVERY_REASONS = ["ATHLETICS", "TRAVEL", "ARTS"] as const;
+
+/**
+ * Phase 3E: DISC_032 broadened from FLEXIBILITY_VERY_OR_ESSENTIAL-only
+ * (retired) to also include SOMEWHAT flexibility (via the existing
+ * isFlexibilitySomewhatOrHigher) and any already-stated schedule-
+ * intensive context (athletics, travel, arts/performance), since those
+ * families have real potential constraints to name even if they rated
+ * flexibility only "somewhat" important -- or haven't rated it at all.
+ */
+export function isScheduleConstraintContext(ctx: BranchContext): boolean {
+  if (isFlexibilitySomewhatOrHigher(ctx)) return true;
+  return includesAny(asStringArray(ctx.raw.discovery_reasons), SCHEDULE_INTENSIVE_DISCOVERY_REASONS);
 }
 
 // ---------------------------------------------------------------------------
 // Evaluation order + active-question computation
 // ---------------------------------------------------------------------------
 
-/** Every field id in an order where each question's own show_when only ever depends on fields earlier in this list (or grade band / primary reason, both resolved from ALWAYS-active questions at the top). */
+/**
+ * Every field id in an order where each question's own show_when only
+ * ever depends on fields earlier in this list (or grade band / primary
+ * reason, both resolved from ALWAYS-active questions at the top).
+ *
+ * Phase 3E: discovery_reasons moved up to immediately after
+ * current_grade (both are ALL/always-active, so this is a pure
+ * reordering, not a behavior change for anything except the new
+ * student_age placement) so isAgeContextUseful can read its
+ * GRADE_PLANNING signal.
+ */
 const EVALUATION_ORDER: readonly string[] = [
   "student_display_name",
   "current_grade",
+  "discovery_reasons",
   "student_age",
   "residence",
   "current_education_model",
-  "discovery_reasons",
   "primary_discovery_reason",
   "desired_primary_change",
   "reported_academic_position",
@@ -248,7 +317,6 @@ const BRANCH_PREDICATES: Record<string, (ctx: BranchContext) => boolean> = {
   MULTIPLE_DISCOVERY_REASONS: isMultipleDiscoveryReasons,
   PRIMARY_REASON_UNCLEAR: isPrimaryReasonUnclear,
   FLEXIBILITY_SOMEWHAT_OR_HIGHER: isFlexibilitySomewhatOrHigher,
-  FLEXIBILITY_VERY_OR_ESSENTIAL: isFlexibilityVeryOrEssential,
   ATHLETICS_INTEREST: isAthleticsInterest,
   ATHLETICS_INTEREST_AND_MIDDLE_OR_HS: isAthleticsInterestAndMiddleOrHs,
   ATHLETICS_INTEREST_AND_MIDDLE_OR_HS_AND_COLLEGE_ATHLETICS_DEFINITELY_OR_POSSIBLY:
@@ -259,7 +327,9 @@ const BRANCH_PREDICATES: Record<string, (ctx: BranchContext) => boolean> = {
   HIGH_SCHOOL: isHighSchool,
   HIGH_SCHOOL_AND_GRADUATION_OR_CREDIT_CONCERN: isHighSchoolAndGraduationOrCreditConcern,
   ELEMENTARY_AND_SUPPORT_PRIORITIES_NOT_ALREADY_KNOWN: isElementaryAndSupportPrioritiesNotAlreadyKnown,
-  ELEMENTARY_OR_HOME_BASED_INTEREST_WITH_SUPPORT_NEED: isElementaryOrHomeBasedInterestWithSupportNeed,
+  AGE_CONTEXT_USEFUL: isAgeContextUseful,
+  HOME_OR_REMOTE_SUPPORT_CONTEXT: isHomeOrRemoteSupportContext,
+  SCHEDULE_CONSTRAINT_CONTEXT: isScheduleConstraintContext,
 };
 
 export interface ActiveFlowResult {

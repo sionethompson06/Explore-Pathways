@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0-phase0-corrected",
+  "version": "1.2.0-phase3e-discovery-calibrated",
   "status": "PHASE_0_CORRECTED_AUTHORITATIVE",
-  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C3, C4, C5. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/taxonomy.json). Every base model, overlay, support, opportunity and review signal below now carries an explicit reachability_status so Phase 4 validation and reporting can distinguish ACTIVE, RESERVED, RETIRED, BASELINE and EXCLUDED items rather than leaving reachability implicit. ACTIVE = reachable by at least one rule in contracts/rules.json (or, for review signals, wired outside the rules engine as documented). RESERVED = a real taxonomy entry intentionally not yet reachable in Discovery V1; its ID/description are kept but it must never appear as a personalized result, and its presence must not fail an active-rule reachability check. RETIRED = deprecated, kept for explainability only. EXCLUDED = permanently unavailable in this version regardless of score or unmet need (B10 only). BASELINE = always potentially offered as a possible service, not gated by a scoring rule (S01 only).",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C3, C4, C5, DEC-H3+. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/taxonomy.json). Every base model, overlay, support, opportunity and review signal below now carries an explicit reachability_status so Phase 4 validation and reporting can distinguish ACTIVE, RESERVED, RETIRED, BASELINE and EXCLUDED items rather than leaving reachability implicit. ACTIVE = reachable by at least one rule in contracts/rules.json (or, for review signals, wired outside the rules engine as documented). RESERVED = a real taxonomy entry intentionally not yet reachable in Discovery V1; its ID/description are kept but it must never appear as a personalized result, and its presence must not fail an active-rule reachability check. RETIRED = deprecated, kept for explainability only. EXCLUDED = permanently unavailable in this version regardless of score or unmet need (B10 only). BASELINE = always potentially offered as a possible service, not gated by a scoring rule (S01 only). Phase 3E discovery calibration: OP04 moved ACTIVE->RETIRED (dual-enrollment/college-courses merged into one concept targeting OP05); OP07/OP09/OP12 moved RESERVED->ACTIVE (DISC_022 now captures work-based learning, industry credentials and entrepreneurship directly).",
   "base_models": [
     {
       "id": "B01",
@@ -236,7 +236,8 @@
       "id": "OP04",
       "label": "Dual-enrollment exploration",
       "default_status": "EXPLORE_NOT_ELIGIBLE",
-      "reachability_status": "ACTIVE"
+      "reachability_status": "RETIRED",
+      "reachability_note": "Retired at Phase 3E discovery calibration: DISC_022's DUAL_ENROLLMENT and COLLEGE_COURSES are merged into one family-facing concept (canonical value COLLEGE_LEVEL_COURSES), which targets OP05 (College-course exploration) alone via ADV_004. ADV_003, the only rule that ever targeted OP04, is retired with no replacement targeting this opportunity. Kept, not deleted, so a historical run recorded against it stays explainable."
     },
     {
       "id": "OP05",
@@ -255,8 +256,8 @@
       "id": "OP07",
       "label": "Internship exploration",
       "default_status": "EXPLORE_NOT_ELIGIBLE",
-      "reachability_status": "RESERVED",
-      "reachability_note": "Reserved at Phase 0 corrections (DEC-C3). No question in the current registry captures internship interest, so a triggering rule cannot be added without also adding a new question -- deliberately out of scope for a data-contract-only correction. Must never appear as a personalized opportunity in Discovery V1."
+      "reachability_status": "ACTIVE",
+      "reachability_note": "Reserved at Phase 0 corrections (DEC-C3) for lack of a capturing question. DISC_022 now includes WORK_BASED_LEARNING (Phase 3E discovery calibration), and ADV_011 targets this opportunity, so it moves to ACTIVE."
     },
     {
       "id": "OP08",
@@ -268,8 +269,8 @@
       "id": "OP09",
       "label": "Industry-credential exploration",
       "default_status": "EXPLORE_NOT_ELIGIBLE",
-      "reachability_status": "RESERVED",
-      "reachability_note": "Reserved at Phase 0 corrections (DEC-C3), same reasoning as OP07: no capturing question exists yet."
+      "reachability_status": "ACTIVE",
+      "reachability_note": "Reserved at Phase 0 corrections (DEC-C3) for lack of a capturing question. DISC_022 now includes INDUSTRY_CREDENTIALS (Phase 3E discovery calibration), and ADV_012 targets this opportunity, so it moves to ACTIVE."
     },
     {
       "id": "OP10",
@@ -287,8 +288,8 @@
       "id": "OP12",
       "label": "Entrepreneurship",
       "default_status": "EXPLORE_NOT_ELIGIBLE",
-      "reachability_status": "RESERVED",
-      "reachability_note": "Reserved at Phase 0 corrections (DEC-C3), same reasoning as OP07: no capturing question exists yet."
+      "reachability_status": "ACTIVE",
+      "reachability_note": "Reserved at Phase 0 corrections (DEC-C3) for lack of a capturing question. DISC_022 now includes ENTREPRENEURSHIP (Phase 3E discovery calibration), and ADV_013 targets this opportunity, so it moves to ACTIVE."
     },
     {
       "id": "OP13",
@@ -425,6 +426,6 @@
     "No public numerical ability, fit or family-value score.",
     "No provider IDs or invented real schools in Discovery V1.",
     "B10 remains unavailable regardless of score or unmet need.",
-    "RESERVED opportunities (OP07, OP09, OP12, OP13, OP15) must never be displayed as a personalized opportunity in a Discovery Report; their existence in this file must not cause a Phase 4 reachability check to fail."
+    "RESERVED opportunities (OP13, OP15) must never be displayed as a personalized opportunity in a Discovery Report; their existence in this file must not cause a Phase 4 reachability check to fail. (OP07, OP09 and OP12 were reserved for the same reason at Phase 0 but moved to ACTIVE at Phase 3E once DISC_022 gained questions that capture them -- see contracts/CHANGELOG.md.)"
   ]
 }
