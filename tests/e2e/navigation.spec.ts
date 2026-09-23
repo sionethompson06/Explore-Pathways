@@ -69,11 +69,12 @@ test.describe("public navigation", () => {
 test.describe("Discovery entry point routing", () => {
   test("goal cards link to /discover with the correct allowlisted interest", async ({ page }) => {
     await page.goto("/");
-    // The card link's accessible name is its full text content (label
-    // + description), so match on the label as a case-sensitive
-    // prefix -- distinct from the footer's differently-cased
-    // "Homeschool Support" nav link to /pathways/homeschool.
-    await page.getByRole("link", { name: /^Homeschool support/ }).click();
+    // Scope to the "What are you hoping to make possible?" section
+    // specifically -- the footer also has a same-cased "Homeschool
+    // Support" link (to /pathways/homeschool), so an unscoped query
+    // would be ambiguous.
+    const goalsSection = page.locator('section[aria-labelledby="goals-heading"]');
+    await goalsSection.getByRole("link", { name: /^Homeschool Support/ }).click();
     await expect(page).toHaveURL(/\/discover\?interest=homeschool_support$/);
     await expect(page.getByText("You selected:")).toBeVisible();
     await expect(page.getByText("Homeschool support", { exact: true }).first()).toBeVisible();

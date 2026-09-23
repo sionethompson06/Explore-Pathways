@@ -3,7 +3,7 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { Section } from "@/components/marketing/Section";
 import { Card } from "@/components/marketing/Card";
 import { ButtonLink } from "@/components/marketing/Button";
-import { JourneyList } from "@/components/marketing/home/JourneyList";
+import { InteractivePathwayProcess } from "@/components/marketing/home/InteractivePathwayProcess";
 import { DISCOVER_HREF, PRIMARY_CTA_LABEL } from "@/content/nav-links";
 
 export const metadata: Metadata = {
@@ -24,9 +24,9 @@ export default function HowItWorksPage() {
 
       <Section tone="alt" ariaLabelledBy="journey-heading">
         <h2 id="journey-heading" className="visually-hidden">
-          The six steps
+          The five steps
         </h2>
-        <JourneyList />
+        <InteractivePathwayProcess />
       </Section>
 
       <Section tone="default" ariaLabelledBy="distinctions-heading" narrow>

@@ -4,7 +4,7 @@ Version: 2.0.0-phase2b-photography-supplied
 
 The owner supplied an approved generated marketing image asset pack (`pathways_marketing_asset_pack_v1`) that fills every slot below. All nine images are now committed to `public/pathways/marketing/photography/` and wired into the site -- see `docs/pathways/MEDIA_SOURCE_REGISTER.md` for full provenance, the trademark correction applied to two of the nine images before use, and the exact component/page each one renders on.
 
-**Asset Pack 2** (product/infographic/conversion imagery, supplied separately for Phase 2C) is documented in `docs/pathways/MEDIA_SOURCE_REGISTER.md` "Asset Pack 2" rather than in this manifest, since this manifest's slot/crop/aspect-ratio spec format was written specifically for Pack 1 photography. Pack 2 files live at `public/pathways/marketing/infographics/`, registered in `src/content/marketing-infographics.ts`.
+**Asset Pack 2** (product/infographic/conversion imagery, supplied separately for Phase 2C) is documented in `docs/pathways/MEDIA_SOURCE_REGISTER.md` "Asset Pack 2" rather than in this manifest, since this manifest's slot/crop/aspect-ratio spec format was written specifically for Pack 1 photography. As of Phase 2E, all four Pack 2 files are reference-only design assets (never deployed to the runtime bundle) at `docs/pathways/pack/reference-assets/asset-pack-2/` -- every section they informed is now a real interactive component.
 
 ## How this is wired in
 

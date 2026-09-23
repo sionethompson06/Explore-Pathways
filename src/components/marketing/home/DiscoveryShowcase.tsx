@@ -1,17 +1,17 @@
-import { ReportPreviewCard } from "./ReportPreviewCard";
+import { InteractiveDiscoveryPreview } from "./InteractiveDiscoveryPreview";
 import styles from "./DiscoveryShowcase.module.css";
 
 /**
- * Section (Phase 2C, Asset Pack 2 P2-02 direction): "See Your
- * Student's Possibilities More Clearly." The supplied P2-02 graphic
- * paired a fabricated student photo and first-person quote in a
- * profile-card layout that reads as a testimonial -- this project has
- * consistently declined to use that pattern anywhere (see
+ * Section (Phase 2E): "See Your Student's Possibilities More
+ * Clearly." The supplied Asset Pack 2 P2-02 graphic paired a
+ * fabricated student photo and first-person quote in a profile-card
+ * layout that reads as a testimonial -- this project has consistently
+ * declined to use that pattern anywhere (see
  * docs/pathways/MEDIA_SOURCE_REGISTER.md "Asset Pack 2" for the full
- * explanation). This component keeps the existing accessible
- * ReportPreviewCard as the actual Discovery Report visual, elevated
- * into a two-column "product showcase" composition that echoes
- * P2-02's premium layout weight without its fabricated elements.
+ * explanation). This component pairs supporting copy with the real
+ * interactive InteractiveDiscoveryPreview (tabbed report), in a
+ * two-column "product showcase" composition that echoes P2-02's
+ * premium layout weight without its fabricated elements.
  */
 export function DiscoveryShowcase() {
   return (
@@ -30,7 +30,7 @@ export function DiscoveryShowcase() {
         </ul>
       </div>
       <div className={styles.card}>
-        <ReportPreviewCard />
+        <InteractiveDiscoveryPreview />
       </div>
     </div>
   );

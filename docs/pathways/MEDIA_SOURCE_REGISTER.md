@@ -1,6 +1,6 @@
 # Pathways Marketing Site — Media Source Register
 
-Version: 4.0.0-phase2c-asset-pack-2
+Version: 5.0.0-phase2e-interactive-experience
 Per the Phase 2 authorization section 3 and `docs/pathways/DECISION_LOG.md` DEC-D6 (media usage rights are a launch decision, not resolved by this phase): this document records every visual asset used on the public marketing site and its actual rights status. It exists so nothing here is ever mistaken for cleared, licensed production photography of real Pathways students, parents, staff, or partners.
 
 ## Summary
@@ -42,22 +42,22 @@ No other asset in the pack was found to contain a third-party trademark, brand n
 
 All nine images are wired through `src/content/marketing-photos.ts` (the typed registry of every slot's real path and alt text) and rendered via `src/components/marketing/PhotoSlot.tsx`, which uses `next/image` with `fill`, per-image `sizes`, and `priority` only on the actual hero LCP image -- never a raw `<img>`.
 
-## Asset Pack 2 (product / infographic / conversion imagery)
+## Asset Pack 2 (product / infographic / conversion imagery) -- REFERENCE-ONLY as of Phase 2E
 
-The owner separately supplied 4 approved product/infographic images ("Asset Pack 2"), attached directly to the Phase 2C instruction, with an accompanying integration prompt directing: Pack 1 photography for emotional/lifestyle sections, Pack 2 for product/infographic/conversion sections (What Are You Hoping to Make Possible?, Why Families Explore, Find Your Path in Minutes, Discovery Report showcase, the process section).
+The owner separately supplied 4 approved product/infographic images ("Asset Pack 2"), attached directly to the Phase 2C instruction. At Phase 2C, three of these four were deployed as decorative banner images. **At Phase 2E, the owner made an explicit design-correction decision: Pack 2 must never be the primary user interface as flattened images -- it is design reference and art direction for real, interactive, component-based sections.** All four Pack 2 images are therefore now **REFERENCE-ONLY DESIGN ASSETS**, moved out of the runtime bundle (`public/`) into `docs/pathways/pack/reference-assets/asset-pack-2/` (not served, not committed to `public/`, per the owner's own instruction not to delete owner-approved source material). Every section they previously illustrated is now a real, interactive, keyboard-operable component -- see "Which sections use Pack 1 vs. Pack 2" below for the current mapping.
 
 **Provenance:** delivered as 4 individual image attachments (not a zip), saved locally by the harness before this session could access them. Source: owner-approved generated Pathways marketing assets, per the same "aspirational, not real people" rules as Pack 1.
 
-| Pack | Asset ID | Filename (as committed) | Placement | Decorative or informative? | Alt-text treatment | Optimization performed | Known limitations |
-|---|---|---|---|---|---|---|---|
-| 2 | P2-01 | `infographics/01-find-your-path-in-minutes.webp` | "Find Your Path in Minutes" section (homepage) | Decorative (supporting visual; all meaningful content duplicated in real HTML alongside it) | Empty alt (`alt=""`) | Re-encoded WebP q88; used at natural aspect ratio via `next/image` (never cropped/`fill`) | None found on inspection beyond the corrected items below |
-| 2 | P2-02 | *(not committed)* | Would have been "Discovery Report showcase" | N/A -- not used | N/A | N/A | **Rejected, not a technical defect: the supplied graphic paired a fabricated student photo, name ("Jordan M."), grade, and first-person quote in a profile-card layout that reads as a testimonial.** This project has consistently declined that pattern in every prior phase (no fake testimonials, no named "real" students). The section instead keeps its existing accessible `ReportPreviewCard` (illustrative, disclaimer-labeled, no photo/quote), elevated into a two-column showcase layout that echoes P2-02's premium composition without its fabricated elements. See `DiscoveryShowcase.tsx`. |
-| 2 | P2-03 | `infographics/03-possibility-to-progress.webp` | "A Clear Path From Possibility to Progress" section (homepage), alongside the existing 6-step `JourneyList` | Decorative | Empty alt | Cropped to remove a bottom band containing the banned phrase "REAL STUDENTS. REAL POSSIBILITIES." (in-place Gaussian blur was tested first but left a visible seam at full display size, so the final approach crops the image to its clean top ~87% instead); re-encoded WebP q88 | The graphic's own step copy differs slightly from the site's actual copy (it omits the "Advance" step and simplifies the "Plan"/"Implement" steps' wording, dropping the "paid, not automatic" caveat on the Student Success Blueprint). The real `JourneyList` HTML -- not the graphic's baked-in text -- remains the authoritative content, per Phase 2C's own "do not automatically convert image text into factual claims" rule. |
-| 2 | P2-04 | `infographics/04-what-are-you-hoping-to-make-possible.webp` | "What are you hoping to make possible?" section (homepage), above the existing, unchanged `GoalGrid` | Decorative | Empty alt | Cropped to remove a bottom band containing the large headline "Real Families. Real Reasons." (same banned-phrase pattern as P2-03); re-encoded WebP q88 | The graphic's 8-item grid includes two categories ("Credit Recovery", "Reclassification Guidance") not currently offered as functional `GoalGrid` selector options. These are shown only as descriptive, non-interactive text (in `FindYourPath.tsx`'s "Popular reasons" list) -- not as new clickable routes -- so no new `GoalInterest` value, `/discover` allowlist entry, or backend capability is implied or required. |
+| Pack | Asset ID | Filename (as committed) | Status | Design reference for | Known limitations |
+|---|---|---|---|---|---|
+| 2 | P2-01 | `pack/reference-assets/asset-pack-2/01-find-your-path-in-minutes.webp` | **REFERENCE-ONLY DESIGN ASSET** (deployed in Phase 2C, retired in Phase 2E) | `FindYourPath.tsx` -- the real CTA, 4 benefit cards, and reason-chip links | None found on inspection |
+| 2 | P2-02 | *(never committed)* | **REFERENCE-ONLY DESIGN ASSET** (never deployed) | `InteractiveDiscoveryPreview.tsx` -- composition/premium-panel direction only | **Rejected, not a technical defect: the supplied graphic paired a fabricated student photo, name ("Jordan M."), grade, and first-person quote in a profile-card layout that reads as a testimonial.** This project has consistently declined that pattern in every prior phase (no fake testimonials, no named "real" students). |
+| 2 | P2-03 | `pack/reference-assets/asset-pack-2/03-possibility-to-progress.webp` | **REFERENCE-ONLY DESIGN ASSET** (deployed in Phase 2C, retired in Phase 2E) | `InteractivePathwayProcess.tsx` -- the connected-circle step design language | Cropped before it was ever deployed, to remove a bottom band containing the banned phrase "REAL STUDENTS. REAL POSSIBILITIES." (see below). Its own step copy also differs from the site's real copy (omits a step, drops the Student Success Blueprint's "paid, not automatic" caveat) -- never used as source text; see `src/content/how-it-works.ts`. |
+| 2 | P2-04 | `pack/reference-assets/asset-pack-2/04-what-are-you-hoping-to-make-possible.webp` | **REFERENCE-ONLY DESIGN ASSET** (deployed in Phase 2C, retired in Phase 2E) | `GoalGrid.tsx` -- the card-grid layout and icon-circle style | Cropped before it was ever deployed, to remove a bottom band containing the large headline "Real Families. Real Reasons." (same banned-phrase pattern, see below). Its 8-item grid includes two categories ("Credit Recovery", "Reclassification Guidance") with no existing `GoalInterest` value -- `GoalGrid.tsx` links these plainly to `/discover` with no `interest` param, never inventing one; see `src/content/goal-cards.ts`. |
 
-**Two banned-phrase corrections (not technical defects, content-safety corrections):** both P2-03 and P2-04 were supplied with a large "REAL STUDENTS/FAMILIES. REAL POSSIBILITIES/REASONS." headline baked into their pixels. This exact phrase pattern was explicitly named as something to never copy, in the owner's own original Phase 2B brief ("no fake testimonials, no 'Real Students. Real Possibilities.'"). Both images were cropped to exclude that band before being committed -- not blurred/patched in place, since an initial blur attempt looked acceptable at forensic zoom but left a visible artifact at real display size; cropping the (otherwise redundant, since the surrounding icon content it sat alongside is already covered by this site's own separate "Why Families Explore" section) band entirely was the cleaner fix.
+**Two banned-phrase corrections (not technical defects, content-safety corrections), made before either image was ever deployed:** both P2-03 and P2-04 were supplied with a large "REAL STUDENTS/FAMILIES. REAL POSSIBILITIES/REASONS." headline baked into their pixels. This exact phrase pattern was explicitly named as something to never copy, in the owner's own original Phase 2B brief ("no fake testimonials, no 'Real Students. Real Possibilities.'"). Both images were cropped to exclude that band -- not blurred/patched in place, since an initial blur attempt looked acceptable at forensic zoom but left a visible artifact at real display size.
 
-**Why P2-01's backpack logo is not a trademark issue:** P2-01 depicts a backpack bearing the Pathways mountain wordmark itself (the same mark used in the site header) -- this is the brand's own mark on branded merchandise within its own marketing asset, not a third-party trademark, and required no correction.
+**Why P2-01's backpack logo was never a trademark issue:** P2-01 depicts a backpack bearing the Pathways mountain wordmark itself (the same mark used in the site header) -- this is the brand's own mark on branded merchandise within its own marketing asset, not a third-party trademark.
 
 ## Non-photographic assets (unchanged from Phase 2/2B)
 
@@ -78,20 +78,22 @@ The owner separately supplied 4 approved product/infographic images ("Asset Pack
 
 ## Which sections use Pack 1 vs. Pack 2
 
-| Section | Pack | Asset(s) |
-|---|---|---|
-| Hero | 1 | 01 |
-| Freedom cards | 1 | 02-05 |
-| What Are You Hoping to Make Possible? | 2 | P2-04 (banner) + unchanged `GoalGrid` |
-| Why Families Explore a Different Path | -- | native icon system only (no photography or infographic) |
-| Discovery Report showcase | 2 (direction only, not the literal graphic) | `ReportPreviewCard` elevated, no P2-02 image |
-| Find Your Path in Minutes | 2 | P2-01 |
-| A Clear Path From Possibility to Progress | 2 | P2-03 (banner) + unchanged `JourneyList` |
-| Human Support | 1 | 06 |
-| Brand Values | -- | native icon system only |
-| Final CTA | 1 | 09 |
-| Homeschool / Athlete / Academic Opportunities / Flexible Learning page heroes | 1 | 07, 02, 08, 04 |
+Pack 1 = actual deployed photography. Pack 2 = design reference only, as of Phase 2E -- every section it once illustrated is now a real interactive component; no Pack 2 image is deployed anywhere.
+
+| Section | Deployed imagery | Pack 2 design reference | Real component |
+|---|---|---|---|
+| Hero | Pack 1 (01) | -- | `Hero.tsx` |
+| Freedom cards | Pack 1 (02-05) | -- | `FreedomCards.tsx` |
+| What Are You Hoping to Make Possible? | none | P2-04 | `GoalGrid.tsx` (8 interactive cards) |
+| Why Families Explore a Different Path | none | P2-04 (icon/tile style) | `ExpandableReasonGrid.tsx` (8 expandable tiles) |
+| Discovery Report showcase | none | P2-02 (composition only, never the graphic itself) | `InteractiveDiscoveryPreview.tsx` (ARIA tabs) |
+| Find Your Path in Minutes | none | P2-01 | `FindYourPath.tsx` (CTA + benefit cards + reason-chip links) |
+| A Clear Path From Possibility to Progress | none | P2-03 | `InteractivePathwayProcess.tsx` (5-step timeline) |
+| Human Support | Pack 1 (06) | -- | `HumanSupport.tsx` |
+| Brand Values | none | -- | `BrandValues.tsx` (native icon system) |
+| Final CTA | Pack 1 (09) | -- | `FinalCta.tsx` |
+| Homeschool / Athlete / Academic Opportunities / Flexible Learning page heroes | Pack 1 (07, 02, 08, 04) | -- | `PageHero.tsx` |
 
 ## Placeholders remaining
 
-None on the sections and pages listed in "Photography now in use" and "Asset Pack 2" above -- every slot both asset-pack prompts called for is now filled with a real (generated, owner-approved) image, except P2-02, which was deliberately rejected for the reason recorded above. `IMAGE_ASSET_MANIFEST.md` should be read alongside this document for the exact crop/aspect-ratio spec each Pack 1 asset was fit to.
+None. Every Pack 1 photography slot is filled and deployed (see "Photography now in use"). Every Pack 2-influenced section is a real interactive component (see "Which sections use Pack 1 vs. Pack 2") -- no static placeholder image stands in for interactivity anywhere. `IMAGE_ASSET_MANIFEST.md` should be read alongside this document for the exact crop/aspect-ratio spec each Pack 1 asset was fit to.
