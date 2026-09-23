@@ -60,7 +60,7 @@ export function DiscoveryQuestionnaire({
   const previousStage = currentIndex > 0 ? stageOrder[currentIndex - 1] : undefined;
   const isReview = stageId === "REVIEW";
 
-  async function commit(field: string, value: AnswerValue) {
+  async function commit(field: string, value: AnswerValue): Promise<boolean> {
     setLocalAnswers((prev) => ({ ...prev, [field]: value }));
     setSaveState("saving");
     setLastFailedPatch(null);
@@ -74,12 +74,14 @@ export function DiscoveryQuestionnaire({
         return next;
       });
       startTransition(() => router.refresh());
+      return true;
     } else {
       setSaveState("error");
       setLastFailedPatch(patch);
       const next: Record<string, string> = {};
       for (const error of result.errors) next[error.field] = error.message;
       setFieldErrors((prev) => ({ ...prev, ...next }));
+      return false;
     }
   }
 
@@ -98,6 +100,29 @@ export function DiscoveryQuestionnaire({
 
   function goToStage(next: string) {
     router.push(`/discover/profile?stage=${next}`);
+  }
+
+  /**
+   * Continue from GOALS is special-cased for discovery_reasons (DISC_006,
+   * DEC-G5): a homepage marketing-interest hint is shown as an editable
+   * preselection but is never written to the stored draft merely because
+   * the page loaded. Pressing Continue while that preselection remains
+   * visibly selected is itself the parent's explicit confirmation of the
+   * visible selection -- they must not be required to uncheck/recheck an
+   * already-correct option just to "confirm" it. Any real interaction with
+   * the checkboxes already commits immediately (QuestionField's onCommit),
+   * so this only needs to persist whatever is currently visible; resaving
+   * an already-committed value is a harmless no-op. If the save fails, stay
+   * on GOALS (the existing error/retry state is shown) rather than advance
+   * past a required question that was never actually persisted.
+   */
+  async function handleContinue() {
+    if (stageId === "GOALS" && interestHint && localAnswers.discovery_reasons !== undefined) {
+      const ok = await commit("discovery_reasons", localAnswers.discovery_reasons);
+      if (!ok) return;
+    }
+    const nextStage = stageOrder[currentIndex + 1] ?? "REVIEW";
+    goToStage(nextStage);
   }
 
   async function handleSubmit() {
@@ -167,14 +192,7 @@ export function DiscoveryQuestionnaire({
             ) : (
               <span />
             )}
-            <button
-              type="button"
-              className={styles.primaryButton}
-              onClick={() => {
-                const nextStage = stageOrder[currentIndex + 1] ?? "REVIEW";
-                goToStage(nextStage);
-              }}
-            >
+            <button type="button" className={styles.primaryButton} onClick={handleContinue}>
               Continue
             </button>
           </div>

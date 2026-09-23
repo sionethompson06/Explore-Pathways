@@ -107,6 +107,114 @@ test.describe("Discovery: homepage interest handoff", () => {
   });
 });
 
+/**
+ * DEC-G5 (Phase 3A owner clarification): a homepage marketing-interest
+ * hint stays a non-persistent hint until the parent reaches DISC_006
+ * and presses Continue -- at which point whatever is currently visible
+ * (the untouched hint, a changed selection, or the hint plus an added
+ * reason) becomes the real, persisted discovery_reasons answer. The
+ * parent is never required to uncheck/recheck an already-correct
+ * preselection just to "confirm" it.
+ */
+test.describe("Discovery: homepage interest confirmation on Continue (DEC-G5)", () => {
+  test("the hint is not silently persisted merely because the GOALS screen loaded", async ({
+    page,
+  }) => {
+    await startDiscovery(page, "athletics");
+    await fillStudentStage(page, "7");
+    await expect(page.getByText("What brought you to Pathways?")).toBeVisible();
+    await expect(page.getByText(/Based on what you told us earlier/)).toBeVisible();
+
+    // No interaction, no Continue -- just reload the same screen.
+    await page.reload();
+    await expect(page.getByText(/Based on what you told us earlier/)).toBeVisible();
+    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+  });
+
+  test("pressing Continue while the visible hint remains selected persists it, with no uncheck/recheck required", async ({
+    page,
+  }) => {
+    await startDiscovery(page, "athletics");
+    await fillStudentStage(page, "7");
+    const athletics = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    await expect(athletics).toBeChecked();
+
+    // Confirm by pressing Continue -- the checkbox itself is never touched.
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/stage=LEARNING/);
+
+    await page.goto("/discover/profile?stage=GOALS");
+    // The hint banner is gone: this is now a real, persisted answer, not
+    // merely a suggestion re-offered on every load.
+    await expect(page.getByText(/Based on what you told us earlier/)).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+  });
+
+  test("changing the visible hint before Continue persists the changed answer, not the original hint", async ({
+    page,
+  }) => {
+    await startDiscovery(page, "athletics");
+    await fillStudentStage(page, "7");
+    const athletics = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    await expect(athletics).toBeChecked();
+    await athletics.uncheck();
+    await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
+
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/stage=LEARNING/);
+
+    await page.goto("/discover/profile?stage=GOALS");
+    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).not.toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "Flexibility", exact: true })).toBeChecked();
+  });
+
+  test("adding a second reason alongside the untouched hint persists both", async ({ page }) => {
+    await startDiscovery(page, "athletics");
+    await fillStudentStage(page, "7");
+    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+    await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
+
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/stage=LEARNING/);
+
+    await page.goto("/discover/profile?stage=GOALS");
+    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "Flexibility", exact: true })).toBeChecked();
+  });
+
+  test("abandoning before DISC_006 confirmation never converts the hint into a completed answer", async ({
+    page,
+  }) => {
+    await startDiscovery(page, "athletics");
+    await fillStudentStage(page, "7");
+    await expect(page.getByText("What brought you to Pathways?")).toBeVisible();
+
+    // Abandon this stage without pressing Continue.
+    await page.getByRole("button", { name: "Back" }).click();
+    await expect(page).toHaveURL(/stage=STUDENT/);
+
+    await page.goto("/discover/profile?stage=REVIEW");
+    await expect(page.getByText("A few required questions still need an answer")).toBeVisible();
+    const bodyText = await page.locator("body").innerText();
+    expect(bodyText).not.toContain("Athletics");
+  });
+
+  test("branch activation (the Athletics stage) requires the confirmed answer, not the unconfirmed hint", async ({
+    page,
+  }) => {
+    await startDiscovery(page, "athletics");
+    await fillStudentStage(page, "7");
+    const progressNav = page.getByRole("navigation", { name: "Discovery progress" });
+    // The hint alone, never confirmed, must not activate the branch.
+    await expect(progressNav).not.toContainText("Athletics");
+
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/stage=LEARNING/);
+    // Confirmed via Continue -- the branch is active from here on.
+    await expect(progressNav).toContainText("Athletics");
+  });
+});
+
 test.describe("Discovery: navigation", () => {
   test("Back returns to the previous stage", async ({ page }) => {
     await startDiscovery(page);

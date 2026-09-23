@@ -440,6 +440,32 @@ This work order is stopped here, per the owner's explicit instruction: "Stop aft
 - `pnpm build` cannot be completed successfully in this specific local sandbox (see "Local build anomaly" above); the real GitHub Actions CI dispatch for this phase's own commit is the build verification of record (see the completion report's CI section).
 - No axe-core/Lighthouse automated accessibility audit was run this phase either — the same specific-items-only scope as every prior phase's accessibility verification.
 - Only Chromium was available in this sandbox; no cross-browser (Firefox/WebKit) check was performed.
-- The homepage-interest hint is treated conservatively as visual-only until a genuine user interaction commits it (rather than, say, auto-committing it the moment the GOALS stage is reached) — flagged in `DECISION_LOG.md` DEC-G5 as an interpretation worth an explicit owner confirmation, not a discovered defect.
+- The homepage-interest hint's exact commit timing (DEC-G5) was flagged for explicit owner confirmation rather than assumed; resolved in Phase 3A below (DEC-G6) with a small, scoped UX patch.
 
 This phase is stopped here, per the instruction's explicit, repeated boundary: a validated Discovery Profile now exists, no recommendation engine or AI was started, and **Phase 4 is not authorized by this work and has not been begun.**
+
+## Phase 3A evidence — owner clarification patch (DEC-G2, DEC-G5/DEC-G6)
+
+**Scope executed:** exactly the owner's two clarifications against Phase 3 (commit `0051e66`), and nothing else. DEC-G2 (the DISC_008 advancement-oriented value interpretation) is approved as implemented, no code change. DEC-G5 (the homepage-interest hint's commit timing) is clarified into DEC-G6 (see `DECISION_LOG.md` §H) and implemented as a single, narrowly scoped client-side UX change. No other Phase 3 behavior, the marketing-interest allowlist, canonical DISC_006 values, branching semantics, normalization, session/`ProfileRevision`/idempotency architecture, or visual design was touched; no recommendation scoring was started; Phase 4 remains not authorized.
+
+**Behavior change:** pressing **Continue** from the GOALS (DISC_006) screen while a homepage-interest preselection remains visibly selected now counts as the parent's explicit confirmation of that visible selection, and persists it as the real `discovery_reasons` answer before advancing — the parent is never required to uncheck/recheck an already-correct option merely to confirm it. This also covers a changed selection (uncheck the hint, check something else) and an added second reason (leave the hint checked, also check another option) -- both were, and remain, persisted immediately via each checkbox's own real-time commit, unaffected by this patch. Abandoning the questionnaire before reaching or confirming DISC_006 (Back, closing the tab) still never converts the hint into a completed answer -- this patch only adds a Continue-time confirmation path, it does not add any new auto-commit trigger. Branch activation (e.g. the Athletics stage appearing in the progress nav) continues to read only the persisted `discovery_reasons` value, never the unconfirmed hint, which required no code change since `computeActiveFlow()` has never taken the hint as an input.
+
+**Implementation:** `src/components/discovery/DiscoveryQuestionnaire.tsx` -- `commit()` now returns whether the save succeeded; a new `handleContinue()` wraps the Continue button's click handler and, only when `stageId === "GOALS"` and an interest hint is still active and `discovery_reasons` currently has a value, explicitly awaits committing that exact value before navigating to the next stage. If that save fails, the parent stays on GOALS with the existing error/retry indicator rather than silently advancing past a required question that was never actually persisted. No change to `src/server/discovery-draft.ts`, `src/lib/discovery/**`, the schema, or any other route/component -- the server-side hint/answer separation (`draftInterestHint` vs. `draftAnswers.discovery_reasons`) and the idempotency/branching engines were already structurally correct for this behavior and needed no repair.
+
+**Tests added (`tests/e2e/discovery-profile.spec.ts`, new `describe` block "Discovery: homepage interest confirmation on Continue (DEC-G5)"), covering all 7 owner-requested scenarios:**
+1. the hint is not silently persisted merely because the GOALS screen loaded (survives a reload with no interaction);
+2. pressing Continue while the visible hint remains selected persists it, with no uncheck/recheck required (hint banner disappears on a later reload -- proof it is now a real answer, not a re-offered suggestion);
+3. changing the visible hint before Continue persists the changed answer, not the original hint;
+4. adding a second reason alongside the untouched hint persists both;
+5. abandoning before DISC_006 confirmation (Back, never Continue) never converts the hint into a completed answer -- proven via the Review screen's "still needs an answer" state and the absence of "Athletics" anywhere in the page body;
+6. refresh after confirmation restores the persisted DISC_006 answer (same reload-based proof as #2);
+7. branch activation (the Athletics stage in the progress nav) requires the confirmed answer, not the unconfirmed hint -- absent before Continue, present after.
+
+**Full regression suite run this phase (real PostgreSQL, not mocked):**
+- `pnpm typecheck` -- pass, 0 errors.
+- `pnpm lint` -- pass, 0 errors/warnings.
+- `pnpm test` -- **141/141 tests passed, 12/12 files** (unchanged from Phase 3 -- this patch touched no server/domain module, so no Vitest file needed a new test).
+- `pnpm exec playwright test` (Chromium) -- **102/102 tests passed** (96 from Phase 3 plus 6 new DEC-G5/DEC-G6 tests), confirming zero regression to any existing Discovery, marketing, or navigation flow.
+- `pnpm build` -- not run locally, consistent with DEC-G4 (this local sandbox's pre-existing, environment-specific `pnpm build` anomaly, unrelated to any code in this repository); the real GitHub Actions CI dispatch and Vercel deployment for this patch's own commit are the build verification of record (see the completion report's CI/Vercel section for this patch).
+
+This work order is stopped here, per the owner's explicit instruction: do not begin Phase 4, do not redesign Phase 3, do not change unrelated questionnaire behavior.
