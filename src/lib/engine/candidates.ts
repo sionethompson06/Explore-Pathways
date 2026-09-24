@@ -1,6 +1,12 @@
 import type { EffectiveAnswers } from "@/lib/discovery/types";
 import type { ScoringPolicy, Taxonomy } from "@/lib/contracts/schemas";
-import type { CandidateModelId, DisplayGateEvaluation, RawContribution, ScoringGroup } from "./types";
+import type {
+  CandidateModelId,
+  DisplayGateEvaluation,
+  GroupContributionProvenance,
+  RawContribution,
+  ScoringGroup,
+} from "./types";
 
 /**
  * Candidate universe, B01's engine-native continuity logic, the
@@ -140,6 +146,67 @@ export function evaluateDisplayGate(
 
   const qualifies = scoreAboveBaseline && hasTwoPositiveGroups && hasLinkedPositiveGroup;
   return { qualifies, reasons: qualifies ? [] : reasons, usedB01StayCurrentException: false };
+}
+
+/**
+ * The Directional Evidence Gate (Phase 4.1, DEC-N7): a general
+ * qualification requirement applied AFTER the normal display gate, for
+ * B02-B09 only -- B01 keeps its own explicit STAY_CURRENT exception
+ * (section 12) and is never governed by this gate.
+ *
+ * Two broad, generic need dimensions (e.g. "wants schedule flexibility"
+ * + "wants some support structure") can each independently satisfy the
+ * normal gate's "2 distinct positive groups, at least one linked"
+ * requirement without ever actually pointing at THIS candidate
+ * specifically -- schedule_flexibility_need and support_structure_need
+ * are family-level needs that legitimately move several different
+ * candidates' scores at once. This gate asks a narrower question: does
+ * this SPECIFIC candidate have real, targeted evidence, or only a share
+ * of generic need?
+ *
+ * A candidate satisfies the gate when EITHER:
+ *   A. STRONG DIRECT MODEL EVIDENCE -- at least one scoring group in
+ *      delivery/family_role/continuity has a raw (pre-multiplier,
+ *      pre-clamp) positive contribution of at least 2 for this
+ *      candidate. These three groups are the ones whose evidence is
+ *      inherently model-specific (a stated delivery preference, a
+ *      family-management preference, an explicit stay/change
+ *      statement) rather than a generic cross-cutting need.
+ *   B. BROAD INDEPENDENT EVIDENCE -- at least three distinct scoring
+ *      groups have a final (post-multiplier, post-clamp) positive
+ *      contribution for this candidate, i.e. the family's answers
+ *      point at this candidate from enough independent angles that
+ *      breadth itself is the evidence.
+ *
+ * Reads only the group-contribution provenance the engine already
+ * computed (scoring.ts's rawPositive per group, and the already-derived
+ * positiveGroups list) -- never final public labels, never a persona or
+ * profile identity.
+ */
+export function evaluateDirectionalEvidenceGate(
+  modelId: CandidateModelId,
+  groupContributions: readonly GroupContributionProvenance[],
+  positiveGroups: readonly ScoringGroup[],
+): { qualifies: boolean; reason?: string } {
+  if (modelId === "B01") {
+    return { qualifies: true };
+  }
+
+  const STRONG_EVIDENCE_GROUPS: readonly ScoringGroup[] = ["delivery", "family_role", "continuity"];
+  const hasStrongDirectModelEvidence = groupContributions.some(
+    (g) => STRONG_EVIDENCE_GROUPS.includes(g.group) && g.rawPositive >= 2,
+  );
+  const hasBroadIndependentEvidence = positiveGroups.length >= 3;
+
+  if (hasStrongDirectModelEvidence || hasBroadIndependentEvidence) {
+    return { qualifies: true };
+  }
+
+  return {
+    qualifies: false,
+    reason:
+      "directional evidence gate: no strong direct model evidence (a delivery/family_role/continuity raw contribution of at least 2) and fewer than 3 independent positive scoring groups",
+  };
 }
 
 /** The union of scoring groups that the family's primary Discovery reason or any selected family priority maps to. desired_primary_change never satisfies this link on its own (section 10/11). */

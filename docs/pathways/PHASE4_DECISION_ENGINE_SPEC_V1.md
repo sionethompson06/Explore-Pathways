@@ -129,6 +129,42 @@ selected") is a negative/"not contains" test the closed `eq`/`in`/
 `discovery_reasons` and `supplemental_need` — never on a persona or
 profile identity.
 
+## 6a. Directional Evidence Gate (Phase 4.1, DEC-N7)
+
+A second, general qualification requirement, applied **after** the base
+display gate above and **only for B02-B09** (B01 keeps its own exception
+from section 6 untouched — `evaluateDirectionalEvidenceGate` returns
+`qualifies: true` immediately for B01).
+
+**Rationale:** `schedule_flexibility_need` and `support_structure_need`
+are family-level needs, not model-specific ones — either one legitimately
+moves several different candidates' scores at once. The base gate's "2
+positive groups, 1 linked" test can be satisfied entirely by two such
+generic dimensions without either one actually pointing at a *specific*
+candidate. A candidate that only ever benefits from generic cross-cutting
+need, with no targeted evidence of its own and no unusually broad
+independent support, should not be recommended.
+
+**Implementation** (`src/lib/engine/candidates.ts`
+`evaluateDirectionalEvidenceGate`, reading only the group-contribution
+provenance `scoring.ts` already computed — never final public labels,
+never a persona or profile identity): a candidate qualifies when EITHER:
+
+- **A. Strong direct model evidence** — at least one of its scoring
+  groups in `delivery`, `family_role`, or `continuity` has a **raw**
+  (pre-multiplier, pre-clamp) positive contribution `>= 2`. These three
+  groups are the ones whose evidence is inherently candidate-specific (a
+  stated delivery preference, a family-management preference, an
+  explicit stay/change statement), unlike `schedule`/`support_structure`,
+  which move broadly across candidates.
+- **B. Broad independent evidence** — at least **three** distinct
+  scoring groups have a **final** (post-multiplier, post-clamp) positive
+  contribution for this candidate.
+
+If neither holds, the candidate does not qualify, and the reason is
+appended to that candidate's `displayGate.reasons` alongside any base-gate
+reasons already present.
+
 ## 7. Model-family diversity/deduplication
 
 A ceiling of 2 displayed cards, never a quota. Sort qualifying candidates
@@ -184,54 +220,65 @@ correct; hidden (inactive-branch) answers never participate; expected
 derived facts match; exact qualifying/displayed candidates and order
 match; required signals are present; forbidden candidates are absent;
 content status matches; B10 is absent everywhere; no public numeric score
-is exposed. `tests/engine-metamorphic.test.ts` implements the 11 invariant
-/ contrast tests M01-M11 (cost, athletic-prestige, other-text, timeline,
+is exposed. Every P01-P15 assertion is an ordinary must-pass test — there
+is no `it.fails`, skip, or known-conflict annotation anywhere in this
+suite. `tests/engine-metamorphic.test.ts` implements the 11 invariant /
+contrast tests M01-M11 (cost, athletic-prestige, other-text, timeline,
 hidden-answer, UNKNOWN≠NO, rule-order, determinism, and three named
-persona-pair contrasts).
+persona-pair contrasts). `tests/engine-directional-gate.test.ts` adds
+targeted regression coverage for the Directional Evidence Gate and the
+FLEX_002 correction (section 11 below).
 
-## 11. Known, documented fixture conflicts (not weakened, not patched)
+## 11. DEC-N7 resolution: Directional Evidence Gate + FLEX_002 correction
 
-Per the owner's own acceptance-test discipline ("fix generalized engine
-behavior instead of relaxing expected arrays; if satisfying one profile
-directly contradicts another or the literal rule text, STOP and report
-the conflict") — three assertions across two personas do not pass under a
-strictly faithful, literal implementation of sections 8-27's verbatim
-rule tables. Each was investigated by hand-tracing actual engine output
-(not guessed), and none has a fix that is both general (non-persona-keyed)
-and faithful to the owner's literal numbers:
+An earlier iteration of this phase (commit `41c0d63`) shipped with three
+golden-profile assertions marked as expected-failing (`it.fails`) rather
+than passing normally, tracked as DEC-N7. **DEC-N7 is now resolved**: all
+three were root-caused to two general, non-persona-keyed engine gaps, both
+now fixed, and all 15 golden profiles pass as ordinary must-pass tests
+with no exceptions.
 
-1. **P04 (elementary homeschool, strong capacity):** B07 (hybrid)
-   mechanically qualifies alongside the expected B08/B09. P04 selects
-   family priorities FLEXIBILITY (→ `schedule`) and PERSONAL_SUPPORT
-   (→ `support_structure`); `schedule_flexibility_need = HIGH` fires
-   `SCHED_HIGH_001` (B07 +2) and `support_structure_need = MODERATE`
-   fires `SUPPORT_MODERATE_001` (B07 +2) — both verbatim section-13/15
-   rules. Both resulting positive groups independently satisfy the
-   display-gate's link requirement, so B07 qualifies under a literal
-   reading of the gate (section 11) with no rule text left to adjust
-   without deviating from the owner's own numbers.
-2. **P14 (cost must not change educational alignment):** B04 (charter/
-   independent-study) mechanically qualifies alongside the expected
-   B03/B06/B07, for the structurally identical reason `SCHED_VERYHIGH_001`
-   (schedule, linked via primary reason `SCHEDULE_FLEXIBILITY`) and
-   `DELIVERY_001` (delivery, linked via family priority `SELF_PACED`)
-   both fire for B04 — the same mechanism the P02 fixture *requires* B04
-   to qualify through (P02 and P14 present near-identical evidence shapes
-   for B04 with opposite expected outcomes).
-3. **P12 (credit recovery + advancement + flexibility):** the displayed
-   virtual-family representative is B06, not the expected B03. B06
-   legitimately outscores B03 here (58.25 vs 56.75) because
-   `unavailable_academic_times` contains `VARIES`, and the pre-existing,
-   unmodified `FLEX_002` rule scores B06 one point higher than B03 for
-   that value (`B03: 2, B06: 3`) — the same asymmetry that literally
-   appears in the owner's own section-15 LOW-tier table
-   (`B03 +1, B04 +1, B06 +2`), so "B03/B06 are always educationally
-   equivalent" does not hold universally under the literal rules.
+**Root cause 1 — missing directional evidence requirement (P04, P14):**
+the base display gate (section 6) can be satisfied entirely by two
+*generic, cross-cutting* family needs (`schedule_flexibility_need`,
+`support_structure_need`) without either one being targeted evidence for
+the specific candidate in question. P04's B07 previously qualified from
+schedule + support_structure alone (no delivery/family_role/continuity
+evidence at all); P14's B04 previously qualified from schedule plus only
+a *weak* (+1, unmultiplied) self-paced delivery signal. Section 6a's
+Directional Evidence Gate closes this: a candidate now needs either one
+strong (`>= 2` raw) delivery/family_role/continuity contribution, or three
+independent positive groups. P04's B07 has neither (two generic groups,
+no strong direct evidence) and no longer qualifies; B08/B09 are
+unaffected (they clear the gate via `delivery`+`family_role`, both
+strong). P14's B04 has only a weak delivery contribution and two groups
+total, so it no longer qualifies; B03/B06/B07 are unaffected (each has
+three independent positive groups: `delivery`+`schedule`+`support_structure`).
+P02 and P06's B04 are also unaffected — each has the same three
+independent positive groups, so Directional Evidence Gate path B applies
+and B04 continues to qualify exactly as their fixtures require.
 
-All three were reached only after confirming (via real engine runs, not
-assumption) that no available rule-level adjustment resolves them without
-either contradicting the verbatim owner-supplied numbers elsewhere or
-regressing an already-passing persona (documented in full, including two
-reverted attempts, in DECISION_LOG.md section N). No fixture expectation
-was changed to make these pass, and no persona-ID branch exists anywhere
-in `src/lib/engine`.
+**Root cause 2 — FLEX_002's public/private virtual asymmetry (P12):**
+`FLEX_002` (unavailable academic times) scored B06 (private online) one
+point higher than B03 (public virtual) — `B03: 2, B06: 3`. Unavailable
+academic times are generic remote/virtual-schedule evidence; they do not
+establish that a *privately funded* online model is inherently more
+schedule-compatible than a *publicly funded* virtual one. Public/private
+funding model is not educational schedule evidence, so this was a real
+scoring bug, not a documentation-only issue. Corrected to `B03: 2, B06: 2`
+(`B04`/`B07`/`B08`/`B09` unchanged). With this fix, P12's B03 and B06 are
+genuinely tied on every remaining group, and the existing stable-ID
+tie-break (section 7 — never cost-driven) deterministically selects B03
+as the virtual-family representative, exactly as P12 requires. The same
+fix also makes P14's B03/B06 pair (already expected tied) tie on this
+group too, with no change to P14's own expected outcome.
+
+Both fixes are general engine/contract corrections — `evaluateDirectionalEvidenceGate`
+takes only a candidate model ID and its already-computed group-contribution
+provenance (never a persona or profile identity, verified by
+`tests/engine-directional-gate.test.ts` section E: the same evidence shape
+produces the same verdict on every B02-B09 model ID), and the FLEX_002
+change is a single JSON value edit applied uniformly to every profile that
+triggers the rule. No fixture expectation was changed, and no
+`it.fails`/skip/known-conflict marker remains anywhere in the golden or
+metamorphic suites.

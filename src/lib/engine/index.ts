@@ -1,7 +1,13 @@
 import "server-only";
 
 export { evaluateDiscoveryProfile, createEngineRun } from "./evaluate";
-export { getCandidateUniverse, evaluateB01Continuity, computeLinkedGroups, selectDisplayedCandidates } from "./candidates";
+export {
+  getCandidateUniverse,
+  evaluateB01Continuity,
+  evaluateDirectionalEvidenceGate,
+  computeLinkedGroups,
+  selectDisplayedCandidates,
+} from "./candidates";
 export { evaluateTriggeredRules, isEvaluableRule, getEvaluableRules } from "./rules";
 export { aggregateCandidateScore, resolveGroupMultiplier } from "./scoring";
 export { computeReviewSignals, computePublicFitLabel, computeContentStatus } from "./considerations";

@@ -172,9 +172,7 @@
       "requiredSignalIds": ["O08", "S11", "REV_STATE_HOMESCHOOL"],
       "forbiddenCandidateIds": ["B10"],
       "forbiddenNotes": ["unrelated virtual-school recommendation merely because learning occurs at home"],
-      "contentStatus": "PERSONALIZED",
-      "knownConflicts": ["qualifying"],
-      "knownConflictNote": "B07 mechanically qualifies alongside the expected B08/B09 under a strictly faithful reading of the literal SCHED_HIGH_001 (schedule, linked via the FLEXIBILITY family priority) and SUPPORT_MODERATE_001 (support_structure, linked via PERSONAL_SUPPORT) rules -- see docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md section 11 and DECISION_LOG.md DEC-N7. Not fixed by weakening this expectation or persona-keyed code."
+      "contentStatus": "PERSONALIZED"
     },
     {
       "id": "P05",
@@ -567,9 +565,7 @@
         "loss of advancement because recovery is present",
         "loss of recovery because advancement is present"
       ],
-      "contentStatus": "PERSONALIZED",
-      "knownConflicts": ["displayed"],
-      "knownConflictNote": "The displayed virtual-family representative is B06, not the expected B03: B06 legitimately outscores B03 here because unavailable_academic_times contains VARIES and the pre-existing FLEX_002 rule scores B06 one point higher than B03 for that value -- the same asymmetry that appears in the owner's own section-15 LOW-tier table (B03 +1, B04 +1, B06 +2). See DECISION_LOG.md DEC-N7."
+      "contentStatus": "PERSONALIZED"
     },
     {
       "id": "P13",
@@ -652,9 +648,7 @@
       "requiredScopedSignalIds": { "B03": ["REV_STATE_AVAILABILITY"], "B06": ["REV_COST_ALIGNMENT"] },
       "forbiddenCandidateIds": ["B10"],
       "forbiddenNotes": ["cost-driven educational ordering"],
-      "contentStatus": "PERSONALIZED",
-      "knownConflicts": ["qualifying"],
-      "knownConflictNote": "B04 mechanically qualifies alongside the expected B03/B06/B07, for the same structural reason the P02 fixture requires B04 to qualify through (SCHED_VERYHIGH_001 schedule evidence linked via the primary reason, plus DELIVERY_001 delivery evidence linked via a family priority). See DECISION_LOG.md DEC-N7."
+      "contentStatus": "PERSONALIZED"
     },
     {
       "id": "P15",

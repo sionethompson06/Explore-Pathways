@@ -28,20 +28,6 @@ interface GoldenPersona {
   forbiddenCandidateIds?: string[];
   forbiddenQualifying?: string[];
   contentStatus: "PERSONALIZED" | "LIMITED_INFORMATION" | "ADVISOR_FIRST";
-  /**
-   * Named, documented conflicts between this persona's expectation and a
-   * strictly faithful implementation of the owner's literal per-model
-   * rule tables (DECISION_LOG.md DEC-N7,
-   * PHASE4_DECISION_ENGINE_SPEC_V1.md section 11). "qualifying" and/or
-   * "displayed" mark exactly the one or two assertions below known to
-   * fail for this reason -- every other assertion for this persona still
-   * runs as a normal, must-pass check. These are reported, not hidden:
-   * `it.fails` still runs the assertion and fails the suite if it ever
-   * unexpectedly starts passing (i.e. if this ceases to be true, the
-   * test tells us so rather than silently drifting).
-   */
-  knownConflicts?: ("qualifying" | "displayed")[];
-  knownConflictNote?: string;
 }
 
 const fixture = JSON.parse(readFileSync(fixturePaths.goldenProfiles, "utf-8")) as {
@@ -104,28 +90,15 @@ for (const persona of fixture.personas) {
       }
     });
 
-    const qualifyingIsKnownConflict = persona.knownConflicts?.includes("qualifying") ?? false;
-    const displayedIsKnownConflict = persona.knownConflicts?.includes("displayed") ?? false;
+    it("exact expected qualifying candidates match", () => {
+      expect([...evaluation.qualifyingCandidateIds].sort()).toEqual(
+        [...persona.expectedQualifying].sort(),
+      );
+    });
 
-    (qualifyingIsKnownConflict ? it.fails : it)(
-      qualifyingIsKnownConflict
-        ? `exact expected qualifying candidates match (KNOWN CONFLICT: ${persona.knownConflictNote})`
-        : "exact expected qualifying candidates match",
-      () => {
-        expect([...evaluation.qualifyingCandidateIds].sort()).toEqual(
-          [...persona.expectedQualifying].sort(),
-        );
-      },
-    );
-
-    (displayedIsKnownConflict ? it.fails : it)(
-      displayedIsKnownConflict
-        ? `exact expected displayed candidates and order match (KNOWN CONFLICT: ${persona.knownConflictNote})`
-        : "exact expected displayed candidates and order match",
-      () => {
-        expect(evaluation.displayedCandidateIds).toEqual(persona.expectedDisplayed);
-      },
-    );
+    it("exact expected displayed candidates and order match", () => {
+      expect(evaluation.displayedCandidateIds).toEqual(persona.expectedDisplayed);
+    });
 
     it("required signals are present", () => {
       const allActivated = new Set<string>([

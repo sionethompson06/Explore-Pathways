@@ -5,6 +5,7 @@ import { evaluateTriggeredRules } from "./rules";
 import {
   computeLinkedGroups,
   evaluateB01Continuity,
+  evaluateDirectionalEvidenceGate,
   evaluateDisplayGate,
   getCandidateUniverse,
   selectDisplayedCandidates,
@@ -83,13 +84,28 @@ export function evaluateDiscoveryProfile(
     const positiveGroups = groupContributions
       .filter((g) => g.finalContribution > 0)
       .map((g) => g.group);
-    const displayGate = evaluateDisplayGate(
+    const baseDisplayGate = evaluateDisplayGate(
       modelId,
       internalScore,
       positiveGroups,
       linkedGroups,
       modelId === "B01" && b01.stayCurrentExceptionEligible,
     );
+
+    // Directional Evidence Gate (Phase 4.1, DEC-N7): applied only after
+    // the base gate already qualifies, and only for B02-B09 -- B01's own
+    // exception path is untouched (evaluateDirectionalEvidenceGate
+    // returns qualifies: true immediately for B01).
+    const directionalGate = baseDisplayGate.qualifies
+      ? evaluateDirectionalEvidenceGate(modelId, groupContributions, positiveGroups)
+      : { qualifies: true as const };
+    const displayGate = directionalGate.qualifies
+      ? baseDisplayGate
+      : {
+          qualifies: false,
+          reasons: [...baseDisplayGate.reasons, directionalGate.reason!],
+          usedB01StayCurrentException: false,
+        };
 
     positiveGroupsByModel[modelId] = positiveGroups;
     internalSortScoreByModel[modelId] = internalScore;

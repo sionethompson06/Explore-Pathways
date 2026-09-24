@@ -150,8 +150,9 @@
     },
     {
       "id": "FLEX_002",
-      "version": "1.0.0-candidate",
+      "version": "1.1.0-phase4.1-engine",
       "group": "schedule",
+      "added_reason": "Phase 4.1 (DEC-N7 resolution, PHASE4_DECISION_ENGINE_SPEC_V1.md section 11a): B06 dropped from +3 to +2, matching B03. Unavailable academic times are generic remote/virtual-schedule evidence -- they do not establish that generic PRIVATE ONLINE schooling (B06) is inherently more schedule-compatible than generic PUBLIC VIRTUAL schooling (B03). Public/private funding model is not educational schedule evidence, so B03 and B06 must receive identical schedule-group credit from this rule. B04/B07/B08/B09 are unchanged.",
       "when": {
         "all": [
           {
@@ -169,7 +170,7 @@
       "score_effects": {
         "B03": 2,
         "B04": 2,
-        "B06": 3,
+        "B06": 2,
         "B07": 1,
         "B08": 3,
         "B09": 3

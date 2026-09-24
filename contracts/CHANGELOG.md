@@ -246,3 +246,31 @@ Owner-authorized: build the deterministic Discovery decision engine only. Full r
 ### tests/
 
 - `tests/engine-golden.test.ts` (15 personas x 10 assertions each), `tests/engine-metamorphic.test.ts` (M01-M11), `tests/contracts.test.ts` (updated counts + 3 new negative-control tests), `tests/discovery-calibration.test.ts` (updated for DEC-N2).
+
+## Phase 4.1 — Resolve owner-calibrated engine acceptance conflicts (DEC-N7 resolution; rules.json data-only edit, no version bump beyond 2.0.0-phase4-engine)
+
+Owner-authorized narrow correction resolving DEC-N7. Full record at `docs/pathways/DECISION_LOG.md` section O and `docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md` sections 6a/11. Not merged to main; no Discovery Report, AI, questionnaire change, or Phase 5.
+
+### rules.json (FLEX_002 corrected)
+
+- `FLEX_002`'s `score_effects.B06` changed from `3` to `2`, now identical to `B03` (both `2`). `B04`/`B07`/`B08`/`B09` unchanged. Unavailable academic times are generic remote/virtual-schedule evidence and do not make a privately funded online model (B06) inherently more schedule-compatible than a publicly funded virtual one (B03).
+
+### src/lib/engine/candidates.ts (new)
+
+- `evaluateDirectionalEvidenceGate(modelId, groupContributions, positiveGroups)`: a general qualification requirement applied after the existing display gate, for B02-B09 only. Qualifies when either (A) a raw positive contribution `>= 2` exists in `delivery`/`family_role`/`continuity`, or (B) at least 3 distinct scoring groups have a final positive contribution. B01 is exempt (returns `qualifies: true` immediately).
+
+### src/lib/engine/evaluate.ts
+
+- Applies the Directional Evidence Gate after the base display gate already qualifies a candidate; appends its reason to `displayGate.reasons` when it fails.
+
+### src/lib/engine/index.ts
+
+- Exports `evaluateDirectionalEvidenceGate`.
+
+### fixtures/golden-profiles.json / tests/engine-golden.test.ts
+
+- Removed the Phase 4 follow-up `knownConflicts`/`knownConflictNote` fields and the corresponding conditional `it.fails` mechanism. All P01-P15 assertions are ordinary must-pass tests again; no expected value was changed.
+
+### tests/engine-directional-gate.test.ts (new)
+
+- 12 regression tests (sections A-E of the Phase 4.1 instruction) covering the Directional Evidence Gate and the FLEX_002 correction.
