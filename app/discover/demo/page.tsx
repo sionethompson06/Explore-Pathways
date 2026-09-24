@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { mapMarketingInterestToHint } from "@/lib/discovery/marketing-hint";
 import { DiscoveryDemoQuestionnaire } from "@/components/discovery/DiscoveryDemoQuestionnaire";
 import { Section } from "@/components/marketing/Section";
-import { commitDemoAnswer, computeDemoState, validateDemoCompletion } from "./actions";
+import { buildDemoDiscoveryReport, commitDemoAnswer, computeDemoState, validateDemoCompletion } from "./actions";
 
 export const metadata: Metadata = {
   title: "Discovery Preview Demo",
@@ -41,16 +41,21 @@ export default async function DiscoveryDemoPage({
   const initialState = await computeDemoState({}, "STUDENT", interestHint);
 
   return (
-    <Section tone="default" ariaLabelledBy="discovery-demo-heading" narrow>
+    <Section tone="default" ariaLabelledBy="discovery-demo-heading">
       <h1 id="discovery-demo-heading" className="visually-hidden">
         Discovery Preview Demo
       </h1>
+      {/* Phase 5.1: NOT `narrow` -- the questionnaire constrains its own
+          width (DiscoveryQuestionnaire.module.css .wrapper), so a generated
+          report can render at the full premium Phase 5 report width
+          instead of being squeezed into the questionnaire's prose column. */}
       <DiscoveryDemoQuestionnaire
         initialState={initialState}
         interestHint={interestHint}
         computeState={computeDemoState}
         commitAnswer={commitDemoAnswer}
         validateCompletion={validateDemoCompletion}
+        buildReport={buildDemoDiscoveryReport}
       />
     </Section>
   );

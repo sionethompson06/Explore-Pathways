@@ -314,3 +314,39 @@ Owner-authorized. Full record at `docs/pathways/DECISION_LOG.md` section P and `
 ### tests/report-golden.test.ts, tests/report-structural.test.ts, tests/report-invariants.test.ts, tests/report-forbidden-copy.test.ts (new)
 
 - 94 + 150 + 13 + 15 = 272 new tests. Full Vitest suite: 421 pre-existing + 272 new = 693 passed.
+
+## Phase 5.1 — End-to-end interactive Discovery demo integration
+
+Owner-authorized. Full record at `docs/pathways/DECISION_LOG.md` section Q and `docs/pathways/PHASE5_1_END_TO_END_DEMO_INTEGRATION.md`. Integration-only phase on top of the unmodified Phase 4/Phase 4.1/Phase 5 layers; no question bank, rules, scoring policy, taxonomy, report content, Golden Profile, or Golden Report contract changed. Not merged to main; no AI, no database/session/cookie/browser-storage persistence added to the interactive demo, no URL answer payload.
+
+### src/lib/report/profile-context.ts (new)
+
+- `buildReportProfileContext({ rawAnswers, profileRevisionId, gradeBand })`, replacing three previously-duplicated inline copies of the same presentation-only field-extraction logic. Re-exported from `src/lib/report/index.ts`. Contains no educational-decision logic.
+
+### app/discover/demo/actions.ts
+
+- New DB-free `buildDemoDiscoveryReport(rawAnswers)` server action: validates the raw answer snapshot, runs the real Phase 4 engine (`evaluateDiscoveryProfile`), derives a deterministic `profileRevisionId` (`demo_interactive_<effectiveProfileHash prefix>`, never random, never in the URL), and assembles the report (`assembleDiscoveryReport`) with a fixed `consultationState: "UNCONFIGURED"`/`saveAvailable: false` and a fixed demo `createdAt`. Stale doc comments claiming Phase 4 was "not authorized" were corrected.
+
+### src/components/report/ReportView.tsx, ReportView.module.css
+
+- `isDemoRoute: boolean` prop replaced by `demoLabel?: string` plus a new `secondaryTopAction?: ReactNode`. UI component prop-API change only — `DiscoveryReportDTO`/`report-contract.json` unchanged. `.topActions` gained `flex-wrap`/`gap` to accommodate two top actions.
+
+### app/discover/report/page.tsx, app/discover/report/demo/page.tsx
+
+- Both routes' inline profile-context extraction replaced by the new shared `buildReportProfileContext` helper (DEC-Q1), with confirmed byte-identical output. The Golden fixture demo route now passes `demoLabel="Synthetic report demo"` in place of the removed `isDemoRoute` prop; its own behavior is otherwise unchanged.
+
+### app/discover/demo/page.tsx, src/components/discovery/DiscoveryDemoQuestionnaire.tsx
+
+- The old `CompletionScreen` ("Discovery Demo Complete") removed entirely; successful Review now generates and displays the real Phase 5 report via `<ReportView demoLabel="Interactive Discovery demo — answers are not saved">`, rendered outside the questionnaire's own narrow-width wrapper. New "Review or Edit My Answers" (returns to Review in place, preserving all answers) and "Start Demo Again" (clears all state) actions. Review button copy changed to "See My Personalized Discovery Report" / "Building Your Discovery Report…". An unexpected report-generation error shows a dedicated retry screen without erasing answers.
+
+### src/components/discovery/DiscoveryQuestionnaire.tsx (production)
+
+- Same Review button copy change, for wording parity only; `submitProfileAction`'s redirect-to-`/discover/report` behavior is unchanged.
+
+### tests/discovery-demo-report.test.ts (new)
+
+- Pipeline tests for P01/P03/P09/P12/P15 (no mocked `EngineEvaluation`) plus demo/Golden-fixture parity tests for GR01/GR03/GR12/GR15. 25 new tests.
+
+### tests/e2e/discovery-demo-integration.spec.ts (new), plus updates to discovery-demo.spec.ts, discovery-profile.spec.ts, discovery-scroll.spec.ts, discovery-visual-qa.spec.ts
+
+- New end-to-end coverage for the interactive demo's questionnaire → report → edit → regenerate → restart → refresh-reset → persistence-safety flow; existing specs updated for the new button wording and report-based completion state. Full Playwright suite: 160 passed. Full Vitest suite: 693 pre-existing + 25 new = 718 passed.

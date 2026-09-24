@@ -21,13 +21,17 @@ const AFTER_DIRECTIONS_ANCHOR = "r03-directions-end";
  */
 export function ReportView({
   report,
-  isDemoRoute = false,
+  demoLabel,
   editAnswersOverride,
+  secondaryTopAction,
 }: {
   report: DiscoveryReportDTO;
-  isDemoRoute?: boolean;
-  /** Production only: the real reopen-for-editing server action, so an already-completed session's draft is explicitly reloaded before editing (see app/discover/report/page.tsx). The demo route never passes this -- it has no session to reopen. */
+  /** Presentation-only subordinate notice (section 16/11 of the Phase 5.1 spec) -- never changes report content. Omitted entirely in production. */
+  demoLabel?: string;
+  /** Production only: the real reopen-for-editing server action, so an already-completed session's draft is explicitly reloaded before editing (see app/discover/report/page.tsx). The demo routes never pass this -- neither has a database session to reopen. */
   editAnswersOverride?: ReactNode;
+  /** Interactive demo only: a "Start Demo Again" control rendered alongside the edit action. */
+  secondaryTopAction?: ReactNode;
 }) {
   const hasSupportOpportunity =
     Boolean(report.sections.supportOpportunityMap.support) ||
@@ -37,13 +41,14 @@ export function ReportView({
   return (
     <div className={styles.page}>
       <Container>
-        {isDemoRoute ? <span className={styles.demoLabel}>Synthetic report demo</span> : null}
+        {demoLabel ? <span className={styles.demoLabel}>{demoLabel}</span> : null}
         <div className={styles.topActions}>
           {editAnswersOverride ?? (
             <a href={report.actions.editAnswers.href} className={styles.editLink}>
               {report.actions.editAnswers.label}
             </a>
           )}
+          {secondaryTopAction}
         </div>
         <div className={styles.stack}>
           <ReportHero snapshot={report.sections.snapshot} />

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { QuestionField } from "./QuestionField";
 import { findBlockingOtherTextFields } from "./otherTextGate";
@@ -13,24 +12,29 @@ import type {
   StageProgressView,
 } from "./types";
 import type { RawAnswers, StageId } from "@/lib/discovery/types";
+import type { DiscoveryReportDTO } from "@/lib/report/types";
+import { ReportView } from "@/components/report/ReportView";
 import styles from "./DiscoveryQuestionnaire.module.css";
 
 /**
- * Preview Demo Mode's client component (Phase 3C). Everything here
- * lives in React memory only -- no localStorage/sessionStorage/
- * IndexedDB, no cookies, no URL params carrying an answer, and no
- * database. A page refresh always loses this component's state and
- * restarts the demo; that is intentional and is disclosed in the
- * notice below, not an error condition.
+ * Preview Demo Mode's client component (Phase 3C; extended by Phase
+ * 5.1 to generate a real Discovery Report). Everything here lives in
+ * React memory only -- no localStorage/sessionStorage/IndexedDB, no
+ * cookies, no URL params carrying an answer, and no database. A page
+ * refresh always loses this component's state (including any
+ * generated report) and restarts the demo; that is intentional and is
+ * disclosed in the notice below, not an error condition.
  *
- * `computeState`/`commitAnswer`/`validateCompletion` are the three
+ * `computeState`/`commitAnswer`/`validateCompletion`/`buildReport` are
  * stateless "use server" functions from app/discover/demo/actions.ts,
  * passed down as props (never imported directly into this client
  * bundle, matching the convention already used by the real
  * DiscoveryQuestionnaire/saveAnswerAction). Every one of them
- * recomputes its answer purely from the @/lib/discovery domain
- * module -- there is no second question bank and no duplicated
- * branch or validation logic in this file.
+ * recomputes purely from the @/lib/discovery domain module and, for
+ * `buildReport`, the canonical Phase 4 engine and Phase 5 report
+ * assembler -- there is no second question bank, no duplicated
+ * branch/validation logic, and no duplicated scoring/report-wording
+ * logic in this file.
  */
 
 interface DemoStateView {
@@ -55,7 +59,13 @@ interface DemoCompletionResultView {
   errors: FieldErrorView[];
 }
 
+type DemoReportResultView =
+  | { ok: true; report: DiscoveryReportDTO }
+  | { ok: false; errors: FieldErrorView[] };
+
 type SaveState = "idle" | "saving" | "saved" | "error";
+
+const INTERACTIVE_DEMO_LABEL = "Interactive Discovery demo — answers are not saved";
 
 export function DiscoveryDemoQuestionnaire({
   initialState,
@@ -63,6 +73,7 @@ export function DiscoveryDemoQuestionnaire({
   computeState,
   commitAnswer,
   validateCompletion,
+  buildReport,
 }: {
   initialState: DemoStateView;
   interestHint: string | null;
@@ -78,6 +89,7 @@ export function DiscoveryDemoQuestionnaire({
     interestHint: string | null,
   ) => Promise<DemoCommitResultView>;
   validateCompletion: (rawAnswers: RawAnswers) => Promise<DemoCompletionResultView>;
+  buildReport: (rawAnswers: RawAnswers) => Promise<DemoReportResultView>;
 }) {
   const [rawAnswers, setRawAnswers] = useState<RawAnswers>({});
   // Mirrors `rawAnswers` synchronously (never waits for a re-render),
@@ -108,8 +120,13 @@ export function DiscoveryDemoQuestionnaire({
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [lastFailedPatch, setLastFailedPatch] = useState<Record<string, unknown> | null>(null);
   const [submitErrors, setSubmitErrors] = useState<FieldErrorView[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const [isBuildingReport, setIsBuildingReport] = useState(false);
+  const [report, setReport] = useState<DiscoveryReportDTO | null>(null);
+  // Distinct from `submitErrors` (expected field/completion validation
+  // errors, shown inline on Review): this is the safe fallback for an
+  // UNEXPECTED report-generation/contract failure (section 21) --
+  // never fabricates a generic report, never erases current answers.
+  const [reportError, setReportError] = useState<string | null>(null);
   // Phase 3F.1: mirrors the real DiscoveryQuestionnaire's identical ref --
   // each mounted OtherTextInput registers its own live text getter here.
   const otherTextLiveRef = useRef<Record<string, () => string>>({});
@@ -129,11 +146,12 @@ export function DiscoveryDemoQuestionnaire({
 
   // Phase 3D: the same anchor ref is attached to whichever of the two
   // mutually-exclusive branches below is currently rendered (the
-  // stage/Review view, or the Demo Complete screen) -- keying on both
-  // `state.stageId` and `isComplete` together covers Continue/Back/
-  // Edit (stageId changes) and reaching or restarting Demo Complete
-  // (isComplete flips while stageId can stay "REVIEW").
-  const stageAnchorRef = useScrollStageAnchor<HTMLDivElement>(`${state.stageId}|${isComplete}`);
+  // stage/Review view, or the generated report) -- keying on both
+  // `state.stageId` and whether a report exists together covers
+  // Continue/Back/Edit (stageId changes) and reaching or leaving the
+  // generated report (report flips between null/non-null while
+  // stageId can stay "REVIEW").
+  const stageAnchorRef = useScrollStageAnchor<HTMLDivElement>(`${state.stageId}|${Boolean(report)}`);
 
   function displayValue(field: string): AnswerValue {
     if (field === "discovery_reasons" && interestHint && rawAnswers.discovery_reasons === undefined) {
@@ -245,20 +263,47 @@ export function DiscoveryDemoQuestionnaire({
     await goToStage(nextStage);
   }
 
-  async function handleComplete() {
+  /**
+   * "See My Personalized Discovery Report" (Phase 5.1). Sends the
+   * CURRENT in-memory answer snapshot to the DB-free
+   * `buildDemoDiscoveryReport` action, which validates it (identical
+   * completeness check the old validateCompletion round trip used),
+   * then runs the real Phase 4 engine and Phase 5 assembler. Expected
+   * validation failures stay on Review as ordinary field errors,
+   * exactly like before; an unexpected thrown error (contract/engine
+   * failure) is caught here and shown as a safe, non-fabricated
+   * fallback -- current answers are never cleared either way.
+   */
+  async function handleGenerateReport() {
     setSubmitErrors([]);
-    setIsSubmitting(true);
-    const result = await validateCompletion(rawAnswersRef.current);
-    setIsSubmitting(false);
-    if (!result.ok) {
-      setSubmitErrors(result.errors);
-      return;
+    setReportError(null);
+    setIsBuildingReport(true);
+    try {
+      const result = await buildReport(rawAnswersRef.current);
+      setIsBuildingReport(false);
+      if (!result.ok) {
+        setSubmitErrors(result.errors);
+        return;
+      }
+      setReport(result.report);
+    } catch {
+      setIsBuildingReport(false);
+      setReportError(
+        "We couldn't build your Discovery Report just yet. Your demo answers are still here. Please try again.",
+      );
     }
-    setIsComplete(true);
+  }
+
+  /** "Review or Edit My Answers" from the generated report -- returns to the REVIEW stage in place, with every current answer preserved (never the database-backed /discover/profile or reopenForEditingAction). */
+  function handleEditFromReport() {
+    setReport(null);
+    setReportError(null);
   }
 
   async function handleRestart() {
-    setIsComplete(false);
+    setReport(null);
+    setReportError(null);
+    setIsBuildingReport(false);
     applyLocally({});
     setFieldErrors({});
     setSubmitErrors([]);
@@ -268,6 +313,32 @@ export function DiscoveryDemoQuestionnaire({
     const fresh = await computeState({}, "STUDENT", interestHint);
     if (requestSeqRef.current !== seq) return;
     setState(fresh);
+  }
+
+  // Phase 5.1: a generated report renders full-width, OUTSIDE the narrow
+  // `styles.wrapper` questionnaire layout -- the premium Phase 5 report
+  // experience is never squeezed into the questionnaire's prose-width
+  // column (see app/discover/demo/page.tsx, which no longer forces a
+  // narrow Section either).
+  if (report) {
+    return (
+      <div ref={stageAnchorRef} tabIndex={-1} className={styles.stageAnchor}>
+        <ReportView
+          report={report}
+          demoLabel={INTERACTIVE_DEMO_LABEL}
+          editAnswersOverride={
+            <button type="button" className={styles.secondaryButton} onClick={handleEditFromReport}>
+              Review or Edit My Answers
+            </button>
+          }
+          secondaryTopAction={
+            <button type="button" className={styles.secondaryButton} onClick={handleRestart}>
+              Start Demo Again
+            </button>
+          }
+        />
+      </div>
+    );
   }
 
   return (
@@ -281,86 +352,83 @@ export function DiscoveryDemoQuestionnaire({
         <p className={styles.noticeRestart}>Refreshing this page will restart the demo.</p>
       </div>
 
-      {isComplete ? (
-        <CompletionScreen
-          headingRef={stageAnchorRef}
-          onReview={() => setIsComplete(false)}
-          onRestart={handleRestart}
-        />
-      ) : (
-        <>
-          <div ref={stageAnchorRef} tabIndex={-1} className={styles.stageAnchor}>
-            <ProgressBar stages={state.stages} currentStageId={state.stageId} />
-          </div>
+      <div ref={stageAnchorRef} tabIndex={-1} className={styles.stageAnchor}>
+        <ProgressBar stages={state.stages} currentStageId={state.stageId} />
+      </div>
 
-          {saveState !== "idle" ? (
-            <p className={styles.saveIndicator} role="status">
-              {saveState === "saving"
-                ? "Saving…"
-                : saveState === "saved"
-                  ? "Saved"
-                  : "Couldn't save your last answer."}
-              {saveState === "error" ? (
-                <button type="button" className={styles.retryButton} onClick={retry}>
-                  Retry
-                </button>
-              ) : null}
+      {saveState !== "idle" ? (
+        <p className={styles.saveIndicator} role="status">
+          {saveState === "saving"
+            ? "Saving…"
+            : saveState === "saved"
+              ? "Saved"
+              : "Couldn't save your last answer."}
+          {saveState === "error" ? (
+            <button type="button" className={styles.retryButton} onClick={retry}>
+              Retry
+            </button>
+          ) : null}
+        </p>
+      ) : null}
+
+      {!isReview ? (
+        <>
+          {interestHint && state.stageId === "GOALS" ? (
+            <p className={styles.hintBanner}>
+              Based on what you told us earlier, we&apos;ve suggested &ldquo;
+              {state.interestHintLabel}&rdquo; below -- change it if that&apos;s not quite
+              right.
             </p>
           ) : null}
 
-          {!isReview ? (
-            <>
-              {interestHint && state.stageId === "GOALS" ? (
-                <p className={styles.hintBanner}>
-                  Based on what you told us earlier, we&apos;ve suggested &ldquo;
-                  {state.interestHintLabel}&rdquo; below -- change it if that&apos;s not quite
-                  right.
-                </p>
-              ) : null}
+          <div className={styles.questions}>
+            {state.questions.map((question) => (
+              <QuestionField
+                key={question.id}
+                question={question}
+                value={displayValue(question.field)}
+                onCommit={commit}
+                error={fieldErrors[question.field]}
+                otherTextValue={question.otherTextField ? displayValue(question.otherTextField) : undefined}
+                otherTextError={question.otherTextField ? otherTextGateErrors[question.otherTextField] : undefined}
+                registerOtherTextLiveValue={registerOtherTextLiveValue}
+              />
+            ))}
+          </div>
 
-              <div className={styles.questions}>
-                {state.questions.map((question) => (
-                  <QuestionField
-                    key={question.id}
-                    question={question}
-                    value={displayValue(question.field)}
-                    onCommit={commit}
-                    error={fieldErrors[question.field]}
-                    otherTextValue={question.otherTextField ? displayValue(question.otherTextField) : undefined}
-                    otherTextError={question.otherTextField ? otherTextGateErrors[question.otherTextField] : undefined}
-                    registerOtherTextLiveValue={registerOtherTextLiveValue}
-                  />
-                ))}
-              </div>
-
-              <div className={styles.navRow}>
-                {previousStage ? (
-                  <button
-                    type="button"
-                    className={styles.secondaryButton}
-                    onClick={() => goToStage(previousStage)}
-                  >
-                    Back
-                  </button>
-                ) : (
-                  <span />
-                )}
-                <button type="button" className={styles.primaryButton} onClick={handleContinue}>
-                  Continue
-                </button>
-              </div>
-            </>
-          ) : (
-            <ReviewScreen
-              sections={state.reviewSections}
-              isReadyForReview={state.isReadyForReview}
-              submitErrors={submitErrors}
-              isSubmitting={isSubmitting}
-              onEdit={goToStage}
-              onSubmit={handleComplete}
-            />
-          )}
+          <div className={styles.navRow}>
+            {previousStage ? (
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => goToStage(previousStage)}
+              >
+                Back
+              </button>
+            ) : (
+              <span />
+            )}
+            <button type="button" className={styles.primaryButton} onClick={handleContinue}>
+              Continue
+            </button>
+          </div>
         </>
+      ) : reportError ? (
+        <ReportErrorScreen
+          message={reportError}
+          isRetrying={isBuildingReport}
+          onRetry={handleGenerateReport}
+          onReviewAnswers={() => setReportError(null)}
+        />
+      ) : (
+        <ReviewScreen
+          sections={state.reviewSections}
+          isReadyForReview={state.isReadyForReview}
+          submitErrors={submitErrors}
+          isBuildingReport={isBuildingReport}
+          onEdit={goToStage}
+          onGenerateReport={handleGenerateReport}
+        />
       )}
     </div>
   );
@@ -408,16 +476,16 @@ function ReviewScreen({
   sections,
   isReadyForReview,
   submitErrors,
-  isSubmitting,
+  isBuildingReport,
   onEdit,
-  onSubmit,
+  onGenerateReport,
 }: {
   sections: ReviewSection[];
   isReadyForReview: boolean;
   submitErrors: FieldErrorView[];
-  isSubmitting: boolean;
+  isBuildingReport: boolean;
   onEdit: (stageId: StageId) => void;
-  onSubmit: () => void;
+  onGenerateReport: () => void;
 }) {
   return (
     <div className={styles.review}>
@@ -465,44 +533,43 @@ function ReviewScreen({
       <button
         type="button"
         className={styles.primaryButton}
-        disabled={!isReadyForReview || isSubmitting}
-        onClick={onSubmit}
+        disabled={!isReadyForReview || isBuildingReport}
+        onClick={onGenerateReport}
       >
-        {isSubmitting ? "Submitting…" : "Complete My Discovery Profile"}
+        {isBuildingReport ? "Building Your Discovery Report…" : "See My Personalized Discovery Report"}
       </button>
     </div>
   );
 }
 
-function CompletionScreen({
-  headingRef,
-  onReview,
-  onRestart,
+/**
+ * The safe fallback for an UNEXPECTED report-generation failure
+ * (section 21) -- never a fabricated generic report, never a silent
+ * fall back to a Golden fixture, and current answers stay intact
+ * underneath (this screen only replaces the Review list, it does not
+ * clear `rawAnswers`).
+ */
+function ReportErrorScreen({
+  message,
+  isRetrying,
+  onRetry,
+  onReviewAnswers,
 }: {
-  headingRef: React.RefObject<HTMLHeadingElement | null>;
-  onReview: () => void;
-  onRestart: () => void;
+  message: string;
+  isRetrying: boolean;
+  onRetry: () => void;
+  onReviewAnswers: () => void;
 }) {
   return (
-    <div className={styles.completion}>
-      <h2 ref={headingRef} tabIndex={-1} className={styles.stageAnchor}>
-        Discovery Demo Complete
-      </h2>
-      <p>
-        You&apos;ve reached the end of the current Pathways Discovery experience. In the live
-        system, these answers will be securely saved and used to prepare the next stage of your
-        Pathways Discovery.
-      </p>
+    <div className={styles.completion} role="alert">
+      <p>{message}</p>
       <div className={styles.completionActions}>
-        <button type="button" className={styles.secondaryButton} onClick={onReview}>
-          REVIEW MY ANSWERS
+        <button type="button" className={styles.primaryButton} disabled={isRetrying} onClick={onRetry}>
+          {isRetrying ? "Building Your Discovery Report…" : "Try Again"}
         </button>
-        <button type="button" className={styles.secondaryButton} onClick={onRestart}>
-          START DEMO AGAIN
+        <button type="button" className={styles.secondaryButton} onClick={onReviewAnswers}>
+          Review My Answers
         </button>
-        <Link href="/" className={styles.primaryButton}>
-          RETURN TO PATHWAYS
-        </Link>
       </div>
     </div>
   );

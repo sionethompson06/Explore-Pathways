@@ -7,6 +7,7 @@ import { validateCompletedProfile } from "@/lib/discovery/validation";
 import type { RawAnswers } from "@/lib/discovery/types";
 import { evaluateDiscoveryProfile } from "@/lib/engine/evaluate";
 import { assembleDiscoveryReport } from "@/lib/report/assemble";
+import { buildReportProfileContext } from "@/lib/report/profile-context";
 
 export const metadata: Metadata = {
   title: "Synthetic Discovery Report Demo",
@@ -58,22 +59,14 @@ export default async function DiscoveryReportDemoPage({
   }
   const evaluation = evaluateDiscoveryProfile(validation.effective, contracts);
 
-  const raw = persona.raw as Record<string, unknown>;
+  const profile = buildReportProfileContext({
+    rawAnswers: persona.raw as Record<string, unknown>,
+    profileRevisionId: `demo_${fixtureId}`,
+    gradeBand: evaluation.derivedFacts.grade_band,
+  });
   const report = assembleDiscoveryReport(
     {
-      profile: {
-        profileRevisionId: `demo_${fixtureId}`,
-        studentDisplayName: typeof raw["student_display_name"] === "string" ? raw["student_display_name"] : undefined,
-        currentGrade: typeof raw["current_grade"] === "string" ? raw["current_grade"] : undefined,
-        currentEducationModel:
-          typeof raw["current_education_model"] === "string" ? raw["current_education_model"] : undefined,
-        selectedFamilyPriorities: Array.isArray(raw["family_priorities"]) ? (raw["family_priorities"] as string[]) : [],
-        primaryDiscoveryReason:
-          typeof raw["primary_discovery_reason"] === "string" ? raw["primary_discovery_reason"] : undefined,
-        desiredPrimaryChange: typeof raw["desired_primary_change"] === "string" ? raw["desired_primary_change"] : undefined,
-        costPreference: typeof raw["cost_preference"] === "string" ? raw["cost_preference"] : undefined,
-        gradeBand: evaluation.derivedFacts.grade_band,
-      },
+      profile,
       engine: evaluation,
       operational: { consultationState: "UNCONFIGURED", saveAvailable: false },
     },
@@ -108,7 +101,7 @@ export default async function DiscoveryReportDemoPage({
           ))}
         </nav>
       </Section>
-      <ReportView report={report} isDemoRoute />
+      <ReportView report={report} demoLabel="Synthetic report demo" />
     </>
   );
 }

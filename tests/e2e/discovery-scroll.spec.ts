@@ -93,7 +93,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
     await scrollToBottom(page);
-    await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
+    await page.getByRole("button", { name: /See My Personalized Discovery Report|Continue/ }).click();
 
     await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
     await expectProgressNavNearTop(page);
@@ -114,7 +114,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
-    await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
+    await page.getByRole("button", { name: /See My Personalized Discovery Report|Continue/ }).click();
 
     await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
     await scrollToBottom(page);
@@ -124,7 +124,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await expectProgressNavNearTop(page);
   });
 
-  test("Demo Complete and Start Demo Again both scroll to the beginning of their content", async ({
+  test("the generated report and Start Demo Again both scroll to the beginning of their content", async ({
     page,
   }) => {
     await page.goto("/discover/demo");
@@ -141,12 +141,15 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
-    await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
+    await page.getByRole("button", { name: /See My Personalized Discovery Report|Continue/ }).click();
     await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
     await scrollToBottom(page);
-    await page.getByRole("button", { name: "Complete My Discovery Profile" }).click();
+    await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
 
-    const heading = page.getByRole("heading", { name: "Discovery Demo Complete" });
+    // Excludes the page's own pre-existing visually-hidden landmark H1
+    // (the same pattern already used by the golden-fixture demo route)
+    // so this resolves to exactly the report's own heading.
+    const heading = page.locator("h1:not(#discovery-demo-heading)");
     await expect(heading).toBeVisible();
     await expect(async () => {
       const box = await heading.boundingBox();
@@ -156,7 +159,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     }).toPass({ timeout: 4000 });
 
     await scrollToBottom(page);
-    await page.getByRole("button", { name: "START DEMO AGAIN" }).click();
+    await page.getByRole("button", { name: "Start Demo Again" }).click();
     await expect(page.getByText("What grade is your student currently in?")).toBeVisible();
     await expectProgressNavNearTop(page);
   });

@@ -1,6 +1,7 @@
 import "server-only";
 
 export { assembleDiscoveryReport, REPORT_TEMPLATE_VERSION } from "./assemble";
+export { buildReportProfileContext } from "./profile-context";
 export { selectReportArchetype } from "./archetypes";
 export { buildSnapshotSection } from "./snapshot";
 export { buildInsightSection } from "./insights";

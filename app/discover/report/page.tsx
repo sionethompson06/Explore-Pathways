@@ -38,6 +38,7 @@ export default async function DiscoveryReportPage() {
     { loadContracts },
     { evaluateDiscoveryProfile },
     { assembleDiscoveryReport },
+    { buildReportProfileContext },
   ] = await Promise.all([
     import("@/server/session"),
     import("@/server/discovery-draft"),
@@ -46,6 +47,7 @@ export default async function DiscoveryReportPage() {
     import("@/lib/contracts/loader"),
     import("@/lib/engine/evaluate"),
     import("@/lib/report/assemble"),
+    import("@/lib/report/profile-context"),
   ]);
 
   const cookieStore = await cookies();
@@ -91,24 +93,14 @@ export default async function DiscoveryReportPage() {
   const contracts = loadContracts();
   const evaluation = evaluateDiscoveryProfile(validation.effective, contracts);
 
-  const raw = revision.rawAnswers as Record<string, unknown>;
+  const profile = buildReportProfileContext({
+    rawAnswers: revision.rawAnswers as Record<string, unknown>,
+    profileRevisionId: revision.revisionId,
+    gradeBand: evaluation.derivedFacts.grade_band,
+  });
   const report = assembleDiscoveryReport(
     {
-      profile: {
-        profileRevisionId: revision.revisionId,
-        studentDisplayName: typeof raw["student_display_name"] === "string" ? raw["student_display_name"] : undefined,
-        currentGrade: typeof raw["current_grade"] === "string" ? raw["current_grade"] : undefined,
-        currentEducationModel:
-          typeof raw["current_education_model"] === "string" ? raw["current_education_model"] : undefined,
-        selectedFamilyPriorities: Array.isArray(raw["family_priorities"])
-          ? (raw["family_priorities"] as string[])
-          : [],
-        primaryDiscoveryReason:
-          typeof raw["primary_discovery_reason"] === "string" ? raw["primary_discovery_reason"] : undefined,
-        desiredPrimaryChange: typeof raw["desired_primary_change"] === "string" ? raw["desired_primary_change"] : undefined,
-        costPreference: typeof raw["cost_preference"] === "string" ? raw["cost_preference"] : undefined,
-        gradeBand: evaluation.derivedFacts.grade_band,
-      },
+      profile,
       engine: evaluation,
       // No live/verified consultation service is configured in this build --
       // never claim LIVE_VERIFIED or REQUEST_ONLY without one actually existing.

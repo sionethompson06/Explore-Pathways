@@ -118,7 +118,7 @@ test.describe("Discovery visual QA: breakpoints", () => {
     await page.getByRole("radio", { name: "Regular support", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=REVIEW/);
-    await page.getByRole("button", { name: "Complete My Discovery Profile" }).click();
+    await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
     await expect(page).toHaveURL(/\/discover\/report$/);
 
     for (const bp of [

@@ -60,11 +60,11 @@ async function fillScheduleStage(page: Page) {
 async function fillFamilyStage(page: Page) {
   await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
   await page.getByRole("radio", { name: "Regular support", exact: true }).check();
-  await page.getByRole("button", { name: /Complete My Discovery Profile|Continue/ }).click();
+  await page.getByRole("button", { name: /See My Personalized Discovery Report|Continue/ }).click();
 }
 
 test.describe("Discovery: happy path completion (grade 6, no athletics branch)", () => {
-  test("a family can complete the full Discovery profile and reach the honest completion screen", async ({
+  test("a family can complete the full Discovery profile and reach their real personalized Discovery Report", async ({
     page,
   }) => {
     await startDiscovery(page);
@@ -78,13 +78,16 @@ test.describe("Discovery: happy path completion (grade 6, no athletics branch)",
     await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Goals" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Complete My Discovery Profile" }).click();
+    await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
     await expect(page).toHaveURL(/\/discover\/report$/);
-    await expect(
-      page.getByRole("heading", { name: "Your Discovery Profile Is Complete" }),
-    ).toBeVisible();
+    // Phase 5.1: production now redirects straight into the real, database-backed
+    // Phase 5 report (never a placeholder "profile is complete" screen) -- exactly
+    // one H1 (the report headline), no demo label (this is not a demo route).
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.getByText("YOUR DISCOVERY REPORT", { exact: true })).toBeVisible();
+    await expect(page.getByText(/Interactive Discovery demo|Synthetic report demo/)).toHaveCount(0);
 
-    // Honest completion state: no recommendation/ranking language anywhere.
+    // Honest, non-fabricated report: no forbidden ranking/urgency language anywhere.
     const bodyText = await page.locator("body").innerText();
     expect(bodyText).not.toMatch(/best school|top match|ranked|score:|% fit/i);
   });

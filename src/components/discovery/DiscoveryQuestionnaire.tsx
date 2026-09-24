@@ -378,7 +378,7 @@ function ReviewScreen({
           setIsSubmitting(false);
         }}
       >
-        {isSubmitting ? "Submitting…" : "Complete My Discovery Profile"}
+        {isSubmitting ? "Building Your Discovery Report…" : "See My Personalized Discovery Report"}
       </button>
     </div>
   );
