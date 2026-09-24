@@ -184,6 +184,49 @@ export function validateContracts(contracts: LoadedContracts): ValidationResult 
     }
   }
 
+  // --- Phase 4 engine safety guarantees (section 33) -----------------------
+  // FEASIBILITY rules must never contribute an educational score -- cost,
+  // location, timeline and similar practical-feasibility signals reach a
+  // candidate only through a scoped review/consideration, never a score
+  // effect (DEC-H2/DEC-N).
+  for (const rule of evaluableRules) {
+    if (rule.reason_type === "FEASIBILITY" && Object.keys(rule.score_effects).length > 0) {
+      errors.push({
+        code: "FEASIBILITY_RULE_HAS_SCORE_EFFECTS",
+        message: `Rule ${rule.id} is reason_type FEASIBILITY but has non-empty score_effects. Feasibility rules must never contribute an educational score.`,
+      });
+    }
+  }
+
+  // Operational/practical fields that can never contribute score, however
+  // they are used in a rule's condition (PHASE4_DECISION_ENGINE_SPEC_V1.md
+  // section 33). *_other_text fields are discovered from the question
+  // bank's own other_text_field declarations, not hardcoded by name.
+  const scoreForbiddenFields = new Set<string>([
+    "cost_preference",
+    "desired_start_timeline",
+    "parent_context",
+    "primary_sport",
+    "athletic_level",
+    ...questionBank.questions
+      .map((q) => q.other_text_field)
+      .filter((field): field is string => typeof field === "string"),
+  ]);
+  for (const rule of evaluableRules) {
+    const referencesForbiddenField = rule.when.all.some((condition) =>
+      scoreForbiddenFields.has(condition.field),
+    );
+    if (referencesForbiddenField && Object.keys(rule.score_effects).length > 0) {
+      const forbiddenFieldsUsed = rule.when.all
+        .map((c) => c.field)
+        .filter((field) => scoreForbiddenFields.has(field));
+      errors.push({
+        code: "OPERATIONAL_FIELD_CONTRIBUTES_SCORE",
+        message: `Rule ${rule.id} conditions on operational/practical field(s) [${forbiddenFieldsUsed.join(", ")}] (never allowed to contribute an educational score) but has non-empty score_effects.`,
+      });
+    }
+  }
+
   // --- Legacy alias targets must resolve to real canonical IDs ------------
   const allKnownCanonicalIds = new Set<string>([
     ...knownBaseModelIds,
@@ -250,9 +293,12 @@ export function validateContracts(contracts: LoadedContracts): ValidationResult 
   }
   for (const review of taxonomy.review_signals) {
     if (review.reachability_status === "ACTIVE" && !touchedReviews.has(review.id)) {
-      // REV_COST_ALIGNMENT is documented as postprocess-triggered, not
-      // rule-triggered -- an expected, named exception, not a defect.
-      if (review.id !== "REV_COST_ALIGNMENT") {
+      // REV_STATE_AVAILABILITY is attached engine-natively (any qualifying
+      // candidate in scoring-policy.json's material_review_mapping scope
+      // -- src/lib/engine/considerations.ts), not by a rules.json rule --
+      // an expected, named exception, not a defect. See scoring-policy.json's
+      // state_availability_policy field for the full rationale.
+      if (review.id !== "REV_STATE_AVAILABILITY") {
         warnings.push({
           code: "ACTIVE_REVIEW_UNREACHED",
           message: `Review signal ${review.id} is marked ACTIVE but no evaluable rule currently activates it.`,

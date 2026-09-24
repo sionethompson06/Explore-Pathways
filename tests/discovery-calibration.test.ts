@@ -286,13 +286,13 @@ describe("Phase 3E derived facts", () => {
     expect(computeEffectiveAnswers({ current_grade: "6" }).derived.support_structure_need).toBe("UNKNOWN");
   });
 
-  it("schedule_flexibility_need: an already-stated schedule-intensive reason raises a mild subjective label", () => {
+  it("Phase 4 supersedes this: being an athlete (discovery_reasons ATHLETICS) alone no longer raises schedule_flexibility_need -- athlete identity is not itself a schedule conflict (docs/pathways/DECISION_LOG.md DEC-N; see tests/engine-metamorphic.test.ts M02/M09)", () => {
     const { derived } = computeEffectiveAnswers({
       current_grade: "6",
       discovery_reasons: ["ATHLETICS"],
       flexibility_importance: "NOT_IMPORTANT",
     });
-    expect(derived.schedule_flexibility_need).toBe("MODERATE");
+    expect(derived.schedule_flexibility_need).toBe("LOW");
   });
 
   it("schedule_flexibility_need: ESSENTIAL alone is VERY_HIGH", () => {

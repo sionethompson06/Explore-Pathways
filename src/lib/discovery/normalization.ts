@@ -62,7 +62,7 @@ function normalizeSingleValue(field: string, value: string | undefined): string 
 }
 
 export function computeEffectiveAnswers(raw: RawAnswers): EffectiveAnswers {
-  const { activeFields, gradeBand } = computeActiveFlow(raw);
+  const { activeFields, gradeBand, primaryReason } = computeActiveFlow(raw);
   const activeSet = new Set(activeFields);
 
   const answers: Record<string, RawAnswerValue> = {};
@@ -77,6 +77,24 @@ export function computeEffectiveAnswers(raw: RawAnswers): EffectiveAnswers {
     } else {
       answers[field] = value;
     }
+  }
+
+  // Phase 4: `primary_discovery_reason` (DISC_007) is only shown/active
+  // when 2+ discovery_reasons are selected (MULTIPLE_DISCOVERY_REASONS) --
+  // with exactly one reason selected, that reason IS the effective
+  // primary reason with no DISC_007 shown at all (branching.ts
+  // derivePrimaryReason's own doc comment). Before this fix, the loop
+  // above left `answers.primary_discovery_reason` entirely absent for
+  // every single-reason profile, silently discarding the one fact the
+  // Phase 4 engine's evidence-multiplier system (src/lib/engine/scoring.ts)
+  // depends on to recognize a family's primary reason at all. This
+  // computed, already-validated value (never a raw, possibly-stale DISC_007
+  // answer whose reason is no longer even selected) is what every
+  // consumer of `answers.primary_discovery_reason` must read.
+  if (primaryReason !== undefined) {
+    answers.primary_discovery_reason = primaryReason;
+  } else {
+    delete answers.primary_discovery_reason;
   }
 
   // Phase 3F: an "Other" sidecar free-text value is effective only
@@ -162,12 +180,14 @@ export function computeEffectiveAnswers(raw: RawAnswers): EffectiveAnswers {
   // --- Phase 3E derived facts (DISCOVERY_CALIBRATION_SPEC_V2.md sections 4/6/8/10/11) ---
   // Each is a conservative, deterministic tier from currently-active
   // evidence only -- UNKNOWN means "not enough active evidence yet,"
-  // never a real tier of need. None of these are a public score, and
-  // none feed a Phase 4 evaluator that does not yet exist.
+  // never a real tier of need. None of these are a public score. The
+  // Phase 4 engine (src/lib/engine) is the one place that reads these
+  // as first-class scoring inputs; see deriveScheduleFlexibilityNeed's
+  // own doc comment for its Phase 4 athlete-identity correction.
 
   const supportStructureNeed = deriveSupportStructureNeed(activeRaw);
-  const scheduleFlexibilityNeed = deriveScheduleFlexibilityNeed(activeRaw, discoveryReasons);
   const athleticScheduleDemand = deriveAthleticScheduleDemand(activeRaw);
+  const scheduleFlexibilityNeed = deriveScheduleFlexibilityNeed(activeRaw, athleticScheduleDemand);
   const familyManagementPreference = deriveFamilyManagementPreference(activeRaw);
   const advancementOpportunities = deriveAdvancementOpportunities(
     advancementInterests,
@@ -220,29 +240,25 @@ function deriveSupportStructureNeed(activeRaw: ActiveRawReader): SupportStructur
 }
 
 /**
- * DISC_013 sets the subjective baseline; a real scheduling constraint
- * can only raise it -- a mild "somewhat important" answer (or no
- * answer yet) next to a genuine weekly conflict is not treated as the
- * family's true need. discovery_reasons ATHLETICS is read directly,
- * not through activeRaw, because it is show_when "ALL" and so
- * already-answered regardless of DISC_013; flexibility_reasons
- * (DISC_014), by contrast, is itself gated behind
- * isFlexibilitySomewhatOrHigher and so can never independently supply
- * this "already exists" signal for a family who rated flexibility
- * NOT_IMPORTANT or hasn't answered DISC_013 at all.
- *
- * Phase 3F.1: TRAVEL and ARTS were retired from DISC_006's new-entry
- * choices (their detail is gathered later instead), so a future
- * submission can no longer supply this signal through discoveryReasons
- * for those two -- FAMILY_TRAVEL was already checked below via
- * flexibility_reasons; ARTS is added to the same list so the signal
- * keeps its new home rather than disappearing. TRAVEL has no
- * flexibility_reasons equivalent of its own beyond FAMILY_TRAVEL,
- * which already covers it.
+ * Phase 4 correction (docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md
+ * section 7, "ATHLETE IDENTITY != SCHOOL-SCHEDULE CONFLICT"): DISC_013
+ * sets the subjective baseline; only a REAL constraint may raise it --
+ * a mild "somewhat important" answer (or no answer yet) next to a
+ * genuine weekly conflict is not treated as the family's true need.
+ * Being an athlete, a stated ATHLETIC_TRAINING preference, or the
+ * bare discovery_reasons ATHLETICS/TRAVEL/ARTS values are deliberately
+ * EXCLUDED from this list -- an athlete whose actual weekly demand is
+ * only LIGHT/MODERATE (deriveAthleticScheduleDemand) must not read as
+ * having a schedule conflict merely from identity. A real constraint
+ * is: an actual reported unavailable time, one of the five concrete
+ * flexibility_reasons below, or athletic_schedule_demand itself
+ * already reaching SUBSTANTIAL/HIGHLY_CONSTRAINED (which is derived
+ * from hours/travel/actual unavailable times, never from athletic
+ * level/prestige -- see deriveAthleticScheduleDemand).
  */
 function deriveScheduleFlexibilityNeed(
   activeRaw: ActiveRawReader,
-  discoveryReasons: string[],
+  athleticScheduleDemand: AthleticScheduleDemand,
 ): ScheduleFlexibilityNeed {
   const importance = activeRaw("flexibility_importance") as string | undefined;
   const unavailable = asStringArray(activeRaw("unavailable_academic_times"));
@@ -251,15 +267,15 @@ function deriveScheduleFlexibilityNeed(
   const hasRealConstraint =
     includesAny(unavailable, ["MORNING", "AFTERNOON", "EVENING", "VARIES"]) ||
     includesAny(flexibilityReasons, [
-      "ATHLETIC_TRAINING",
-      "COMPETITION",
-      "ATHLETIC_TRAVEL",
       "FAMILY_TRAVEL",
       "ARTS",
       "WORK",
       "BUSINESS",
+      "APPOINTMENTS",
+      "FAMILY_RESPONSIBILITIES",
     ]) ||
-    includesAny(discoveryReasons, ["ATHLETICS", "TRAVEL", "ARTS"]);
+    athleticScheduleDemand === "SUBSTANTIAL" ||
+    athleticScheduleDemand === "HIGHLY_CONSTRAINED";
 
   let tier: ScheduleFlexibilityNeed;
   switch (importance) {
@@ -301,7 +317,9 @@ function deriveAthleticScheduleDemand(activeRaw: ActiveRawReader): AthleticSched
   const lightHours = weekly === "UNDER_5" || weekly === "HOURS_5_10";
   const heavyTravel = travel === "SEVERAL_MONTH" || travel === "WEEKLY";
   const moderateTravel = travel === "MONTHLY";
-  const realAcademicConflict = includesAny(unavailable, ["MORNING", "AFTERNOON", "EVENING"]);
+  // Phase 4 correction: VARIES is a real academic-time conflict too --
+  // an unpredictable schedule is not less constraining than a fixed one.
+  const realAcademicConflict = includesAny(unavailable, ["MORNING", "AFTERNOON", "EVENING", "VARIES"]);
 
   if ((heavyHours || heavyTravel) && realAcademicConflict) return "HIGHLY_CONSTRAINED";
   if (heavyHours || heavyTravel) return "SUBSTANTIAL";

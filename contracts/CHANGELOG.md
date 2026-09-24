@@ -197,3 +197,52 @@ Small, owner-approved cleanup patch to Phase 3F. Documented in full at `docs/pat
 ### "Other" required before Continue (new, `src/components/discovery/otherTextGate.ts`)
 
 - New shared `findBlockingOtherTextFields` function, called identically from both `DiscoveryQuestionnaire.tsx` (real profile) and `DiscoveryDemoQuestionnaire.tsx` (demo): blocks stage Continue with an inline error when an active `OTHER` selection's sidecar text is blank or whitespace-only. `QuestionField.tsx`/`OtherTextInput` gained a live (non-debounced) value-getter registration (`registerOtherTextLiveValue`) so Continue always sees the truly current typed text. `validateCompletedProfile`'s existing final Review/Submit REQUIRED check is unchanged and remains the server-authoritative backstop.
+
+## Phase 4 — Deterministic Pathways decision engine (question-bank.json unchanged at 39 questions; rules.json/taxonomy.json/scoring-policy.json/fixtures/golden-profiles.json all bumped)
+
+Owner-authorized: build the deterministic Discovery decision engine only. Full record at `docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md` and `docs/pathways/DECISION_LOG.md` section N. Not merged to main; the final Discovery Report, Report UI, AI, provider matching and Phase 5 were not built.
+
+### question-bank.json
+
+- No question added, removed, or changed. Still 39 questions, version `2.1.0-discovery-ux-simplified`.
+
+### rules.json (1.3.0-phase3f-ux-simplification -> 2.0.0-phase4-engine, 77 rules, 12 RETIRED)
+
+- `normalized_fact_fields` gained `support_structure_need`, `schedule_flexibility_need`, `athletic_schedule_demand`, `family_management_preference`, `advancement_opportunities`.
+- New rules: `SCHED_HIGH_001`/`SCHED_VERYHIGH_001` (schedule_flexibility_need-driven, replacing `FLEX_001`), `DELIVERY_001B` (ONLINE_TEACHER_SUPPORTED split out of `DELIVERY_001`), `SUPPORT_HIGH_001`/`SUPPORT_MODERATE_001`/`SUPPORT_LOW_SELFPACED_001`/`SUPPORT_LOW_SELFPACED_HOMESCHOOL_001`/`SUPPORT_HIGH_ONLINE_TRADEOFF` (support_structure_need-driven), `ACAD_ORG_001`/`ACAD_ENGAGE_001`/`ACAD_SCIENCE_001`/`ACAD_ATTENDANCE_001`/`ACAD_COMMUNICATION_001`, `OPP_002B` (flexibility_reasons ARTS trigger, `OPP_002` kept unchanged for legacy explainability), `COST_ALIGNMENT_REVIEW` (FEASIBILITY, empty score_effects).
+- Retired: `FLEX_001`, `PAR_001` (blanket PROGRAM_MANAGES reward -- no replacement), `IND_002`, `CONF_001`, `ACAD_007`, `ATH_002`, `CURR_001`, `CURR_002` (B01 continuity is now engine-native, `src/lib/engine/candidates.ts`), `LEARN_001`.
+- `LEARN_002` kept evaluable but its B07 target removed (now scores only B03/B06).
+- `PAR_002`/`HOME_002` conditions moved from raw `desired_parent_involvement` to the `family_management_preference` derived fact (behaviorally identical 1:1 map); `PAR_002` also now activates `REV_PROGRAM_MANAGEMENT`.
+- `ELEM_001`'s `REV_ADULT_SUPPORT` `review_model_scope` widened to include B07.
+- `FLEX_002`/`FLEX_003`/`IND_001` gained a `review_model_scope` they were missing (each activated a candidate-scoped review signal without one, which the Phase 4 engine now treats as a global signal unless declared). `FLEX_003` no longer activates `REV_STATE_AVAILABILITY` (engine-native only now, see taxonomy.json below).
+
+### taxonomy.json (1.2.0-phase3e-discovery-calibrated -> 2.0.0-phase4-engine)
+
+- New `review_signals`: `REV_PROGRAM_MANAGEMENT`, `REV_ATTENDANCE_CONTEXT`, `REV_COMMUNICATION_CONTEXT` (all global, never candidate-scoped).
+- `REV_COST_ALIGNMENT`'s note updated: now rule-triggered (`COST_ALIGNMENT_REVIEW`), not postprocess-only.
+
+### scoring-policy.json (1.1.0-phase3e-discovery-calibrated -> 2.0.0-phase4-engine)
+
+- Extended with structured, machine-readable fields alongside the existing human-readable prose: `baseline`, `score_bounds`, `group_bounds`, `multipliers`, `display_gate` (object), `diversity` (object), `max_displayed_cards`, `tie_break`, `content_status_values`, `desired_change_groups`, `legacy_safe_mappings_note`, `global_review_signals_never_scope_a_candidate`, `state_availability_policy`. `src/lib/contracts/schemas.ts`'s `scoringPolicySchema` updated to match.
+
+### fixtures/golden-profiles.json (1.1.0-phase0-corrected -> 2.0.0-owner-calibrated)
+
+- Prior fixture (FX01-FX17 + metamorphic_tests) preserved unmodified at `fixtures/golden-profiles.v1-phase0-corrected.json`.
+- New canonical fixture: 15 owner-calibrated acceptance personas P01-P15, transcribed verbatim from the owner's Phase 4 instruction.
+
+### src/lib/discovery/normalization.ts
+
+- `computeEffectiveAnswers` now writes the resolved `primaryReason` (from `computeActiveFlow`) into `effective.answers.primary_discovery_reason`, fixing a pre-existing gap where a single-selected discovery reason (no DISC_007 shown) never populated this field at all.
+- `deriveScheduleFlexibilityNeed` reordered to take the already-derived `athleticScheduleDemand`; only a real constraint (not bare athlete identity) elevates the tier. `deriveAthleticScheduleDemand`'s real-academic-conflict check gained `VARIES`.
+
+### src/lib/contracts/validate.ts
+
+- New checks: FEASIBILITY rules must have empty `score_effects`; `cost_preference`/`desired_start_timeline`/`parent_context`/`primary_sport`/`athletic_level`/every `*_other_text` field can never appear in a rule condition alongside a non-empty `score_effects`.
+
+### src/lib/engine/ (new module)
+
+- `types.ts`, `conditions.ts`, `rules.ts`, `scoring.ts`, `candidates.ts`, `considerations.ts`, `evaluate.ts`, `hash.ts`, `index.ts`. `evaluateDiscoveryProfile`/`createEngineRun`. No database dependency; no dynamic eval; B10 excluded at the candidate-universe level.
+
+### tests/
+
+- `tests/engine-golden.test.ts` (15 personas x 10 assertions each), `tests/engine-metamorphic.test.ts` (M01-M11), `tests/contracts.test.ts` (updated counts + 3 new negative-control tests), `tests/discovery-calibration.test.ts` (updated for DEC-N2).

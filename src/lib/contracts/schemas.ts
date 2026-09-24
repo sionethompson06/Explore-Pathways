@@ -201,24 +201,55 @@ export type RuleCondition = z.infer<typeof ruleConditionSchema>;
 // scoring-policy.json
 // ---------------------------------------------------------------------------
 
+const scoringPolicyDisplayGateSchema = z.object({
+  min_internal_score_exclusive: z.number(),
+  min_positive_groups: z.number().int().nonnegative(),
+  require_link_to_primary_or_priority: z.boolean(),
+  b01_stay_current_exception: z.boolean(),
+});
+
+const scoringPolicyDiversitySchema = z.object({
+  max_displayed_cards: z.number().int().positive(),
+  same_family_multi_display_families: z.array(z.string()),
+  description: z.string(),
+});
+
 export const scoringPolicySchema = z.object({
   version: z.string().min(1),
+  status: z.string().min(1),
+  corrections_applied: z.string().optional(),
   baseline: z.number(),
+  score_bounds: z.object({ min: z.number(), max: z.number() }),
+  group_bounds: z.object({ min: z.number(), max: z.number() }),
+  multipliers: z.object({
+    primary_reason: z.number(),
+    family_priority: z.number(),
+    desired_change: z.number(),
+    default: z.number(),
+  }),
   primary_multiplier: z.number(),
   top_priority_multiplier: z.number(),
   secondary_multiplier: z.number(),
   default_multiplier: z.number(),
   multiplier_policy: z.string(),
   group_aggregation: z.string(),
-  display_gate: z.string(),
+  display_gate: scoringPolicyDisplayGateSchema,
+  display_gate_description: z.string(),
+  max_displayed_cards: z.number().int().positive(),
+  tie_break: z.string().min(1),
   public_labels: z.array(z.string()).min(1),
+  content_status_values: z.array(z.string()).min(1),
   sorting: z.string(),
-  diversity: z.string(),
+  diversity: scoringPolicyDiversitySchema,
   groups: z.array(z.string()).min(1),
   primary_reason_groups: z.record(z.string(), z.array(z.string())),
   family_priority_groups: z.record(z.string(), z.array(z.string())),
+  desired_change_groups: z.record(z.string(), z.array(z.string())),
+  legacy_safe_mappings_note: z.string(),
   unmapped_priority_behavior: z.string(),
   material_review_mapping: z.record(z.string(), z.array(z.string())),
+  global_review_signals_never_scope_a_candidate: z.array(z.string()),
+  state_availability_policy: z.string(),
   postprocess_rules: z.array(z.string()),
 });
 
