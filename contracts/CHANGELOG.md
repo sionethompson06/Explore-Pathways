@@ -274,3 +274,43 @@ Owner-authorized narrow correction resolving DEC-N7. Full record at `docs/pathwa
 ### tests/engine-directional-gate.test.ts (new)
 
 - 12 regression tests (sections A-E of the Phase 4.1 instruction) covering the Directional Evidence Gate and the FLEX_002 correction.
+
+## Phase 5 — Deterministic personalized Discovery Report + report UI
+
+Owner-authorized. Full record at `docs/pathways/DECISION_LOG.md` section P and `docs/pathways/PHASE5_DISCOVERY_REPORT_SPEC_V1.md`. Builds the report layer strictly on top of the unmodified Phase 4.1 engine; no Phase 4 contract (`question-bank.json`/`rules.json`/`scoring-policy.json`/`taxonomy.json`) or `fixtures/golden-profiles.json` changed. Not merged to main; no AI, no provider matching, no enrollment/advisor/payment workflow.
+
+### report-contract.json (`1.0.0-candidate` -> `2.0.0-phase5-report`)
+
+- Version bumped and a `corrections_applied` note added describing that the `public_dto` shape is now implemented exactly by `src/lib/report/types.ts`'s `DiscoveryReportDTO`, produced by `src/lib/report/assemble.ts`. The shape/forbidden-field contract itself is unchanged; wording/templates now live in the new `report-content.json`.
+
+### report-content.json (new, `1.0.0-phase5-report`)
+
+- Archetype copy for the 8 documented report archetypes (`CURRENT_PLUS_GROWTH`, `FLEXIBLE_WITH_STRUCTURE`, `HIGH_DEMAND_SCHEDULE`, `ADVISOR_FIRST_PLACEMENT_REVIEW`, `RECOVERY_PLUS_ADVANCEMENT`, `FIT_THEN_FEASIBILITY`, `LIMITED_EXPLORATION`, `GENERIC_PERSONALIZED`), per-model candidate-card copy (archetype-specific keys with a `${modelId}__GENERIC` fallback for every ACTIVE base model B01-B09), support/opportunity/overlay tile copy for every ACTIVE taxonomy id, approved public translations for every ACTIVE review signal, pathway/CTA templates, the one authorized `PROFILE_CONTEXT:cost_preference` comparison question, and a `forbidden_claims` list.
+
+### fixtures/golden-reports.json (new, `1.0.0-owner-calibrated`)
+
+- Seven owner-calibrated Golden Report fixtures (GR01/GR03/GR06/GR09/GR12/GR14/GR15), each referencing a `personaId` into `fixtures/golden-profiles.json` -- never duplicating the raw Discovery profile.
+
+### src/lib/contracts/schemas.ts, loader.ts, validate.ts, index.ts
+
+- New `reportContentSchema`/`loadReportContent`/`ReportContent` type. New `validateReportContent` check folded into `validateContracts`'s single result (see DEC-P3 for the full list of guarantees it enforces).
+
+### src/lib/report/* (new)
+
+- `types.ts`, `archetypes.ts`, `snapshot.ts`, `insights.ts`, `directions.ts`, `support-map.ts`, `comparisons.ts`, `pathway.ts`, `cta.ts`, `provenance.ts`, `assemble.ts`, `index.ts`. `assembleDiscoveryReport(input, contracts, createdAt)` is the pure, deterministic entry point every route calls; it never rescores, reranks, replaces, or invents a candidate.
+
+### src/server/discovery-draft.ts
+
+- New read-only `loadLatestCompletedRevision(db, sessionId)`, alongside the existing `hasCompletedRevision`/`reopenForEditing`.
+
+### app/discover/report/page.tsx (rewritten) and app/discover/report/demo/page.tsx (new)
+
+- Production route now renders the real Phase 5 report (previously a development-preview placeholder). New DB-free synthetic demo route at `/discover/report/demo?fixture=GR0x` for visual QA without DEC-G9's DB gap.
+
+### src/components/report/* (new)
+
+- `ReportHero`, `PriorityChips`, `InsightSection`, `DirectionCard`, `DirectionGrid`, `SupportOpportunityMap`, `ComparisonGuide`, `PathwayRoadmap`, `ConversionBand`, `MobileReportCta`, `ReportView`.
+
+### tests/report-golden.test.ts, tests/report-structural.test.ts, tests/report-invariants.test.ts, tests/report-forbidden-copy.test.ts (new)
+
+- 94 + 150 + 13 + 15 = 272 new tests. Full Vitest suite: 421 pre-existing + 272 new = 693 passed.

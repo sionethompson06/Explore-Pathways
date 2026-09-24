@@ -402,6 +402,46 @@ export async function reopenForEditing(db: Database, sessionId: string): Promise
   return true;
 }
 
+export interface LatestCompletedRevision {
+  revisionId: string;
+  rawAnswers: RawAnswers;
+  createdAt: Date;
+}
+
+/**
+ * Read-only load of this session's latest completed ProfileRevision
+ * (Phase 5, PHASE5_DISCOVERY_REPORT_SPEC_V1.md section 36). Unlike
+ * reopenForEditing, this never mutates the draft -- it exists purely
+ * so the report route can recompute effective answers and run the
+ * Phase 4 engine on request, without a second competing data-access
+ * path.
+ */
+export async function loadLatestCompletedRevision(
+  db: Database,
+  sessionId: string,
+): Promise<LatestCompletedRevision | null> {
+  const [row] = await db
+    .select()
+    .from(discoverySession)
+    .where(eq(discoverySession.id, sessionId))
+    .limit(1);
+  if (!row?.studentPathwayRecordId) return null;
+
+  const [latest] = await db
+    .select()
+    .from(profileRevision)
+    .where(eq(profileRevision.studentPathwayRecordId, row.studentPathwayRecordId))
+    .orderBy(desc(profileRevision.revisionNumber))
+    .limit(1);
+  if (!latest) return null;
+
+  return {
+    revisionId: latest.id,
+    rawAnswers: latest.rawAnswers as RawAnswers,
+    createdAt: latest.createdAt,
+  };
+}
+
 /** Whether this session already owns at least one completed profile revision -- used by /discover/report to decide the honest completion state. */
 export async function hasCompletedRevision(db: Database, sessionId: string): Promise<boolean> {
   const [row] = await db

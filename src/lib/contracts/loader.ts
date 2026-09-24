@@ -7,6 +7,7 @@ import {
   rulesFileSchema,
   scoringPolicySchema,
   reportContractSchema,
+  reportContentSchema,
   legacyAliasesSchema,
   contentLibrarySchema,
   type QuestionBank,
@@ -14,6 +15,7 @@ import {
   type RulesFile,
   type ScoringPolicy,
   type ReportContract,
+  type ReportContent,
   type LegacyAliases,
   type ContentLibrary,
 } from "./schemas";
@@ -105,9 +107,14 @@ export function loadContentLibrary(): ContentLibrary {
   );
 }
 
+export function loadReportContent(): ReportContent {
+  return loadJson(CONTRACTS_DIR, "report-content.json", reportContentSchema);
+}
+
 /** Fixture file paths are exposed, not auto-loaded, since only tests consume them. */
 export const fixturePaths = {
   goldenProfiles: join(FIXTURES_DIR, "golden-profiles.json"),
+  goldenReports: join(FIXTURES_DIR, "golden-reports.json"),
   qaMatrix: join(FIXTURES_DIR, "QA_MATRIX.md"),
 };
 
@@ -119,6 +126,7 @@ export interface LoadedContracts {
   reportContract: ReportContract;
   legacyAliases: LegacyAliases;
   contentLibrary: ContentLibrary;
+  reportContent: ReportContent;
 }
 
 /**
@@ -136,5 +144,6 @@ export function loadContracts(): LoadedContracts {
     reportContract: loadReportContract(),
     legacyAliases: loadLegacyAliases(),
     contentLibrary: loadContentLibrary(),
+    reportContent: loadReportContent(),
   };
 }

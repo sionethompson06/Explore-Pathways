@@ -1,0 +1,27 @@
+.wrap {
+  max-width: var(--max-prose-width);
+}
+
+.kicker {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+  margin: 0 0 var(--space-2);
+}
+
+.headline {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-snug);
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+}
+
+.body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-muted);
+  margin: 0;
+}

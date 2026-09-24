@@ -3,38 +3,50 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Section } from "@/components/marketing/Section";
 import { Card } from "@/components/marketing/Card";
-import { Badge } from "@/components/marketing/Badge";
 import { ButtonLink } from "@/components/marketing/Button";
 import buttonStyles from "@/components/marketing/Button.module.css";
+import { ReportView } from "@/components/report/ReportView";
 import { reopenForEditingAction } from "../profile/actions";
 
 export const metadata: Metadata = {
-  title: "Discovery Complete",
-  description: "Your Discovery profile completion status.",
+  title: "Your Discovery Report",
+  description: "Your personalized Discovery Report.",
   robots: { index: false, follow: false },
 };
 
 /**
- * Phase 3's honest completion boundary (instruction §38): confirms
- * the profile was completed and that this session owns it -- nothing
- * more. No recommendation, ranking, score, or provider is generated
- * or implied here; that is Phase 4's report assembler, not built yet.
- * Private/no-store by construction: this page reads cookies(), so
- * Next.js never statically caches or serves it from a shared cache.
+ * Phase 5's production report route (PHASE5_DISCOVERY_REPORT_SPEC_V1.md
+ * section 36): authorized/guest session -> load the completed profile
+ * revision -> recompute effective answers -> run the Phase 4 engine ->
+ * assemble the Phase 5 ReportDTO -> render it. Private/no-store by
+ * construction (reads cookies()). A completed Discovery user sees the
+ * report immediately -- no email wall, no account creation, no payment
+ * (section 38).
  *
- * The database/session modules are imported dynamically, inside this
- * function, rather than at module scope -- see app/discover/actions.ts's
- * doc comment for why a static top-level import would make this crash
- * outright (bypassing app/discover/error.tsx) whenever the database
- * is misconfigured or unreachable.
+ * The database/session/contracts/engine/report modules are imported
+ * dynamically, inside this function, for the same reason
+ * app/discover/actions.ts documents: a static top-level import would
+ * make this crash outright (bypassing app/discover/error.tsx) whenever
+ * the database is misconfigured or unreachable.
  */
 export default async function DiscoveryReportPage() {
-  const [{ GUEST_SESSION_COOKIE_NAME }, { loadDraftByToken, hasCompletedRevision }, { db }] =
-    await Promise.all([
-      import("@/server/session"),
-      import("@/server/discovery-draft"),
-      import("@/db/client"),
-    ]);
+  const [
+    { GUEST_SESSION_COOKIE_NAME },
+    { loadDraftByToken, loadLatestCompletedRevision },
+    { db },
+    { validateCompletedProfile },
+    { loadContracts },
+    { evaluateDiscoveryProfile },
+    { assembleDiscoveryReport },
+  ] = await Promise.all([
+    import("@/server/session"),
+    import("@/server/discovery-draft"),
+    import("@/db/client"),
+    import("@/lib/discovery/validation"),
+    import("@/lib/contracts/loader"),
+    import("@/lib/engine/evaluate"),
+    import("@/lib/report/assemble"),
+  ]);
 
   const cookieStore = await cookies();
   const token = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
@@ -47,9 +59,9 @@ export default async function DiscoveryReportPage() {
     redirect("/discover");
   }
 
-  const completed = await hasCompletedRevision(db, draft.sessionId);
+  const revision = await loadLatestCompletedRevision(db, draft.sessionId);
 
-  if (!completed) {
+  if (!revision) {
     return (
       <Section tone="default" ariaLabelledBy="report-incomplete-heading" narrow>
         <h1 id="report-incomplete-heading">Your Discovery Profile Isn&apos;t Finished Yet</h1>
@@ -68,31 +80,51 @@ export default async function DiscoveryReportPage() {
     );
   }
 
-  return (
-    <Section tone="default" ariaLabelledBy="report-complete-heading" narrow>
-      <h1 id="report-complete-heading">Your Discovery Profile Is Complete</h1>
-      <Card>
-        <div style={{ marginBottom: "var(--space-4)" }}>
-          <Badge>Development preview</Badge>
-        </div>
-        <p>
-          Your answers have been organized into your Discovery profile. The pathway
-          recommendation and report experience is the next build stage -- it is not enabled in
-          this development version yet.
-        </p>
-        <p style={{ marginBottom: 0 }}>
-          Nothing here ranks schools, scores your student, or names a provider. When the report
-          experience is ready, it will build directly on the profile you just completed.
-        </p>
-      </Card>
+  const validation = validateCompletedProfile(revision.rawAnswers);
+  if (!validation.ok || !validation.effective) {
+    // A stored completed revision should always still validate under the
+    // current contracts; if it somehow doesn't (contract/version drift),
+    // fail loudly rather than fabricate a generic recommendation (section 67).
+    throw new Error("Stored completed Discovery profile no longer validates against the current contracts.");
+  }
 
-      <div style={{ marginTop: "var(--space-5)" }}>
-        <form action={reopenForEditingAction}>
-          <button type="submit" className={`${buttonStyles.button} ${buttonStyles.secondary}`}>
-            Review or Edit Your Answers
-          </button>
-        </form>
-      </div>
-    </Section>
+  const contracts = loadContracts();
+  const evaluation = evaluateDiscoveryProfile(validation.effective, contracts);
+
+  const raw = revision.rawAnswers as Record<string, unknown>;
+  const report = assembleDiscoveryReport(
+    {
+      profile: {
+        profileRevisionId: revision.revisionId,
+        studentDisplayName: typeof raw["student_display_name"] === "string" ? raw["student_display_name"] : undefined,
+        currentGrade: typeof raw["current_grade"] === "string" ? raw["current_grade"] : undefined,
+        currentEducationModel:
+          typeof raw["current_education_model"] === "string" ? raw["current_education_model"] : undefined,
+        selectedFamilyPriorities: Array.isArray(raw["family_priorities"])
+          ? (raw["family_priorities"] as string[])
+          : [],
+        primaryDiscoveryReason:
+          typeof raw["primary_discovery_reason"] === "string" ? raw["primary_discovery_reason"] : undefined,
+        desiredPrimaryChange: typeof raw["desired_primary_change"] === "string" ? raw["desired_primary_change"] : undefined,
+        costPreference: typeof raw["cost_preference"] === "string" ? raw["cost_preference"] : undefined,
+        gradeBand: evaluation.derivedFacts.grade_band,
+      },
+      engine: evaluation,
+      // No live/verified consultation service is configured in this build --
+      // never claim LIVE_VERIFIED or REQUEST_ONLY without one actually existing.
+      operational: { consultationState: "UNCONFIGURED", saveAvailable: false },
+    },
+    contracts,
+    revision.createdAt.toISOString(),
   );
+
+  const editAnswersOverride = (
+    <form action={reopenForEditingAction}>
+      <button type="submit" className={`${buttonStyles.button} ${buttonStyles.secondary}`}>
+        {report.actions.editAnswers.label}
+      </button>
+    </form>
+  );
+
+  return <ReportView report={report} editAnswersOverride={editAnswersOverride} />;
 }

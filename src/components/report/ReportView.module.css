@@ -1,0 +1,39 @@
+.page {
+  padding: var(--space-6) 0 var(--space-9);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.topActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+.editLink {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-emphasis);
+  text-decoration: none;
+}
+
+.demoLabel {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-bottom: calc(var(--space-9) + 64px);
+  }
+}

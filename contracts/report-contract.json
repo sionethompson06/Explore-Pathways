@@ -1,5 +1,6 @@
 {
-  "version": "1.0.0-candidate",
+  "version": "2.0.0-phase5-report",
+  "corrections_applied": "Phase 5 (docs/pathways/PHASE5_DISCOVERY_REPORT_SPEC_V1.md): the public_dto shape below is now implemented exactly by src/lib/report/types.ts's DiscoveryReportDTO and produced by src/lib/report/assemble.ts. contracts/report-content.json (new, 1.0.0-phase5-report) holds the actual wording/templates; this file stays the narrow shape/forbidden-field contract. No Phase 4 field listed under internal_record changed.",
   "public_dto": {
     "report_id": "opaque ID, requires an authorized session",
     "profile_revision_id": "opaque ID, nonauthorizing",

@@ -7,6 +7,7 @@ export {
   loadReportContract,
   loadLegacyAliases,
   loadContentLibrary,
+  loadReportContent,
   fixturePaths,
   type LoadedContracts,
 } from "./loader";
@@ -23,6 +24,7 @@ export type {
   RuleCondition,
   ScoringPolicy,
   ReportContract,
+  ReportContent,
   LegacyAliases,
   ContentLibrary,
 } from "./schemas";

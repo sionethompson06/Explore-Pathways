@@ -1,0 +1,100 @@
+.full {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: var(--space-8) var(--space-6);
+  background: linear-gradient(160deg, var(--color-navy-900), var(--color-navy-700));
+  color: var(--color-text-inverse);
+  text-align: center;
+}
+
+.headline {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-tight);
+  margin: 0 auto var(--space-4);
+  max-width: 40rem;
+  color: var(--color-text-inverse);
+}
+
+.body {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-inverse-muted);
+  margin: 0 auto var(--space-6);
+  max-width: 40rem;
+}
+
+.values {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin: 0 0 var(--space-7);
+  text-align: left;
+}
+
+.valueTitle {
+  font-weight: 700;
+  margin: 0 0 var(--space-1);
+}
+
+.valueBody {
+  margin: 0;
+  color: var(--color-text-inverse-muted);
+  font-size: var(--font-size-sm);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-white);
+  font-weight: 700;
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-tint);
+}
+
+.inlineHeadline {
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-navy-900);
+}
+
+.inlineBody {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.inlineCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--color-accent-strong);
+  color: var(--color-white);
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .values {
+    grid-template-columns: repeat(2, 1fr);
+    text-align: center;
+  }
+}

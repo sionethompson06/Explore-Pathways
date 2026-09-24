@@ -271,6 +271,48 @@ export const reportContractSchema = z.object({
 export type ReportContract = z.infer<typeof reportContractSchema>;
 
 // ---------------------------------------------------------------------------
+// report-content.json (Phase 5)
+// ---------------------------------------------------------------------------
+
+export const reportContentSchema = z.object({
+  version: z.string().min(1),
+  status: z.string().min(1),
+  corrections_applied: z.string().optional(),
+  archetypes: z.record(z.string(), z.record(z.string(), z.unknown())),
+  candidate_cards: z.record(
+    z.string(),
+    z.object({
+      title: z.string().min(1),
+      description: z.string().min(1),
+      why: z.array(z.string()),
+      whatToLookFor: z.array(z.string()),
+    }),
+  ),
+  support_tiles: z.record(z.string(), z.object({ title: z.string().min(1), description: z.string().min(1) })),
+  opportunity_tiles: z.record(z.string(), z.object({ title: z.string().min(1), description: z.string().min(1) })),
+  overlay_tiles: z.record(z.string(), z.object({ title: z.string().min(1), description: z.string().min(1) })),
+  review_questions: z.record(
+    z.string(),
+    z.object({ question: z.string().min(1), explanation: z.string().min(1), priority: z.number().int() }),
+  ),
+  pathway_intro_generic: z.string(),
+  subordinate_statement: z.string(),
+  cta_templates: z.record(z.string(), z.unknown()),
+  conversion_value_concepts: z.array(z.object({ title: z.string().min(1), body: z.string().min(1) })),
+  inline_conversion_band: z.object({ headline: z.string().min(1), body: z.string().min(1) }),
+  scope_statement: z.string().min(1),
+  feasibility_context_questions: z.record(
+    z.string(),
+    z.object({ question: z.string().min(1), explanation: z.string().min(1), priority: z.number().int() }),
+  ),
+  priority_chip_labels: z.record(z.string(), z.string()),
+  feasibility_chip_labels: z.record(z.string(), z.string()),
+  forbidden_claims: z.array(z.string()),
+});
+
+export type ReportContent = z.infer<typeof reportContentSchema>;
+
+// ---------------------------------------------------------------------------
 // legacy-aliases.json
 // ---------------------------------------------------------------------------
 

@@ -307,6 +307,120 @@ export function validateContracts(contracts: LoadedContracts): ValidationResult 
     }
   }
 
+  const reportContentIssues = validateReportContent(contracts);
+  errors.push(...reportContentIssues.errors);
+  warnings.push(...reportContentIssues.warnings);
+
+  return { ok: errors.length === 0, errors, warnings };
+}
+
+/**
+ * Phase 5 report-content validation (PHASE5_DISCOVERY_REPORT_SPEC_V1.md
+ * section 33): every ACTIVE base model/support/opportunity/review
+ * signal Phase 4 can actually activate must have approved public
+ * report copy (or, for a RESERVED/RETIRED/EXCLUDED id, must never
+ * have any), every archetype must be complete, and no forbidden claim
+ * string may appear anywhere in the approved content. This never
+ * evaluates a rule or re-derives an educational decision -- purely a
+ * referential-integrity and copy-safety check over contracts/report-content.json.
+ */
+function validateReportContent(contracts: LoadedContracts): ValidationResult {
+  const errors: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
+  const { taxonomy, reportContent } = contracts;
+
+  const REQUIRED_ARCHETYPES = [
+    "CURRENT_PLUS_GROWTH",
+    "FLEXIBLE_WITH_STRUCTURE",
+    "HIGH_DEMAND_SCHEDULE",
+    "ADVISOR_FIRST_PLACEMENT_REVIEW",
+    "RECOVERY_PLUS_ADVANCEMENT",
+    "FIT_THEN_FEASIBILITY",
+    "LIMITED_EXPLORATION",
+    "GENERIC_PERSONALIZED",
+  ];
+  for (const archetype of REQUIRED_ARCHETYPES) {
+    const entry = reportContent.archetypes[archetype] as Record<string, unknown> | undefined;
+    if (!entry) {
+      errors.push({ code: "REPORT_ARCHETYPE_MISSING", message: `Report content is missing archetype "${archetype}".` });
+      continue;
+    }
+    for (const requiredField of ["r01_headline", "r02_headline", "r06_stages", "r07_headline", "cta_intent_label"]) {
+      if (!(requiredField in entry)) {
+        errors.push({
+          code: "REPORT_ARCHETYPE_INCOMPLETE",
+          message: `Archetype "${archetype}" is missing required field "${requiredField}".`,
+        });
+      }
+    }
+  }
+
+  const activeBaseModelIds = taxonomy.base_models.filter((m) => m.reachability_status === "ACTIVE").map((m) => m.id);
+  for (const modelId of activeBaseModelIds) {
+    if (!(`${modelId}__GENERIC` in reportContent.candidate_cards)) {
+      errors.push({
+        code: "REPORT_CANDIDATE_CARD_MISSING",
+        message: `Base model ${modelId} is ACTIVE but report-content.json has no "${modelId}__GENERIC" candidate card.`,
+      });
+    }
+  }
+  for (const key of Object.keys(reportContent.candidate_cards)) {
+    const modelId = key.split("__")[0]!;
+    if (modelId === "B10") {
+      errors.push({ code: "REPORT_B10_PUBLIC_CONTENT", message: `report-content.json candidate_cards must never contain B10 content (key "${key}").` });
+    }
+    const model = taxonomy.base_models.find((m) => m.id === modelId);
+    if (!model) {
+      errors.push({ code: "REPORT_UNKNOWN_CANDIDATE_CARD_MODEL", message: `Candidate card "${key}" references unknown base model "${modelId}".` });
+    }
+  }
+
+  const activeSupportIds = new Set(taxonomy.supports.filter((s) => s.reachability_status === "ACTIVE").map((s) => s.id));
+  for (const supportId of activeSupportIds) {
+    if (!(supportId in reportContent.support_tiles)) {
+      errors.push({ code: "REPORT_SUPPORT_TILE_MISSING", message: `Support ${supportId} is ACTIVE but report-content.json has no support tile for it.` });
+    }
+  }
+
+  const activeOpportunityIds = new Set(
+    taxonomy.opportunities.filter((o) => o.reachability_status === "ACTIVE").map((o) => o.id),
+  );
+  const nonPublicOpportunityIds = new Set(
+    taxonomy.opportunities.filter((o) => o.reachability_status !== "ACTIVE").map((o) => o.id),
+  );
+  for (const opportunityId of activeOpportunityIds) {
+    if (!(opportunityId in reportContent.opportunity_tiles)) {
+      errors.push({ code: "REPORT_OPPORTUNITY_TILE_MISSING", message: `Opportunity ${opportunityId} is ACTIVE but report-content.json has no opportunity tile for it.` });
+    }
+  }
+  for (const opportunityId of Object.keys(reportContent.opportunity_tiles)) {
+    if (nonPublicOpportunityIds.has(opportunityId)) {
+      errors.push({
+        code: "REPORT_RESERVED_OPPORTUNITY_PUBLIC",
+        message: `Opportunity ${opportunityId} is not ACTIVE (RESERVED/RETIRED) and must never have public report-content tile.`,
+      });
+    }
+  }
+
+  const activeReviewIds = taxonomy.review_signals.filter((r) => r.reachability_status === "ACTIVE").map((r) => r.id);
+  for (const reviewId of activeReviewIds) {
+    if (!(reviewId in reportContent.review_questions)) {
+      errors.push({ code: "REPORT_REVIEW_QUESTION_MISSING", message: `Review signal ${reviewId} is ACTIVE but report-content.json has no approved public translation for it.` });
+    }
+  }
+
+  // No forbidden claim string may appear anywhere in the approved copy.
+  const haystack = JSON.stringify(reportContent).toLowerCase();
+  for (const claim of reportContent.forbidden_claims) {
+    // The forbidden_claims array itself legitimately contains these strings --
+    // check occurrence count exceeds the one expected self-reference.
+    const needle = claim.toLowerCase();
+    const occurrences = haystack.split(needle).length - 1;
+    if (occurrences > 1) {
+      errors.push({ code: "REPORT_FORBIDDEN_CLAIM_PRESENT", message: `Forbidden claim "${claim}" appears in approved report content outside of the forbidden_claims list itself.` });
+    }
+  }
+
   return { ok: errors.length === 0, errors, warnings };
 }
 
