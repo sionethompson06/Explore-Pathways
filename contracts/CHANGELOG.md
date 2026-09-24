@@ -128,3 +128,42 @@ Deterministic, conservative, never a public score and never Phase 4 output: `sup
 ### fixtures/golden-profiles.json, report-contract.json, content-library.json
 
 **Unchanged.** `golden-profiles.json` remains dormant/unexecuted by any current code (confirmed by inspection: only exposed as a path constant in `loader.ts`); rewriting it was deliberately out of scope for a phase that does not implement the engine that would consume it.
+
+## Phase 3F — Discovery UX simplification (question-bank.json 2.0.0-discovery-calibrated -> 2.1.0-discovery-ux-simplified)
+
+Owner-approved manual-review refinement of the Phase 3E calibrated build, documented in full at `docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md` and `docs/pathways/DECISION_LOG.md` section L. Still not Phase 4.
+
+### question-bank.json (still 39 questions -- no question ID added, removed, or renamed)
+
+- Reworded DISC_008/009/010/011/012/013/024/033/E03 to shorter wording (see the UX doc's table); removed the explanatory helper sentences on DISC_010/026/E03 (DISC_012 keeps its "Choose up to three." helper, still needed to communicate the limit).
+- DISC_031: fixed card order (STAY_CURRENT/SEEKING_CHANGE/OPEN_TO_CHANGE/UNKNOWN) and removed all three per-option helper texts.
+- Added a new optional schema field, `other_text_field` (`src/lib/contracts/schemas.ts`), declared directly on a parent question rather than as a 40th+ canonical question. Set on `discovery_reasons`, `reported_support_needs`, `flexibility_reasons`, `advancement_interests`, `family_priorities`.
+- Reduced grade-tiered/flat option lists on `family_priorities`, `reported_support_needs`, `flexibility_reasons`, `advancement_interests`, `desired_primary_change` (before -> after counts in the UX doc), each retiring or consolidating specific legacy values -- see legacy-aliases.json below.
+- Added `max_selections: 3` to `reported_support_needs`.
+- Added new canonical values: `ORGANIZATION_STUDY_HABITS`, `ENGAGEMENT_CONFIDENCE` (reported_support_needs); `HONORS_AP`, `CAREER_CTE_CREDENTIALS` (advancement_interests); `OTHER` added to `reported_support_needs`, `advancement_interests`, `family_priorities`, `desired_primary_change` (the last two as a plain card with no inline text).
+- Reordered `preferred_learning_environment` (DISC_012) to precede `learning_support_pattern` (DISC_011) in `stages.ts`'s LEARNING field list and `branching.ts`'s `EVALUATION_ORDER` -- both remain `show_when: "ALL"`, so this is a pure reordering. See the UX doc section 4 for the full branch-decision rationale (DISC_011 stays broadly active, not a DISC_012-gated follow-up).
+
+### legacy-aliases.json (new aliases and removals)
+
+- `question_value_aliases.advancement_interests`: added `ADVANCED_MATH`/`ADVANCED_SCIENCE`/`ADVANCED_ELA` -> `CHALLENGING_COURSEWORK`.
+- `question_value_aliases.reported_support_needs` (new section): `ROUTINES`/`ORGANIZATION`/`TIME_MANAGEMENT`/`TASK_COMPLETION`/`STUDY_SKILLS` -> `ORGANIZATION_STUDY_HABITS`; `ENGAGEMENT`/`CONFIDENCE` -> `ENGAGEMENT_CONFIDENCE`.
+- `question_value_aliases.learning_support_pattern` (new section): `INDEPENDENT_WORK_DIFFICULT` -> `CLOSE_ADULT_SUPPORT`.
+- `question_value_aliases.flexibility_reasons` (new section): `COMPETITION`/`ATHLETIC_TRAVEL` -> `ATHLETIC_TRAINING`; `BUSINESS` -> `WORK`.
+- `question_value_removals.family_priorities`: added `ATHLETIC_FLEXIBILITY`, `LOCATION_FLEXIBILITY`, `ADVANCED_COURSES`, `ACCREDITATION`, `DIPLOMA` (alongside the existing `ACADEMIC_QUALITY`) -- none aliased to a survivor, per the instruction's "do not introduce a combined value unless necessary."
+- `PHONICS` (reported_support_needs) and `FAMILY_TIME` (flexibility_reasons) are retired from new-entry use via `grade_band_allowed_values` only -- deliberately **not** added to `question_value_removals` or `question_value_aliases`, since historical answers carry their own still-valid effective meaning that no survivor value safely represents.
+
+### rules.json (60 -> 62 rule entries; 3 retired, unchanged from Phase 3E)
+
+- Narrowed `ADV_006`'s condition to `HIGH_SCHOOL_EARLY` only (`ADVANCED_MATH`/`ADVANCED_SCIENCE`/`ADVANCED_ELA` now alias to `CHALLENGING_COURSEWORK`, which already reaches `ADV_006`'s exact O02+OP01+REV_ADVANCEMENT_READINESS target via `ADV_010`).
+- Added `ADV_014` (`HONORS_AP` -> `O02`/`OP02`+`OP03`/`REV_ADVANCEMENT_READINESS`) and `ADV_015` (`CAREER_CTE_CREDENTIALS` -> `O09`/`OP08`+`OP09`/`REV_ADVANCEMENT_READINESS`) -- each rule activates two opportunities from one broad Discovery selection rather than making the parent choose a technical distinction, per the instruction's explicit guidance. All empty `score_effects` (interest signals only).
+- No taxonomy.json change was needed: OP02/OP03/OP08/OP09 were already `ACTIVE`.
+
+### src/lib/discovery/normalization.ts (derived facts)
+
+- `advancement_opportunities.subject_challenge` now derives solely from DISC_034 (`subject_advancement_interests`) -- the DISC_022-based `ADVANCED_MATH`/`ADVANCED_SCIENCE`/`ADVANCED_ELA` clause was removed, since those values are retired from DISC_022 and DISC_034 is the sole architecturally-correct subject-area source per Phase 3F.
+- `advancement_opportunities.advanced_coursework` additionally checks `HONORS_AP`; `.career_cte` and `.industry_credentials` both additionally check `CAREER_CTE_CREDENTIALS`.
+- Added Other-text sidecar exclusion: a `*_other_text` field is effective only while its parent question is active and its parent's (already legacy-normalized) value still includes `OTHER`.
+
+### New: "Other" inline free-text sidecar mechanism
+
+New optional `other_text_field` on the Question schema; `src/lib/discovery/registry.ts` exports `getParentQuestionForOtherTextField`/`OTHER_TEXT_FIELDS`; `KNOWN_FIELDS` includes sidecar field names. `src/lib/discovery/validation.ts` validates each sidecar as sanitized short text capped at 150 characters, and requires nonblank text at profile-completion time exactly when the parent's active value includes `OTHER`. `src/lib/discovery/present.ts` threads `otherTextField` onto `QuestionDescriptor` and appends sidecar text to its parent's own Review row. `src/components/discovery/QuestionField.tsx` renders the inline input and clears it on deselect. See `docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md` section 6 for the full design.

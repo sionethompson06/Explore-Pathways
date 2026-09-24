@@ -37,5 +37,25 @@ export function requireQuestionById(id: string): Question {
   return question;
 }
 
-/** Every field name the canonical registry defines -- used to reject unknown fields at every validation boundary. */
-export const KNOWN_FIELDS: ReadonlySet<string> = new Set(QUESTIONS.map((q) => q.field));
+/**
+ * Phase 3F: sidecar "Other" free-text field name -> its parent
+ * Question, for the small set of questions broad enough to need one
+ * (see `other_text_field` in schemas.ts). Not a second question
+ * registry -- these field names are never in `QUESTIONS` themselves,
+ * only declared on their parent's own record.
+ */
+const otherTextFieldToParent = new Map<string, Question>(
+  QUESTIONS.filter((q) => q.other_text_field).map((q) => [q.other_text_field!, q]),
+);
+
+export function getParentQuestionForOtherTextField(field: string): Question | undefined {
+  return otherTextFieldToParent.get(field);
+}
+
+export const OTHER_TEXT_FIELDS: ReadonlySet<string> = new Set(otherTextFieldToParent.keys());
+
+/** Every field name the canonical registry defines, plus every declared "Other" sidecar field -- used to reject unknown fields at every validation boundary. */
+export const KNOWN_FIELDS: ReadonlySet<string> = new Set([
+  ...QUESTIONS.map((q) => q.field),
+  ...otherTextFieldToParent.keys(),
+]);

@@ -275,8 +275,12 @@ const EVALUATION_ORDER: readonly string[] = [
   "desired_primary_change",
   "reported_academic_position",
   "reported_support_needs",
-  "learning_support_pattern",
+  // Phase 3F: preferred_learning_environment now precedes
+  // learning_support_pattern (both show_when "ALL", so this is a pure
+  // reordering matching the new display order in stages.ts, not a
+  // behavior change for either predicate).
   "preferred_learning_environment",
+  "learning_support_pattern",
   "flexibility_importance",
   "flexibility_reasons",
   "preferred_academic_time",

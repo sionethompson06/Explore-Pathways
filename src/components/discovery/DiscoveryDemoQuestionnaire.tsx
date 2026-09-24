@@ -277,6 +277,7 @@ export function DiscoveryDemoQuestionnaire({
                     value={displayValue(question.field)}
                     onCommit={commit}
                     error={fieldErrors[question.field]}
+                    otherTextValue={question.otherTextField ? displayValue(question.otherTextField) : undefined}
                   />
                 ))}
               </div>

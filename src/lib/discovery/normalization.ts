@@ -1,6 +1,7 @@
 import "server-only";
 import { loadLegacyAliases } from "@/lib/contracts/loader";
 import { computeActiveFlow } from "./branching";
+import { getParentQuestionForOtherTextField, OTHER_TEXT_FIELDS } from "./registry";
 import type {
   AdvancementOpportunityFlags,
   AthleticScheduleDemand,
@@ -75,6 +76,22 @@ export function computeEffectiveAnswers(raw: RawAnswers): EffectiveAnswers {
       if (normalized !== undefined) answers[field] = normalized;
     } else {
       answers[field] = value;
+    }
+  }
+
+  // Phase 3F: an "Other" sidecar free-text value is effective only
+  // while its parent question is active AND its parent's (already
+  // legacy-normalized) effective value still includes OTHER --
+  // regardless of whether the client remembered to clear it itself.
+  // Context only: never read by any derived fact below.
+  for (const otherTextField of OTHER_TEXT_FIELDS) {
+    const parent = getParentQuestionForOtherTextField(otherTextField);
+    if (!parent) continue;
+    const parentEffective = answers[parent.field];
+    const parentHasOther = Array.isArray(parentEffective) && parentEffective.includes("OTHER");
+    const text = raw[otherTextField];
+    if (parentHasOther && typeof text === "string" && text.trim().length > 0) {
+      answers[otherTextField] = text;
     }
   }
 
@@ -313,18 +330,23 @@ function deriveAdvancementOpportunities(
 ): AdvancementOpportunityFlags {
   const has = (value: string) => advancementInterests.includes(value);
   return {
-    subject_challenge:
-      subjectAdvancementInterests.some((v) => v !== "NONE" && v !== "UNKNOWN") ||
-      has("ADVANCED_MATH") ||
-      has("ADVANCED_SCIENCE") ||
-      has("ADVANCED_ELA"),
-    advanced_coursework: has("HONORS") || has("AP") || has("CHALLENGING_COURSEWORK") || has("ENRICHMENT"),
+    // Phase 3F: DISC_022 no longer carries subject-specific signal
+    // (ADVANCED_MATH/ADVANCED_SCIENCE/ADVANCED_ELA are retired from
+    // new-entry use and alias to CHALLENGING_COURSEWORK) -- DISC_034
+    // (subject_advancement_interests) is now the sole subject-area
+    // source, per docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md.
+    subject_challenge: subjectAdvancementInterests.some((v) => v !== "NONE" && v !== "UNKNOWN"),
+    advanced_coursework:
+      has("HONORS") || has("AP") || has("HONORS_AP") || has("CHALLENGING_COURSEWORK") || has("ENRICHMENT"),
     early_high_school_coursework: has("HIGH_SCHOOL_EARLY"),
     college_level_learning: has("COLLEGE_LEVEL_COURSES"),
     research_projects: has("RESEARCH"),
-    career_cte: has("CAREER_CTE"),
+    // Phase 3F: the combined CAREER_CTE_CREDENTIALS card (HIGH_SCHOOL
+    // tier) sets both flags true, mirroring rule ADV_015's dual
+    // OP08+OP09 activation for one broad selection.
+    career_cte: has("CAREER_CTE") || has("CAREER_CTE_CREDENTIALS"),
     work_based_learning: has("WORK_BASED_LEARNING"),
-    industry_credentials: has("INDUSTRY_CREDENTIALS"),
+    industry_credentials: has("INDUSTRY_CREDENTIALS") || has("CAREER_CTE_CREDENTIALS"),
     entrepreneurship: has("ENTREPRENEURSHIP"),
     accelerated_graduation: has("EARLY_GRADUATION"),
   };

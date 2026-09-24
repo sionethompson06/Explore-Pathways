@@ -77,7 +77,7 @@ test.describe("Discovery visual QA: breakpoints", () => {
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=LEARNING/);
         await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-        await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+        await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=SCHEDULE/);
         await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
@@ -107,7 +107,7 @@ test.describe("Discovery visual QA: breakpoints", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=LEARNING/);
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=SCHEDULE/);
     await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();

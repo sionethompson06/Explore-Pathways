@@ -60,6 +60,7 @@ function describeQuestion(field: string, gradeBand: GradeBand): QuestionDescript
     ...(textMaxLength ? { textMaxLength } : {}),
     ...(locationStates ? { locationStates } : {}),
     ...(question.helper_text ? { helperText: question.helper_text } : {}),
+    ...(question.other_text_field ? { otherTextField: question.other_text_field } : {}),
   };
 }
 
@@ -115,6 +116,21 @@ function formatValueLabel(field: string, value: RawAnswerValue, gradeBand: Grade
   return getOptionLabelForQuestion(field, value, gradeBand);
 }
 
+/**
+ * Phase 3F: when an active field's own value includes OTHER and it
+ * declares an `other_text_field`, its sidecar free text is appended to
+ * the SAME Review row -- not a second, fabricated row for a field that
+ * is not itself a canonical question.
+ */
+function appendOtherText(baseLabel: string, question: ReturnType<typeof getQuestionByField>, raw: RawAnswers): string {
+  if (!question?.other_text_field) return baseLabel;
+  const value = raw[question.field];
+  if (!Array.isArray(value) || !value.includes("OTHER")) return baseLabel;
+  const otherText = raw[question.other_text_field];
+  if (typeof otherText !== "string" || otherText.trim().length === 0) return baseLabel;
+  return `${baseLabel} (Other: "${otherText.trim()}")`;
+}
+
 /** Every currently ACTIVE and ANSWERED field, grouped by stage, for the Review screen -- never a hidden/stale answer. */
 export function buildReviewSections(raw: RawAnswers): ReviewSection[] {
   const { activeFields, gradeBand } = computeActiveFlow(raw);
@@ -130,7 +146,7 @@ export function buildReviewSections(raw: RawAnswers): ReviewSection[] {
         return {
           field,
           wording: getQuestionWording(field, gradeBand),
-          valueLabel: formatValueLabel(field, raw[field], gradeBand),
+          valueLabel: appendOtherText(formatValueLabel(field, raw[field], gradeBand), question, raw),
         };
       })
       .filter((item) => item.valueLabel.length > 0);

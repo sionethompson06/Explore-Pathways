@@ -186,6 +186,7 @@ export function DiscoveryQuestionnaire({
                 value={localAnswers[question.field]}
                 onCommit={commit}
                 error={fieldErrors[question.field]}
+                otherTextValue={question.otherTextField ? localAnswers[question.otherTextField] : undefined}
               />
             ))}
           </div>

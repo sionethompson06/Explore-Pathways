@@ -176,25 +176,31 @@ const OVERRIDES: Record<string, Record<string, string>> = {
     TIME_MANAGEMENT: "Managing time",
     ENGAGEMENT: "Staying engaged",
     TASK_COMPLETION: "Finishing tasks",
-    ATTENDANCE: "Attendance",
-    MISSING_CREDITS: "Missing credits",
+    ATTENDANCE: "Attendance/consistency",
+    MISSING_CREDITS: "Credits or graduation",
     COMMUNICATION: "Communication",
     CONFIDENCE: "Confidence",
-    NONE: "None of these",
+    /** Phase 3F new canonical value, consolidating ROUTINES/ORGANIZATION/TIME_MANAGEMENT/TASK_COMPLETION/STUDY_SKILLS -- see contracts/legacy-aliases.json. */
+    ORGANIZATION_STUDY_HABITS: "Organization and study habits",
+    /** Phase 3F new canonical value, consolidating ENGAGEMENT/CONFIDENCE -- see contracts/legacy-aliases.json. */
+    ENGAGEMENT_CONFIDENCE: "Engagement and confidence",
+    NONE: "No additional support",
   },
   learning_support_pattern: {
-    INDEPENDENT: "Thrives working independently",
-    OCCASIONAL_CHECK_INS: "Does well with occasional check-ins",
-    REGULAR_GUIDANCE: "Benefits from regular guidance",
-    CLOSE_ADULT_SUPPORT: "Does best with close adult support",
+    INDEPENDENT: "Independently",
+    OCCASIONAL_CHECK_INS: "With occasional check-ins",
+    REGULAR_GUIDANCE: "With regular guidance",
+    CLOSE_ADULT_SUPPORT: "With frequent support",
     INDEPENDENT_WORK_DIFFICULT: "Independent work is a growth area right now",
   },
   preferred_learning_environment: {
     SELF_PACED: "Self-paced",
     LIVE_TEACHER: "Live teacher-led",
-    HANDS_ON: "Hands-on",
+    BLEND: "A mix of independent and live learning",
+    HANDS_ON: "Hands-on/project-based",
     SMALL_GROUP: "Small group",
     ONE_TO_ONE: "One-to-one",
+    MOVEMENT: "Movement/active learning",
   },
   flexibility_importance: {
     NOT_IMPORTANT: "Not important -- our schedule already works well",
@@ -203,9 +209,13 @@ const OVERRIDES: Record<string, Record<string, string>> = {
     ESSENTIAL: "Essential for our family",
   },
   flexibility_reasons: {
-    ATHLETIC_TRAINING: "Athletic training",
+    /** Phase 3F: new-entry umbrella for athletics/training/competition -- COMPETITION and ATHLETIC_TRAVEL retired from new-entry use and aliased to it. */
+    ATHLETIC_TRAINING: "Athletics, training, or competition",
     ATHLETIC_TRAVEL: "Athletic travel",
     FAMILY_TRAVEL: "Family travel",
+    ARTS: "Arts or performance",
+    /** Phase 3F: new-entry umbrella for work/entrepreneurship -- BUSINESS retired from new-entry use and aliased to it. */
+    WORK: "Work or entrepreneurship",
     COLLEGE_COURSES: "College-level courses",
     PACE: "Learning at their own pace",
     FAMILY_RESPONSIBILITIES: "Family responsibilities",
@@ -235,24 +245,28 @@ const OVERRIDES: Record<string, Record<string, string>> = {
     TOO_EARLY: "Too early to say",
   },
   advancement_interests: {
-    ENRICHMENT: "Enrichment beyond the standard curriculum",
+    ENRICHMENT: "More enrichment",
     HONORS: "Honors-level courses",
     AP: "Advanced Placement (AP) courses",
     ADVANCED_MATH: "Advanced math",
     ADVANCED_SCIENCE: "Advanced science",
     ADVANCED_ELA: "Advanced English/Language Arts",
     CHALLENGING_COURSEWORK: "More challenging coursework",
-    HIGH_SCHOOL_EARLY: "Starting high school courses early",
+    HIGH_SCHOOL_EARLY: "High-school coursework early",
     /** Phase 3E canonical merge of DUAL_ENROLLMENT/COLLEGE_COURSES -- see contracts/legacy-aliases.json. */
     COLLEGE_LEVEL_COURSES: "College-level or dual-enrollment courses",
     DUAL_ENROLLMENT: "Dual enrollment",
     COLLEGE_COURSES: "College-level courses",
-    EARLY_GRADUATION: "Early graduation",
-    RESEARCH: "Independent research projects",
+    EARLY_GRADUATION: "Earlier graduation",
+    RESEARCH: "Research/independent projects",
     CAREER_CTE: "Career and technical education (CTE)",
     WORK_BASED_LEARNING: "Work-based learning or internships",
     INDUSTRY_CREDENTIALS: "Industry certifications or credentials",
     ENTREPRENEURSHIP: "Entrepreneurship opportunities",
+    /** Phase 3F new canonical value: one card activating both OP02 (Honors) and OP03 (AP) via ADV_014 -- legacy HONORS-only/AP-only answers are NOT aliased to it (see contracts/legacy-aliases.json note). */
+    HONORS_AP: "Honors/AP",
+    /** Phase 3F new canonical value (HIGH_SCHOOL tier only): one card activating both OP08 (Career/CTE) and OP09 (industry credentials) via ADV_015. */
+    CAREER_CTE_CREDENTIALS: "Career/CTE or industry credentials",
     NONE_CURRENTLY: "None of these right now",
   },
   credit_recovery_need: {
@@ -261,13 +275,14 @@ const OVERRIDES: Record<string, Record<string, string>> = {
   family_priorities: {
     ACADEMIC_QUALITY: "Academic quality",
     PERSONAL_SUPPORT: "Personal support",
-    COLLEGE_PREPARATION: "College preparation",
+    COLLEGE_PREPARATION: "College/career preparation",
     ATHLETIC_FLEXIBILITY: "Athletic flexibility",
     SELF_PACED: "Self-paced learning",
     LIVE_TEACHER: "Live teacher instruction",
+    SOCIAL: "In-person/social learning",
     LOCATION_FLEXIBILITY: "Location flexibility",
     ACADEMIC_ADVANCEMENT: "Academic advancement",
-    SMALL_ENVIRONMENT: "A smaller environment",
+    SMALL_ENVIRONMENT: "Smaller/personal learning environment",
     /** Phase 3E new canonical value, replacing ACADEMIC_QUALITY for new entries -- not semantically equivalent, so no alias between them. */
     STRUCTURE_ACCOUNTABILITY: "Structure and accountability",
   },
@@ -353,8 +368,10 @@ export function getOptionLabel(field: string, value: string): string {
  * DISC_011's own registry note: "K-4 wording: When learning at home,
  * how much adult help is useful? INDEPENDENT label becomes works for
  * short periods." This is the one documented grade-conditional
- * wording/label swap in the registry; everything else uses the
- * registry's single parent_wording regardless of grade band.
+ * *wording* swap in the registry; everything else uses the registry's
+ * single parent_wording regardless of grade band. (See
+ * getOptionLabelForQuestion below for grade-conditional *option label*
+ * swaps, which Phase 3F adds more of.)
  */
 export function getQuestionWording(field: string, gradeBand: GradeBand): string {
   const question = getQuestionByField(field);
@@ -365,6 +382,24 @@ export function getQuestionWording(field: string, gradeBand: GradeBand): string 
   return question.parent_wording;
 }
 
+/**
+ * Phase 3F grade-conditional option labels for `advancement_interests`
+ * (DISC_022): the same canonical value can read differently depending
+ * on grade band, since one value now sometimes stands in for a
+ * different concept at a younger tier (see contracts/CHANGELOG.md
+ * "Phase 3F"). Never changes which value is stored -- presentation
+ * only, exactly like the DISC_011 case above.
+ */
+const ADVANCEMENT_INTERESTS_GRADE_LABELS: Partial<Record<GradeBand, Record<string, string>>> = {
+  ELEMENTARY: {
+    CHALLENGING_COURSEWORK: "More challenging learning",
+  },
+  MIDDLE: {
+    COLLEGE_LEVEL_COURSES: "Future college-level opportunities",
+    CAREER_CTE: "Career/technical exploration",
+  },
+};
+
 export function getOptionLabelForQuestion(
   field: string,
   value: string,
@@ -372,6 +407,10 @@ export function getOptionLabelForQuestion(
 ): string {
   if (field === "learning_support_pattern" && gradeBand === "ELEMENTARY" && value === "INDEPENDENT") {
     return "Works well independently for short periods";
+  }
+  if (field === "advancement_interests") {
+    const override = ADVANCEMENT_INTERESTS_GRADE_LABELS[gradeBand]?.[value];
+    if (override) return override;
   }
   return getOptionLabel(field, value);
 }

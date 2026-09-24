@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { getQuestionByField, KNOWN_FIELDS } from "./registry";
+import { getParentQuestionForOtherTextField, getQuestionByField, OTHER_TEXT_FIELDS } from "./registry";
 import { computeActiveFlow } from "./branching";
 import { LOCATION_STATE_VALUES } from "./labels";
 import type {
@@ -20,6 +20,33 @@ const TEXT_MAX_LENGTH: Record<string, number> = {
   primary_sport: 60,
   parent_context: 750,
 };
+
+/** Phase 3F: every "Other" sidecar free-text field shares this one limit (Phase 3F instruction §2). */
+const OTHER_TEXT_MAX_LENGTH = 150;
+
+/**
+ * Validates one "Other" sidecar free-text value on its own -- it has
+ * no `Question` object of its own (see `other_text_field` in
+ * schemas.ts), so it cannot go through `validateAnswerValue`. Sanitized
+ * and length-capped exactly like any other short_text field; never
+ * anything but plain text.
+ */
+function validateOtherTextValue(field: string, value: RawAnswerValue): FieldValidationError[] {
+  if (value === undefined) return [];
+  const schema = z.string().transform(sanitizeText).pipe(z.string().max(OTHER_TEXT_MAX_LENGTH));
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    return [
+      {
+        field,
+        questionId: getParentQuestionForOtherTextField(field)?.id ?? "UNKNOWN",
+        code: typeof value === "string" ? "TEXT_TOO_LONG" : "INVALID_SHAPE",
+        message: result.error.issues[0]?.message ?? "Not a valid answer.",
+      },
+    ];
+  }
+  return [];
+}
 
 /** Multi-select values that deselect every other choice when picked, per field. Defaults to whichever of NONE/UNKNOWN the question's own allowed_values contains. */
 const EXTRA_EXCLUSIVE_VALUES: Record<string, string[]> = {
@@ -170,7 +197,7 @@ export function validateDraftPatch(
 
   for (const [field, value] of Object.entries(patch)) {
     const question = getQuestionByField(field);
-    if (!question || !KNOWN_FIELDS.has(field)) {
+    if (!question && !OTHER_TEXT_FIELDS.has(field)) {
       errors.push({
         field,
         questionId: "UNKNOWN",
@@ -188,7 +215,11 @@ export function validateDraftPatch(
     (merged.discovery_reasons as string[] | undefined) ?? [];
 
   for (const [field, value] of Object.entries(patch)) {
-    const question = getQuestionByField(field)!;
+    const question = getQuestionByField(field);
+    if (!question) {
+      errors.push(...validateOtherTextValue(field, value as RawAnswerValue));
+      continue;
+    }
     errors.push(
       ...validateAnswerValue(question, value as RawAnswerValue, { activeDiscoveryReasons }),
     );
@@ -222,6 +253,23 @@ export function validateCompletedProfile(raw: RawAnswers): CompletedProfileValid
     }
 
     errors.push(...validateAnswerValue(question, value, { activeDiscoveryReasons }));
+
+    // Phase 3F: "Other" sidecar text is required, and only required,
+    // when this active question's own value currently includes OTHER.
+    if (question.other_text_field && Array.isArray(value) && value.includes("OTHER")) {
+      const otherText = raw[question.other_text_field];
+      const sanitized = typeof otherText === "string" ? sanitizeText(otherText) : "";
+      if (sanitized.length === 0) {
+        errors.push({
+          field: question.other_text_field,
+          questionId: question.id,
+          code: "REQUIRED",
+          message: `Please add a short description for "Other" under "${question.parent_wording}".`,
+        });
+      } else {
+        errors.push(...validateOtherTextValue(question.other_text_field, otherText));
+      }
+    }
   }
 
   // DISC_007, if active, must resolve to one of the current DISC_006

@@ -9,7 +9,7 @@ import type { RawAnswers } from "@/lib/discovery/types";
 
 describe("registry", () => {
   it("loads the corrected 39-question canonical bank", () => {
-    expect(QUESTION_BANK_VERSION).toBe("2.0.0-discovery-calibrated");
+    expect(QUESTION_BANK_VERSION).toBe("2.1.0-discovery-ux-simplified");
     expect(QUESTIONS).toHaveLength(39);
     expect(QUESTIONS.some((q) => q.id === "DISC_020A")).toBe(true);
   });

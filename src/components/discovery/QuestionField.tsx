@@ -23,6 +23,7 @@ export function QuestionField({
   onCommit,
   error,
   gradeLabelForAge,
+  otherTextValue,
 }: {
   question: QuestionDescriptor;
   value: AnswerValue;
@@ -30,6 +31,8 @@ export function QuestionField({
   error?: string | undefined;
   /** Optional context line shown under DISC_003 (student age) -- purely informational, never gates anything. */
   gradeLabelForAge?: string | undefined;
+  /** Phase 3F: current value of `question.otherTextField`, when declared. Ignored otherwise. */
+  otherTextValue?: AnswerValue;
 }) {
   const errorId = `${question.field}-error`;
   const legendId = `${question.field}-legend`;
@@ -54,7 +57,7 @@ export function QuestionField({
       {question.inputType === "single" || question.inputType === "single_from_previous" ? (
         <SingleChoice question={question} value={value} onCommit={onCommit} />
       ) : question.inputType === "multi" ? (
-        <MultiChoice question={question} value={value} onCommit={onCommit} />
+        <MultiChoice question={question} value={value} onCommit={onCommit} otherTextValue={otherTextValue} />
       ) : question.inputType === "short_text" ? (
         <ShortText question={question} value={value} onCommit={onCommit} labelledBy={legendId} />
       ) : question.inputType === "integer_or_unknown" ? (
@@ -115,10 +118,12 @@ function MultiChoice({
   question,
   value,
   onCommit,
+  otherTextValue,
 }: {
   question: QuestionDescriptor;
   value: AnswerValue;
   onCommit: (field: string, value: AnswerValue) => void;
+  otherTextValue?: AnswerValue;
 }) {
   const current = Array.isArray(value) ? value : [];
   const maxSelections = question.maxSelections;
@@ -143,6 +148,13 @@ function MultiChoice({
       next = [...current.filter((v) => !EXCLUSIVE_VALUES.includes(v)), optionValue];
     }
     onCommit(question.field, next);
+
+    // Phase 3F: unchecking OTHER also clears its inline sidecar text --
+    // both here (client UX) and, independent of whether this call
+    // succeeds, in computeEffectiveAnswers (server-authoritative).
+    if (optionValue === "OTHER" && alreadySelected && question.otherTextField) {
+      onCommit(question.otherTextField, undefined);
+    }
   }
 
   return (
@@ -177,12 +189,70 @@ function MultiChoice({
           </label>
         );
       })}
+      {question.otherTextField && current.includes("OTHER") ? (
+        <OtherTextInput field={question.otherTextField} value={otherTextValue} onCommit={onCommit} />
+      ) : null}
       {maxSelections ? (
         <p className={styles.hint}>
           Choose up to {maxSelections}
           {current.length > 0 ? ` (${current.length} of ${maxSelections} chosen)` : ""}.
         </p>
       ) : null}
+    </div>
+  );
+}
+
+const OTHER_TEXT_MAX_LENGTH = 150;
+
+/**
+ * Phase 3F: the inline free-text box revealed under an "Other"
+ * selection. Deliberately its own component -- mounted only while
+ * OTHER is checked (see MultiChoice above), so there is no stale-value
+ * resync concern: unchecking OTHER unmounts it, and rechecking it
+ * mounts a fresh instance from whatever `value` currently holds.
+ */
+function OtherTextInput({
+  field,
+  value,
+  onCommit,
+}: {
+  field: string;
+  value: AnswerValue;
+  onCommit: (field: string, value: AnswerValue) => void;
+}) {
+  const [local, setLocal] = useState(typeof value === "string" ? value : "");
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => () => clearTimeout(timeoutRef.current), []);
+
+  function handleChange(next: string) {
+    setLocal(next);
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => onCommit(field, next), 500);
+  }
+
+  function flush() {
+    clearTimeout(timeoutRef.current);
+    onCommit(field, local);
+  }
+
+  return (
+    <div className={styles.otherTextRow}>
+      <label htmlFor={`${field}-input`} className={styles.otherTextLabel}>
+        Please describe (optional context for your advisor)
+      </label>
+      <input
+        id={`${field}-input`}
+        type="text"
+        className={styles.textInput}
+        value={local}
+        maxLength={OTHER_TEXT_MAX_LENGTH}
+        onChange={(e) => handleChange(e.target.value)}
+        onBlur={flush}
+      />
+      <p className={styles.hint}>
+        {local.length} / {OTHER_TEXT_MAX_LENGTH}
+      </p>
     </div>
   );
 }

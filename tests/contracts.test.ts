@@ -10,16 +10,18 @@ describe("canonical registry validation", () => {
     expect(contracts.taxonomy.base_models.length).toBeGreaterThan(0);
   });
 
-  it("matches the counts recorded in the Phase 0 corrections and Phase 3E calibration", () => {
-    // 39 = 38 original + DISC_020A (DEC-C1). Phase 3E adds no new question IDs
-    // (only wording/option/branch changes to existing ones), so this stays 39.
+  it("matches the counts recorded in the Phase 0 corrections and Phase 3E/3F calibration", () => {
+    // 39 = 38 original + DISC_020A (DEC-C1). Neither Phase 3E nor Phase 3F
+    // adds a new question ID (only wording/option/branch changes and, in
+    // Phase 3F, typed "Other" sidecar fields associated with existing
+    // questions), so this stays 39.
     expect(contracts.questionBank.questions.length).toBe(39);
-    // 60 = 55 Phase 0 total + ADV_009-013 (Phase 3E: reaches DISC_022's
-    // previously dead-end ENRICHMENT/CHALLENGING_COURSEWORK/WORK_BASED_LEARNING/
-    // INDUSTRY_CREDENTIALS/ENTREPRENEURSHIP). 3 retired = 1 Phase 0
-    // (HOME_003) + ADV_003 (merged into ADV_004) + COST_001 (DEC-H2: cost is
-    // feasibility, never a base-model score input).
-    expect(contracts.rules.rules.length).toBe(60);
+    // 62 = 60 Phase 3E total + ADV_014/ADV_015 (Phase 3F: the combined
+    // HONORS_AP and CAREER_CTE_CREDENTIALS cards). 3 retired, unchanged
+    // from Phase 3E = 1 Phase 0 (HOME_003) + ADV_003 (merged into ADV_004)
+    // + COST_001 (DEC-H2: cost is feasibility, never a base-model score
+    // input).
+    expect(contracts.rules.rules.length).toBe(62);
     expect(contracts.rules.rules.filter((r) => r.status === "RETIRED")).toHaveLength(3);
     // 17 = 14 original + FX15-FX17 (DEC-C7).
   });

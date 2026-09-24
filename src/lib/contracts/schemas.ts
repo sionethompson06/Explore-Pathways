@@ -58,6 +58,16 @@ const questionSchema = z.object({
    * the same options regardless of grade band.
    */
   grade_band_allowed_values: z.record(gradeBandKeySchema, z.array(z.string())).optional(),
+  /**
+   * Phase 3F: the sidecar field name for this question's inline "Other"
+   * free-text elaboration (e.g. "discovery_reasons_other_text"), typed
+   * and associated directly with its parent question rather than
+   * existing as a 40th+ canonical question. Present only on the small
+   * set of multi-select questions broad enough that a fixed list can't
+   * reasonably cover every family (DISC_006/010/014/022/026). Context
+   * only -- never read by any derived fact or future scoring input.
+   */
+  other_text_field: z.string().min(1).optional(),
 });
 
 export const questionBankSchema = z.object({

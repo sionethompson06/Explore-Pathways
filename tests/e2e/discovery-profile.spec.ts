@@ -45,14 +45,14 @@ async function fillGoalsStage(page: Page, reason: string) {
 }
 
 async function fillLearningStage(page: Page) {
-  await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
+  await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
   await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-  await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+  await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }
 
 async function fillScheduleStage(page: Page) {
-  await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+  await expect(page.getByText("How much flexibility would be helpful?")).toBeVisible();
   await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }

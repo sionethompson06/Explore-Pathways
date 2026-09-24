@@ -1,7 +1,7 @@
 {
-  "version": "1.2.0-phase3e-discovery-calibrated",
+  "version": "1.3.0-phase3f-ux-simplification",
   "status": "PILOT_UNVALIDATED",
-  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C2, C4, C6, DEC-H2, DEC-H3+. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/rules.json). RETIRED rules are kept in this array for explainability but must be skipped during evaluation by the Phase 4 engine; only rules without a status of RETIRED are evaluated. Phase 3E retired ADV_003 (replaced by ADV_004) and COST_001 (cost is feasibility, not an educational-alignment score input -- DEC-H2), added ADV_009-013 to reach previously dead-end DISC_022 options, and updated ADV_004/ADV_006/ENV_001's conditions for the calibrated question-bank's canonical enum values.",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C2, C4, C6, DEC-H2, DEC-H3+. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/rules.json). RETIRED rules are kept in this array for explainability but must be skipped during evaluation by the Phase 4 engine; only rules without a status of RETIRED are evaluated. Phase 3E retired ADV_003 (replaced by ADV_004) and COST_001 (cost is feasibility, not an educational-alignment score input -- DEC-H2), added ADV_009-013 to reach previously dead-end DISC_022 options, and updated ADV_004/ADV_006/ENV_001's conditions for the calibrated question-bank's canonical enum values. Phase 3F narrowed ADV_006 to HIGH_SCHOOL_EARLY only (ADVANCED_MATH/ADVANCED_SCIENCE/ADVANCED_ELA retired from DISC_022, now alias to CHALLENGING_COURSEWORK) and added ADV_014/ADV_015 for the new combined HONORS_AP/CAREER_CTE_CREDENTIALS cards.",
   "normalized_fact_fields": [
     "grade_band",
     "athletics_interest",
@@ -1416,17 +1416,15 @@
     },
     {
       "id": "ADV_006",
-      "version": "1.1.0-phase3e-discovery-calibration",
+      "version": "1.2.0-phase3f-ux-simplification",
       "group": "academic",
+      "added_reason": "Phase 3F narrowed this condition to HIGH_SCHOOL_EARLY only: ADVANCED_MATH/ADVANCED_SCIENCE/ADVANCED_ELA are retired from DISC_022 new-entry use and alias to CHALLENGING_COURSEWORK (contracts/legacy-aliases.json), which already activates this same O02+OP01+REV_ADVANCEMENT_READINESS target via ADV_010 -- no distinct Phase-4-relevant signal is lost by dropping them here.",
       "when": {
         "all": [
           {
             "field": "advancement_interests",
             "op": "contains_any",
             "value": [
-              "ADVANCED_MATH",
-              "ADVANCED_SCIENCE",
-              "ADVANCED_ELA",
               "HIGH_SCHOOL_EARLY"
             ]
           }
@@ -2107,6 +2105,76 @@
         ]
       },
       "reason_template": "Your family asked to explore entrepreneurship opportunities; this is an interest signal, not a program guarantee.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_014",
+      "version": "1.0.0-phase3f-ux-simplification",
+      "group": "future",
+      "added_at": "phase3f-ux-simplification",
+      "added_reason": "DISC_022's HIGH_SCHOOL tier now offers one combined \"Honors/AP\" card (HONORS_AP) instead of separate HONORS/AP cards, since most families do not need to distinguish the two at Discovery time. Rather than force that technical distinction, one broad selection activates both OP02 (Honors) and OP03 (AP) for later review. Legacy HONORS-only/AP-only raw answers are NOT aliased to HONORS_AP and keep activating their own more precise single-opportunity rule (ADV_001/ADV_002 respectively).",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "HONORS_AP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP02",
+          "OP03"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore Honors and/or AP coursework; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_015",
+      "version": "1.0.0-phase3f-ux-simplification",
+      "group": "future",
+      "added_at": "phase3f-ux-simplification",
+      "added_reason": "DISC_022's HIGH_SCHOOL tier now offers one combined \"Career/CTE or industry credentials\" card (CAREER_CTE_CREDENTIALS) instead of separate CAREER_CTE/INDUSTRY_CREDENTIALS cards. One broad selection activates both OP08 and OP09 for later review, rather than making the parent choose the technical distinction. MIDDLE tier keeps plain CAREER_CTE alone (industry credentials was never offered at that tier).",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "CAREER_CTE_CREDENTIALS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP08",
+          "OP09"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore career/technical education and industry-credential opportunities; this is an interest signal, not a qualification determination.",
       "reason_type": "ALIGNMENT",
       "status": "PILOT_UNVALIDATED"
     },

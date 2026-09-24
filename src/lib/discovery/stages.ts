@@ -50,8 +50,12 @@ const STAGE_FIELDS: Record<Exclude<StageId, "REVIEW">, readonly string[]> = {
   LEARNING: [
     "reported_academic_position",
     "reported_support_needs",
-    "learning_support_pattern",
+    // Phase 3F: preferred_learning_environment (DISC_012, "How does your
+    // student learn best?") now leads, with learning_support_pattern
+    // (DISC_011, "How does your student work best?") right after it as
+    // the natural follow-up -- see docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md.
     "preferred_learning_environment",
+    "learning_support_pattern",
     "foundational_learning_priorities",
     "subject_advancement_interests",
   ],

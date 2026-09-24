@@ -29,11 +29,38 @@
     },
     "advancement_interests": {
       "DUAL_ENROLLMENT": "COLLEGE_LEVEL_COURSES",
-      "COLLEGE_COURSES": "COLLEGE_LEVEL_COURSES"
+      "COLLEGE_COURSES": "COLLEGE_LEVEL_COURSES",
+      "ADVANCED_MATH": "CHALLENGING_COURSEWORK",
+      "ADVANCED_SCIENCE": "CHALLENGING_COURSEWORK",
+      "ADVANCED_ELA": "CHALLENGING_COURSEWORK"
+    },
+    "reported_support_needs": {
+      "ROUTINES": "ORGANIZATION_STUDY_HABITS",
+      "ORGANIZATION": "ORGANIZATION_STUDY_HABITS",
+      "TIME_MANAGEMENT": "ORGANIZATION_STUDY_HABITS",
+      "TASK_COMPLETION": "ORGANIZATION_STUDY_HABITS",
+      "STUDY_SKILLS": "ORGANIZATION_STUDY_HABITS",
+      "ENGAGEMENT": "ENGAGEMENT_CONFIDENCE",
+      "CONFIDENCE": "ENGAGEMENT_CONFIDENCE"
+    },
+    "learning_support_pattern": {
+      "INDEPENDENT_WORK_DIFFICULT": "CLOSE_ADULT_SUPPORT"
+    },
+    "flexibility_reasons": {
+      "COMPETITION": "ATHLETIC_TRAINING",
+      "ATHLETIC_TRAVEL": "ATHLETIC_TRAINING",
+      "BUSINESS": "WORK"
     }
   },
   "question_value_removals": {
     "preferred_learning_environment": ["BOOKS", "TECHNOLOGY"],
-    "family_priorities": ["ACADEMIC_QUALITY"]
+    "family_priorities": [
+      "ACADEMIC_QUALITY",
+      "ATHLETIC_FLEXIBILITY",
+      "LOCATION_FLEXIBILITY",
+      "ADVANCED_COURSES",
+      "ACCREDITATION",
+      "DIPLOMA"
+    ]
   }
 }

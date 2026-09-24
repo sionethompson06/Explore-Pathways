@@ -25,9 +25,9 @@ async function fillGoalsStage(page: Page, reason: string) {
 }
 
 async function fillLearningStage(page: Page) {
-  await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
+  await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
   await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-  await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+  await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }
 
@@ -35,7 +35,7 @@ async function fillScheduleStage(
   page: Page,
   flexibility: "Not important -- our schedule already works well" | "Essential for our family" = "Not important -- our schedule already works well",
 ) {
-  await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+  await expect(page.getByText("How much flexibility would be helpful?")).toBeVisible();
   await page.getByRole("radio", { name: flexibility, exact: true }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }
@@ -166,8 +166,8 @@ test.describe("Preview Demo Mode: high-school sample profile", () => {
     await fillLearningStage(page);
     await fillScheduleStage(page);
 
-    await expect(page.getByText("How clear does your student's path to graduation feel right now?")).toBeVisible();
-    const graduationGroup = page.getByRole("group", { name: /how clear does your student.s path to graduation feel/i });
+    await expect(page.getByText("How clear is your student's path to graduation?")).toBeVisible();
+    const graduationGroup = page.getByRole("group", { name: /how clear is your student.s path to graduation/i });
     await graduationGroup.getByLabel("We may need help getting back on track", { exact: true }).check();
     await expect(page.getByText("Would reviewing or recovering credits be helpful as part of the plan?")).toBeVisible();
     const creditGroup = page.getByRole("group", { name: /reviewing or recovering credits/i });
@@ -188,5 +188,78 @@ test.describe("Preview Demo Mode: high-school sample profile", () => {
 
     const bodyText = await page.locator("body").innerText();
     expect(bodyText).not.toContain("Would reviewing or recovering credits be helpful as part of the plan?");
+  });
+});
+
+test.describe("Preview Demo Mode: Learning section order (Phase 3F)", () => {
+  test("\"How does your student learn best?\" (DISC_012) appears before \"How does your student work best?\" (DISC_011)", async ({
+    page,
+  }) => {
+    await page.goto("/discover/demo");
+    await fillStudentStage(page, "6th grade");
+    await fillGoalsStage(page, "Academic support");
+
+    await expect(page.getByText("How is your student's learning going now?")).toBeVisible();
+    const learnBestY = await page.getByText("How does your student learn best?").boundingBox();
+    const workBestY = await page.getByText("How does your student work best?").boundingBox();
+    expect(learnBestY).not.toBeNull();
+    expect(workBestY).not.toBeNull();
+    expect(learnBestY!.y).toBeLessThan(workBestY!.y);
+
+    // A self-paced learner still sees the work-best follow-up (never hidden).
+    await page.getByRole("checkbox", { name: "Self-paced", exact: true }).check();
+    await expect(page.getByText("How does your student work best?")).toBeVisible();
+  });
+});
+
+test.describe("Preview Demo Mode: inline \"Other\" free text (Phase 3F)", () => {
+  test("selecting Other reveals a text box; completion requires nonblank text; Review shows it; unchecking Other clears and hides it", async ({
+    page,
+  }) => {
+    await page.goto("/discover/demo");
+    await fillStudentStage(page, "6th grade");
+
+    await expect(page.getByText("What brought you to Pathways?")).toBeVisible();
+    await page.getByRole("checkbox", { name: "Something else", exact: true }).check();
+    const otherInput = page.getByLabel("Please describe (optional context for your advisor)");
+    await expect(otherInput).toBeVisible();
+    await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    await fillLearningStage(page);
+    await fillScheduleStage(page);
+    await fillFamilyStage(page);
+
+    // Blank Other text blocks completion with a clear, field-specific error.
+    await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
+    await page.getByRole("button", { name: "Complete My Discovery Profile" }).click();
+    await expect(page.getByText(/please add a short description for "other"/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Discovery Demo Complete" })).toHaveCount(0);
+
+    // Filling it in, from Review directly, allows completion.
+    await page.getByRole("button", { name: "Edit Goals" }).click();
+    await page.getByLabel("Please describe (optional context for your advisor)").fill("We split time between two homes.");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Continue" }).click(); // Learning (unchanged)
+    await page.getByRole("button", { name: "Continue" }).click(); // Schedule (unchanged)
+    await page.getByRole("button", { name: "Continue" }).click(); // Family (unchanged)
+
+    await expect(page.getByText(/Something else.*Other:.*We split time between two homes\./)).toBeVisible();
+
+    // Unchecking Other removes it from Review's line entirely.
+    await page.getByRole("button", { name: "Edit Goals" }).click();
+    await page.getByRole("checkbox", { name: "Something else", exact: true }).uncheck();
+    await expect(page.getByLabel("Please describe (optional context for your advisor)")).toHaveCount(0);
+    await page.getByRole("checkbox", { name: "Academic support", exact: true }).check();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    const bodyText = await page.locator("body").innerText();
+    expect(bodyText).not.toContain("We split time between two homes.");
+
+    await page.getByRole("button", { name: "Complete My Discovery Profile" }).click();
+    await expect(page.getByRole("heading", { name: "Discovery Demo Complete" })).toBeVisible();
   });
 });

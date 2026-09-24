@@ -79,13 +79,13 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await fillGoalsStage(page, "Academic support");
     await page.getByRole("button", { name: "Continue" }).click();
 
-    await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
+    await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
     await scrollToBottom(page);
     await page.getByRole("button", { name: "Continue" }).click();
 
-    await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+    await expect(page.getByText("How much flexibility would be helpful?")).toBeVisible();
     await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await scrollToBottom(page);
     await page.getByRole("button", { name: "Continue" }).click();
@@ -105,11 +105,11 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await fillGoalsStage(page, "Academic support");
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
+    await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+    await expect(page.getByText("How much flexibility would be helpful?")).toBeVisible();
     await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();
@@ -132,11 +132,11 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await fillGoalsStage(page, "Academic support");
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText(/which best describes how learning is going overall right now/i)).toBeVisible();
+    await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
-    await page.getByRole("radio", { name: "Does well with occasional check-ins", exact: true }).check();
+    await page.getByRole("radio", { name: "With occasional check-ins", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByText("How much schedule flexibility would be helpful for your family?")).toBeVisible();
+    await expect(page.getByText("How much flexibility would be helpful?")).toBeVisible();
     await page.getByRole("radio", { name: "Not important -- our schedule already works well", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText("What role would you ideally like to have in your student's day-to-day learning?")).toBeVisible();

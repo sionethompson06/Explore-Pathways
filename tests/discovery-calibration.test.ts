@@ -20,7 +20,7 @@ function active(raw: RawAnswers): Set<string> {
 
 describe("question-bank contract version and question count", () => {
   it("is the Phase 3E calibrated version with all 39 canonical questions preserved", () => {
-    expect(QUESTION_BANK_VERSION).toBe("2.0.0-discovery-calibrated");
+    expect(QUESTION_BANK_VERSION).toBe("2.1.0-discovery-ux-simplified");
     expect(QUESTIONS).toHaveLength(39);
   });
 });
@@ -208,15 +208,21 @@ describe("DISC_022 (advancement_interests): NONE_CURRENTLY exclusivity and grade
     expect(result.ok).toBe(true);
   });
 
-  it("offers WORK_BASED_LEARNING/INDUSTRY_CREDENTIALS/ENTREPRENEURSHIP to high schoolers", () => {
+  it("offers WORK_BASED_LEARNING/ENTREPRENEURSHIP to high schoolers, with HONORS/AP and CAREER_CTE/INDUSTRY_CREDENTIALS consolidated into combined Phase 3F cards", () => {
     const [q] = describeQuestionsForStage("PLANNING", {
       current_grade: "10",
       reported_academic_position: "AHEAD",
     }).filter((d) => d.field === "advancement_interests");
     const values = new Set(q?.options?.map((o) => o.value));
     expect(values.has("WORK_BASED_LEARNING")).toBe(true);
-    expect(values.has("INDUSTRY_CREDENTIALS")).toBe(true);
     expect(values.has("ENTREPRENEURSHIP")).toBe(true);
+    expect(values.has("HONORS_AP")).toBe(true);
+    expect(values.has("CAREER_CTE_CREDENTIALS")).toBe(true);
+    // Superseded by the combined cards above -- not offered individually at HIGH_SCHOOL.
+    expect(values.has("HONORS")).toBe(false);
+    expect(values.has("AP")).toBe(false);
+    expect(values.has("INDUSTRY_CREDENTIALS")).toBe(false);
+    expect(values.has("CAREER_CTE")).toBe(false);
   });
 
   it("offers ENRICHMENT (not HONORS/AP) to elementary families", () => {

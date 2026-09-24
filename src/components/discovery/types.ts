@@ -35,6 +35,8 @@ export interface QuestionDescriptor {
   locationStates?: OptionDescriptor[];
   /** Phase 3E: a short, reassuring line shown under the question wording, before its options. */
   helperText?: string;
+  /** Phase 3F: when set, selecting the "OTHER" option reveals an inline free-text input committed under this field name (see contracts/question-bank.json `other_text_field`). Context only -- never a derived-fact input. */
+  otherTextField?: string;
 }
 
 export type AnswerValue =
