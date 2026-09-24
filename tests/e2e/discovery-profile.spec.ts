@@ -69,7 +69,7 @@ test.describe("Discovery: happy path completion (grade 6, no athletics branch)",
   }) => {
     await startDiscovery(page);
     await fillStudentStage(page, "6");
-    await fillGoalsStage(page, "Academic support");
+    await fillGoalsStage(page, "More academic support or help getting back on track");
     await fillLearningStage(page);
     await fillScheduleStage(page);
     await fillFamilyStage(page);
@@ -98,7 +98,7 @@ test.describe("Discovery: homepage interest handoff", () => {
     await fillStudentStage(page, "7");
 
     await expect(page.getByText("What brought you to Pathways?")).toBeVisible();
-    const athleticsCheckbox = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    const athleticsCheckbox = page.getByRole("checkbox", { name: "More time for athletics", exact: true });
     await expect(athleticsCheckbox).toBeChecked();
 
     // Editable: the parent can simply uncheck it.
@@ -128,7 +128,7 @@ test.describe("Discovery: homepage interest confirmation on Continue (DEC-G5)", 
     // No interaction, no Continue -- just reload the same screen.
     await page.reload();
     await expect(page.getByText(/Based on what you told us earlier/)).toBeVisible();
-    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "More time for athletics", exact: true })).toBeChecked();
   });
 
   test("pressing Continue while the visible hint remains selected persists it, with no uncheck/recheck required", async ({
@@ -136,7 +136,7 @@ test.describe("Discovery: homepage interest confirmation on Continue (DEC-G5)", 
   }) => {
     await startDiscovery(page, "athletics");
     await fillStudentStage(page, "7");
-    const athletics = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    const athletics = page.getByRole("checkbox", { name: "More time for athletics", exact: true });
     await expect(athletics).toBeChecked();
 
     // Confirm by pressing Continue -- the checkbox itself is never touched.
@@ -147,7 +147,7 @@ test.describe("Discovery: homepage interest confirmation on Continue (DEC-G5)", 
     // The hint banner is gone: this is now a real, persisted answer, not
     // merely a suggestion re-offered on every load.
     await expect(page.getByText(/Based on what you told us earlier/)).toHaveCount(0);
-    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "More time for athletics", exact: true })).toBeChecked();
   });
 
   test("changing the visible hint before Continue persists the changed answer, not the original hint", async ({
@@ -155,7 +155,7 @@ test.describe("Discovery: homepage interest confirmation on Continue (DEC-G5)", 
   }) => {
     await startDiscovery(page, "athletics");
     await fillStudentStage(page, "7");
-    const athletics = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    const athletics = page.getByRole("checkbox", { name: "More time for athletics", exact: true });
     await expect(athletics).toBeChecked();
     await athletics.uncheck();
     await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
@@ -164,21 +164,21 @@ test.describe("Discovery: homepage interest confirmation on Continue (DEC-G5)", 
     await expect(page).toHaveURL(/stage=LEARNING/);
 
     await page.goto("/discover/profile?stage=GOALS");
-    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).not.toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "More time for athletics", exact: true })).not.toBeChecked();
     await expect(page.getByRole("checkbox", { name: "Flexibility", exact: true })).toBeChecked();
   });
 
   test("adding a second reason alongside the untouched hint persists both", async ({ page }) => {
     await startDiscovery(page, "athletics");
     await fillStudentStage(page, "7");
-    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "More time for athletics", exact: true })).toBeChecked();
     await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
 
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=LEARNING/);
 
     await page.goto("/discover/profile?stage=GOALS");
-    await expect(page.getByRole("checkbox", { name: "Athletics", exact: true })).toBeChecked();
+    await expect(page.getByRole("checkbox", { name: "More time for athletics", exact: true })).toBeChecked();
     await expect(page.getByRole("checkbox", { name: "Flexibility", exact: true })).toBeChecked();
   });
 
@@ -331,7 +331,7 @@ test.describe("Discovery: Review screen", () => {
   test("Edit from Review returns to the named stage", async ({ page }) => {
     await startDiscovery(page);
     await fillStudentStage(page, "6");
-    await fillGoalsStage(page, "Academic support");
+    await fillGoalsStage(page, "More academic support or help getting back on track");
     await fillLearningStage(page);
     await fillScheduleStage(page);
     await fillFamilyStage(page);
@@ -356,7 +356,7 @@ test.describe("Discovery: athletics branch + DISC_020A", () => {
     await page.getByRole("button", { name: "Continue" }).click();
 
     await expect(page).toHaveURL(/stage=GOALS/);
-    const athleticsCheckbox = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    const athleticsCheckbox = page.getByRole("checkbox", { name: "More time for athletics", exact: true });
     await expect(athleticsCheckbox).toBeChecked();
     // The preselection is visual only until the parent actually
     // interacts with it -- explicitly re-affirm it here to commit a
@@ -382,6 +382,29 @@ test.describe("Discovery: athletics branch + DISC_020A", () => {
     await expect(
       page.getByText("Would it be helpful to include NCAA academic requirements"),
     ).toBeVisible();
+  });
+});
+
+test.describe("Discovery: inline \"Other\" free text required before Continue (Phase 3F.1)", () => {
+  test("blank Other text blocks Continue on the real profile, identically to the demo", async ({
+    page,
+  }) => {
+    await startDiscovery(page);
+    await fillStudentStage(page, "6");
+
+    await expect(page.getByText("What brought you to Pathways?")).toBeVisible();
+    await page.getByRole("checkbox", { name: "Something else", exact: true }).check();
+    const otherInput = page.getByLabel("Please describe", { exact: true });
+    await expect(otherInput).toBeVisible();
+    await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
+
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.getByText(/please add a short description for "other"/i)).toBeVisible();
+    await expect(page).not.toHaveURL(/stage=LEARNING/);
+
+    await otherInput.fill("We split time between two homes.");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page).toHaveURL(/stage=LEARNING/);
   });
 });
 

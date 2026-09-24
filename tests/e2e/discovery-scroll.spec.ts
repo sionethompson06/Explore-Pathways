@@ -63,7 +63,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.goto("/discover/demo");
     await fillStudentStage(page, "6th grade");
     await page.getByRole("button", { name: "Continue" }).click();
-    await fillGoalsStage(page, "Athletics");
+    await fillGoalsStage(page, "More time for athletics");
     await scrollToBottom(page);
 
     await page.getByRole("button", { name: "Back" }).click();
@@ -76,7 +76,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.goto("/discover/demo");
     await fillStudentStage(page, "2nd grade");
     await page.getByRole("button", { name: "Continue" }).click();
-    await fillGoalsStage(page, "Academic support");
+    await fillGoalsStage(page, "More academic support or help getting back on track");
     await page.getByRole("button", { name: "Continue" }).click();
 
     await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
@@ -103,7 +103,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.goto("/discover/demo");
     await fillStudentStage(page, "6th grade");
     await page.getByRole("button", { name: "Continue" }).click();
-    await fillGoalsStage(page, "Academic support");
+    await fillGoalsStage(page, "More academic support or help getting back on track");
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();
@@ -130,7 +130,7 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await page.goto("/discover/demo");
     await fillStudentStage(page, "2nd grade");
     await page.getByRole("button", { name: "Continue" }).click();
-    await fillGoalsStage(page, "Academic support");
+    await fillGoalsStage(page, "More academic support or help getting back on track");
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText(/how is your student.s learning going now/i)).toBeVisible();
     await page.getByRole("radio", { name: "Right on level", exact: true }).check();

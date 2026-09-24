@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { QuestionField } from "./QuestionField";
+import { findBlockingOtherTextFields } from "./otherTextGate";
 import { useScrollStageAnchor } from "./useScrollStageAnchor";
 import type {
   AnswerValue,
@@ -55,6 +56,25 @@ export function DiscoveryQuestionnaire({
   const [submitErrors, setSubmitErrors] = useState<FieldErrorView[]>([]);
   const [localAnswers, setLocalAnswers] = useState(answers);
   const [lastFailedPatch, setLastFailedPatch] = useState<Record<string, unknown> | null>(null);
+  // Phase 3F.1: kept separate from `fieldErrors` above -- a field's own
+  // save-success handler (in `commit`) clears its `fieldErrors` entry
+  // unconditionally, which would otherwise race with and silently wipe
+  // out a still-valid Continue-gate blocking message the instant the
+  // Other text field's own (now-valid-shaped, just still-blank) save
+  // round trip resolves.
+  const [otherTextGateErrors, setOtherTextGateErrors] = useState<Record<string, string>>({});
+  // Phase 3F.1: each mounted OtherTextInput registers its own live
+  // (not-yet-debounced) text getter here, so Continue can read the
+  // true current value without waiting on a save round trip.
+  const otherTextLiveRef = useRef<Record<string, () => string>>({});
+
+  function registerOtherTextLiveValue(field: string, getValue: (() => string) | null) {
+    if (getValue) {
+      otherTextLiveRef.current[field] = getValue;
+    } else {
+      delete otherTextLiveRef.current[field];
+    }
+  }
 
   const stageOrder = useMemo(() => stages.map((s) => s.id), [stages]);
   const currentIndex = stageOrder.indexOf(stageId);
@@ -125,6 +145,33 @@ export function DiscoveryQuestionnaire({
    * past a required question that was never actually persisted.
    */
   async function handleContinue() {
+    // Phase 3F.1: a selected "Other" with blank/whitespace-only text
+    // blocks Continue itself -- final Review/Submit
+    // (validateCompletedProfile) is a second, server-authoritative
+    // enforcement of the same rule, not the only one.
+    const blocking = findBlockingOtherTextFields(
+      questions,
+      (field) => localAnswers[field],
+      (field) => otherTextLiveRef.current[field]?.() ?? (typeof localAnswers[field] === "string" ? (localAnswers[field] as string) : undefined),
+    );
+    const otherTextFields = questions.map((q) => q.otherTextField).filter((f): f is string => Boolean(f));
+    if (blocking.length > 0) {
+      setOtherTextGateErrors((prev) => {
+        const next = { ...prev };
+        for (const field of otherTextFields) delete next[field];
+        for (const failure of blocking) next[failure.field] = failure.message;
+        return next;
+      });
+      return;
+    }
+    if (otherTextFields.length > 0) {
+      setOtherTextGateErrors((prev) => {
+        const next = { ...prev };
+        for (const field of otherTextFields) delete next[field];
+        return next;
+      });
+    }
+
     if (stageId === "GOALS" && interestHint && localAnswers.discovery_reasons !== undefined) {
       const ok = await commit("discovery_reasons", localAnswers.discovery_reasons);
       if (!ok) return;
@@ -187,6 +234,8 @@ export function DiscoveryQuestionnaire({
                 onCommit={commit}
                 error={fieldErrors[question.field]}
                 otherTextValue={question.otherTextField ? localAnswers[question.otherTextField] : undefined}
+                otherTextError={question.otherTextField ? otherTextGateErrors[question.otherTextField] : undefined}
+                registerOtherTextLiveValue={registerOtherTextLiveValue}
               />
             ))}
           </div>

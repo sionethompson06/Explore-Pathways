@@ -68,10 +68,10 @@ describe("DISC_006 legacy environment normalization", () => {
     expect(answers.discovery_reasons).toEqual(["BETTER_FIT_ENVIRONMENT"]);
   });
 
-  it("SMALLER_ENVIRONMENT stays its own separate value, never merged into BETTER_FIT_ENVIRONMENT", () => {
+  it("Phase 3F.1 supersedes this: SMALLER_ENVIRONMENT is now aliased to BETTER_FIT_ENVIRONMENT (docs/pathways/DECISION_LOG.md DEC-M1) -- see tests/discovery-ux-simplification-3f1.test.ts for the current coverage", () => {
     const raw: RawAnswers = { current_grade: "6", discovery_reasons: ["SMALLER_ENVIRONMENT"] };
     const { answers } = computeEffectiveAnswers(raw);
-    expect(answers.discovery_reasons).toEqual(["SMALLER_ENVIRONMENT"]);
+    expect(answers.discovery_reasons).toEqual(["BETTER_FIT_ENVIRONMENT"]);
   });
 });
 

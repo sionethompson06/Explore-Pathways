@@ -167,3 +167,33 @@ Owner-approved manual-review refinement of the Phase 3E calibrated build, docume
 ### New: "Other" inline free-text sidecar mechanism
 
 New optional `other_text_field` on the Question schema; `src/lib/discovery/registry.ts` exports `getParentQuestionForOtherTextField`/`OTHER_TEXT_FIELDS`; `KNOWN_FIELDS` includes sidecar field names. `src/lib/discovery/validation.ts` validates each sidecar as sanitized short text capped at 150 characters, and requires nonblank text at profile-completion time exactly when the parent's active value includes `OTHER`. `src/lib/discovery/present.ts` threads `otherTextField` onto `QuestionDescriptor` and appends sidecar text to its parent's own Review row. `src/components/discovery/QuestionField.tsx` renders the inline input and clears it on deselect. See `docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md` section 6 for the full design.
+
+## Phase 3F.1 — Discovery cleanup patch (question-bank.json 2.1.0-discovery-ux-simplified, no version bump -- data-only edits within the same schema shape)
+
+Small, owner-approved cleanup patch to Phase 3F. Documented in full at `docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md` section 10 and `docs/pathways/DECISION_LOG.md` section M. Still not Phase 4.
+
+### question-bank.json (still 39 questions)
+
+- `discovery_reasons` (DISC_006) new-entry choices reduced from 15-18 to 11 (10 at ELEMENTARY): `SCHEDULE_FLEXIBILITY`, `ATHLETICS`, `HOMESCHOOL`, `ONLINE`, `ACADEMIC_ACCELERATION`, `ACADEMIC_SUPPORT`, `BETTER_FIT_ENVIRONMENT`, `PERSONALIZED_LEARNING`, `GRADE_PLANNING` (MIDDLE/HIGH_SCHOOL/UNDETERMINED only), `EXPLORING`, `OTHER`. `matching_use` rewritten to remove the now-inaccurate "OTHER needs no mandatory narrative" and document the new required-before-Continue behavior.
+
+### legacy-aliases.json (discovery_reasons, new)
+
+- `question_value_aliases.discovery_reasons`: added `SMALLER_ENVIRONMENT` -> `BETTER_FIT_ENVIRONMENT`, `ADVANCED_COURSES`/`COLLEGE_ADVANCEMENT` -> `ACADEMIC_ACCELERATION`, `CREDIT_RECOVERY` -> `ACADEMIC_SUPPORT`.
+- `TRAVEL`, `ARTS`, `FAMILY_INVOLVEMENT` retired from new-entry use via `grade_band_allowed_values` only -- no alias, no removal (their historical meaning is not equivalent to any surviving value, same pattern as `PHONICS`/`FAMILY_TIME` in Phase 3F).
+
+### src/lib/discovery/labels.ts
+
+- `discovery_reasons` overrides updated for all 11 surviving new-entry values (e.g. `ATHLETICS`: "More time for athletics"; `ACADEMIC_SUPPORT`: "More academic support or help getting back on track").
+
+### src/lib/discovery/normalization.ts (derived-fact preservation)
+
+- `supplemental_need`'s `discoveryReasons` check simplified to `["ACADEMIC_SUPPORT", "ACADEMIC_ACCELERATION"]` (the two retired/aliased literals can never appear post-normalization).
+- `schedule_flexibility_need`'s `hasRealConstraint` now also checks `ARTS` on `flexibility_reasons`, so that signal keeps its new home now that `ARTS`/`TRAVEL` are gone from `discovery_reasons`' new-entry list.
+
+### tests/discovery-option-count-qa.test.ts
+
+- `DOCUMENTED_EXCEEDING_QUESTIONS` allowlist is now empty (`discovery_reasons` no longer exceeds 12); kept as a named, empty `Set` rather than deleted, so a future over-12 question still must add itself explicitly.
+
+### "Other" required before Continue (new, `src/components/discovery/otherTextGate.ts`)
+
+- New shared `findBlockingOtherTextFields` function, called identically from both `DiscoveryQuestionnaire.tsx` (real profile) and `DiscoveryDemoQuestionnaire.tsx` (demo): blocks stage Continue with an inline error when an active `OTHER` selection's sidecar text is blank or whitespace-only. `QuestionField.tsx`/`OtherTextInput` gained a live (non-debounced) value-getter registration (`registerOtherTextLiveValue`) so Continue always sees the truly current typed text. `validateCompletedProfile`'s existing final Review/Submit REQUIRED check is unchanged and remains the server-authoritative backstop.

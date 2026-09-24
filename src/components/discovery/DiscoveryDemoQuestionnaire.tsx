@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { QuestionField } from "./QuestionField";
+import { findBlockingOtherTextFields } from "./otherTextGate";
 import { useScrollStageAnchor } from "./useScrollStageAnchor";
 import type {
   AnswerValue,
@@ -97,11 +98,29 @@ export function DiscoveryDemoQuestionnaire({
   const requestSeqRef = useRef(0);
   const [state, setState] = useState<DemoStateView>(initialState);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  // Phase 3F.1: kept separate from `fieldErrors` above -- a field's own
+  // save-success handler (in `commit`) clears its `fieldErrors` entry
+  // unconditionally, which would otherwise race with and silently wipe
+  // out a still-valid Continue-gate blocking message the instant the
+  // Other text field's own (now-valid-shaped, just still-blank) save
+  // round trip resolves.
+  const [otherTextGateErrors, setOtherTextGateErrors] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [lastFailedPatch, setLastFailedPatch] = useState<Record<string, unknown> | null>(null);
   const [submitErrors, setSubmitErrors] = useState<FieldErrorView[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  // Phase 3F.1: mirrors the real DiscoveryQuestionnaire's identical ref --
+  // each mounted OtherTextInput registers its own live text getter here.
+  const otherTextLiveRef = useRef<Record<string, () => string>>({});
+
+  function registerOtherTextLiveValue(field: string, getValue: (() => string) | null) {
+    if (getValue) {
+      otherTextLiveRef.current[field] = getValue;
+    } else {
+      delete otherTextLiveRef.current[field];
+    }
+  }
 
   const stageOrder = state.stages.map((s) => s.id as StageId);
   const currentIndex = stageOrder.indexOf(state.stageId);
@@ -188,6 +207,36 @@ export function DiscoveryDemoQuestionnaire({
 
   /** DEC-G6 parity: pressing Continue while the hint remains visibly selected is itself the confirmation -- see the real DiscoveryQuestionnaire's identical comment. */
   async function handleContinue() {
+    // Phase 3F.1: identical Continue-gate to the real
+    // DiscoveryQuestionnaire (see findBlockingOtherTextFields) -- shared
+    // code, not a demo-only reimplementation of the same rule.
+    const otherTextFields = state.questions
+      .map((q) => q.otherTextField)
+      .filter((f): f is string => Boolean(f));
+    const blocking = findBlockingOtherTextFields(
+      state.questions,
+      (field) => displayValue(field),
+      (field) =>
+        otherTextLiveRef.current[field]?.() ??
+        (typeof rawAnswers[field] === "string" ? (rawAnswers[field] as string) : undefined),
+    );
+    if (blocking.length > 0) {
+      setOtherTextGateErrors((prev) => {
+        const next = { ...prev };
+        for (const field of otherTextFields) delete next[field];
+        for (const failure of blocking) next[failure.field] = failure.message;
+        return next;
+      });
+      return;
+    }
+    if (otherTextFields.length > 0) {
+      setOtherTextGateErrors((prev) => {
+        const next = { ...prev };
+        for (const field of otherTextFields) delete next[field];
+        return next;
+      });
+    }
+
     if (state.stageId === "GOALS" && interestHint) {
       const ok = await commit("discovery_reasons", displayValue("discovery_reasons"));
       if (!ok) return;
@@ -278,6 +327,8 @@ export function DiscoveryDemoQuestionnaire({
                     onCommit={commit}
                     error={fieldErrors[question.field]}
                     otherTextValue={question.otherTextField ? displayValue(question.otherTextField) : undefined}
+                    otherTextError={question.otherTextField ? otherTextGateErrors[question.otherTextField] : undefined}
+                    registerOtherTextLiveValue={registerOtherTextLiveValue}
                   />
                 ))}
               </div>

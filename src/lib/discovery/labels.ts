@@ -130,25 +130,29 @@ const OVERRIDES: Record<string, Record<string, string>> = {
     NOT_ENROLLED: "Not currently enrolled",
   },
   discovery_reasons: {
-    SCHEDULE_FLEXIBILITY: "More flexibility in our schedule",
-    HOMESCHOOL: "Explore homeschooling",
-    ONLINE: "Explore online learning",
-    ACADEMIC_ACCELERATION: "Move at a faster academic pace",
+    SCHEDULE_FLEXIBILITY: "More schedule flexibility",
+    ATHLETICS: "More time for athletics",
+    HOMESCHOOL: "Homeschool or home-based learning",
+    ONLINE: "Online learning",
+    /** Phase 3F.1: surviving umbrella for ADVANCED_COURSES/COLLEGE_ADVANCEMENT -- see contracts/legacy-aliases.json. */
+    ACADEMIC_ACCELERATION: "More academic challenge or advancement",
     ADVANCED_COURSES: "Access more advanced courses",
     COLLEGE_ADVANCEMENT: "Get a head start on college",
+    /** Phase 3F.1: surviving umbrella for CREDIT_RECOVERY -- see contracts/legacy-aliases.json. */
+    ACADEMIC_SUPPORT: "More academic support or help getting back on track",
     CREDIT_RECOVERY: "Get back on track toward graduation",
-    GRADE_PLANNING: "Explore grade placement options",
+    GRADE_PLANNING: "Grade placement or reclassification",
     TRAVEL: "Support frequent family travel",
     ARTS: "Support serious arts training or performance",
     CURRENT_SCHOOL_CONCERN: "A concern with the current school",
-    PERSONALIZED_LEARNING: "A more personalized approach to learning",
+    PERSONALIZED_LEARNING: "More personalized learning",
     ENVIRONMENT_CONCERN: "A concern with the learning environment",
-    /** Phase 3E canonical replacement for CURRENT_SCHOOL_CONCERN/DIFFERENT_ENVIRONMENT/ENVIRONMENT_CONCERN -- see contracts/legacy-aliases.json. */
-    BETTER_FIT_ENVIRONMENT: "Find a learning environment that feels like a better fit",
+    /** Phase 3E canonical replacement for CURRENT_SCHOOL_CONCERN/DIFFERENT_ENVIRONMENT/ENVIRONMENT_CONCERN; Phase 3F.1 additionally folds in SMALLER_ENVIRONMENT -- see contracts/legacy-aliases.json. */
+    BETTER_FIT_ENVIRONMENT: "A learning environment that feels like a better fit",
     SMALLER_ENVIRONMENT: "A smaller, more personal environment",
     FAMILY_INVOLVEMENT: "More family involvement in learning",
     OTHER: "Something else",
-    EXPLORING: "Just exploring options for now",
+    EXPLORING: "We're exploring what's possible",
   },
   desired_primary_change: {
     TIME_CONTROL: "More control over our time",

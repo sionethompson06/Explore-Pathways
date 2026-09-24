@@ -24,6 +24,8 @@ export function QuestionField({
   error,
   gradeLabelForAge,
   otherTextValue,
+  otherTextError,
+  registerOtherTextLiveValue,
 }: {
   question: QuestionDescriptor;
   value: AnswerValue;
@@ -33,6 +35,16 @@ export function QuestionField({
   gradeLabelForAge?: string | undefined;
   /** Phase 3F: current value of `question.otherTextField`, when declared. Ignored otherwise. */
   otherTextValue?: AnswerValue;
+  /** Phase 3F.1: inline validation message (e.g. "please add a short description") shown beside the Other input, distinct from `error` above which belongs to the parent question. */
+  otherTextError?: string | undefined;
+  /**
+   * Phase 3F.1: lets the parent read the Other text input's true
+   * current (untrimmed, not-yet-debounced) value at Continue time,
+   * without waiting on this field's own save debounce -- registered on
+   * mount, unregistered (`null`) on unmount, by the OtherTextInput
+   * below. Ignored for any question without `otherTextField`.
+   */
+  registerOtherTextLiveValue?: ((field: string, getValue: (() => string) | null) => void) | undefined;
 }) {
   const errorId = `${question.field}-error`;
   const legendId = `${question.field}-legend`;
@@ -57,7 +69,14 @@ export function QuestionField({
       {question.inputType === "single" || question.inputType === "single_from_previous" ? (
         <SingleChoice question={question} value={value} onCommit={onCommit} />
       ) : question.inputType === "multi" ? (
-        <MultiChoice question={question} value={value} onCommit={onCommit} otherTextValue={otherTextValue} />
+        <MultiChoice
+          question={question}
+          value={value}
+          onCommit={onCommit}
+          otherTextValue={otherTextValue}
+          otherTextError={otherTextError}
+          registerOtherTextLiveValue={registerOtherTextLiveValue}
+        />
       ) : question.inputType === "short_text" ? (
         <ShortText question={question} value={value} onCommit={onCommit} labelledBy={legendId} />
       ) : question.inputType === "integer_or_unknown" ? (
@@ -119,11 +138,15 @@ function MultiChoice({
   value,
   onCommit,
   otherTextValue,
+  otherTextError,
+  registerOtherTextLiveValue,
 }: {
   question: QuestionDescriptor;
   value: AnswerValue;
   onCommit: (field: string, value: AnswerValue) => void;
   otherTextValue?: AnswerValue;
+  otherTextError?: string | undefined;
+  registerOtherTextLiveValue?: ((field: string, getValue: (() => string) | null) => void) | undefined;
 }) {
   const current = Array.isArray(value) ? value : [];
   const maxSelections = question.maxSelections;
@@ -190,7 +213,13 @@ function MultiChoice({
         );
       })}
       {question.otherTextField && current.includes("OTHER") ? (
-        <OtherTextInput field={question.otherTextField} value={otherTextValue} onCommit={onCommit} />
+        <OtherTextInput
+          field={question.otherTextField}
+          value={otherTextValue}
+          onCommit={onCommit}
+          registerLiveValue={registerOtherTextLiveValue}
+          error={otherTextError}
+        />
       ) : null}
       {maxSelections ? (
         <p className={styles.hint}>
@@ -210,20 +239,41 @@ const OTHER_TEXT_MAX_LENGTH = 150;
  * OTHER is checked (see MultiChoice above), so there is no stale-value
  * resync concern: unchecking OTHER unmounts it, and rechecking it
  * mounts a fresh instance from whatever `value` currently holds.
+ *
+ * Phase 3F.1: also registers a live getter for its own uncommitted
+ * `local` state via `registerLiveValue`, so the parent's Continue
+ * handler can read the true current text (not the debounced/committed
+ * one) without waiting on this field's own 500ms save timer or a blur
+ * event to land first.
  */
 function OtherTextInput({
   field,
   value,
   onCommit,
+  registerLiveValue,
+  error,
 }: {
   field: string;
   value: AnswerValue;
   onCommit: (field: string, value: AnswerValue) => void;
+  registerLiveValue?: ((field: string, getValue: (() => string) | null) => void) | undefined;
+  error?: string | undefined;
 }) {
   const [local, setLocal] = useState(typeof value === "string" ? value : "");
+  const localRef = useRef(local);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  useEffect(() => {
+    localRef.current = local;
+  }, [local]);
+
   useEffect(() => () => clearTimeout(timeoutRef.current), []);
+
+  useEffect(() => {
+    registerLiveValue?.(field, () => localRef.current);
+    return () => registerLiveValue?.(field, null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- field never changes for a mounted instance
+  }, [field]);
 
   function handleChange(next: string) {
     setLocal(next);
@@ -236,10 +286,12 @@ function OtherTextInput({
     onCommit(field, local);
   }
 
+  const errorId = `${field}-other-error`;
+
   return (
     <div className={styles.otherTextRow}>
       <label htmlFor={`${field}-input`} className={styles.otherTextLabel}>
-        Please describe (optional context for your advisor)
+        Please describe
       </label>
       <input
         id={`${field}-input`}
@@ -247,12 +299,18 @@ function OtherTextInput({
         className={styles.textInput}
         value={local}
         maxLength={OTHER_TEXT_MAX_LENGTH}
+        aria-describedby={error ? errorId : undefined}
         onChange={(e) => handleChange(e.target.value)}
         onBlur={flush}
       />
       <p className={styles.hint}>
         {local.length} / {OTHER_TEXT_MAX_LENGTH}
       </p>
+      {error ? (
+        <p id={errorId} role="alert" className={styles.error}>
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

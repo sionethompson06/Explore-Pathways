@@ -17,21 +17,13 @@ const MAX_VISIBLE_OPTIONS = 12;
 
 /**
  * Phase 3F section 23: "If another question must exceed 12: document
- * the exact reason in the completion report." discovery_reasons
- * (DISC_006) is the one documented exception -- Phase 3F's explicit,
- * field-by-field wording/option instructions (sections 3-15) named
- * every other long-list question but not this one, and DISC_006 is
- * the single most heavily depended-upon field in branching.ts
- * (isAthleticsInterest, isAdvancementInterestOrReportedAheadOrMixed,
- * isHomeOrRemoteLearningConsidered, isGradePlanningReasonAndMiddleOrHs,
- * isScheduleConstraintContext) and in rules.json (ENV_001), so
- * consolidating its canonical values was judged out of Phase 3F's
- * actual scope rather than an oversight. This allowlist keeps that
- * judgment call visible and reviewable -- not a silent pass -- exactly
- * so a future change can't quietly let a SECOND question grow past 12
- * unnoticed.
+ * the exact reason in the completion report." Phase 3F.1 reduced
+ * discovery_reasons (DISC_006) itself to 10-11 new-entry choices, so
+ * it no longer needs a documented exception -- this allowlist is kept
+ * empty, not deleted, so a future change that lets ANY question grow
+ * past 12 must add itself here explicitly rather than silently pass.
  */
-const DOCUMENTED_EXCEEDING_QUESTIONS = new Set(["discovery_reasons"]);
+const DOCUMENTED_EXCEEDING_QUESTIONS = new Set<string>([]);
 
 interface OptionCountRow {
   id: string;
@@ -53,8 +45,8 @@ function computeVisibleOptionCounts(): OptionCountRow[] {
   return rows;
 }
 
-describe("Discovery option-count QA (Phase 3F section 23)", () => {
-  it("no single/multi question (other than the explicitly exempt DISC_002, or the one documented exception) exceeds 12 visible new-entry choices in any grade band", () => {
+describe("Discovery option-count QA (Phase 3F section 23, Phase 3F.1 fix 1)", () => {
+  it("no single/multi question (other than the explicitly exempt DISC_002) exceeds 12 visible new-entry choices in any grade band", () => {
     const rows = computeVisibleOptionCounts();
     const overLimit = rows.filter(
       (r) => r.count > MAX_VISIBLE_OPTIONS && !DOCUMENTED_EXCEEDING_QUESTIONS.has(r.field),
@@ -63,9 +55,11 @@ describe("Discovery option-count QA (Phase 3F section 23)", () => {
     expect(overLimit, `Questions exceeding ${MAX_VISIBLE_OPTIONS} visible options:\n${report}`).toEqual([]);
   });
 
-  it("discovery_reasons is the one documented over-limit exception, named explicitly rather than silently passing", () => {
+  it("discovery_reasons no longer appears in the documented over-limit exception allowlist, and is within 12 in every grade band", () => {
+    expect(DOCUMENTED_EXCEEDING_QUESTIONS.has("discovery_reasons")).toBe(false);
     const rows = computeVisibleOptionCounts().filter((r) => r.field === "discovery_reasons");
-    expect(rows.every((r) => r.count > MAX_VISIBLE_OPTIONS)).toBe(true);
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((r) => r.count <= MAX_VISIBLE_OPTIONS)).toBe(true);
   });
 
   it("DISC_002 (current_grade) is the one documented exception, and is exempt by name, not by accident", () => {
@@ -89,6 +83,9 @@ describe("Discovery option-count QA (Phase 3F section 23)", () => {
     }
     for (const row of byField("advancement_interests")) {
       expect(row.count, `advancement_interests @ ${row.gradeBand}`).toBeLessThanOrEqual(11);
+    }
+    for (const row of byField("discovery_reasons")) {
+      expect(row.count, `discovery_reasons @ ${row.gradeBand}`).toBeLessThanOrEqual(11);
     }
   });
 });

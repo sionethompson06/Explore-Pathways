@@ -71,8 +71,8 @@ test.describe("Discovery visual QA: breakpoints", () => {
         await startAndFillStudentStage(page);
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=GOALS/);
-        await page.getByRole("checkbox", { name: "Athletics", exact: true }).uncheck();
-        await page.getByRole("checkbox", { name: "Athletics", exact: true }).check();
+        await page.getByRole("checkbox", { name: "More time for athletics", exact: true }).uncheck();
+        await page.getByRole("checkbox", { name: "More time for athletics", exact: true }).check();
         await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
         await page.getByRole("button", { name: "Continue" }).click();
         await expect(page).toHaveURL(/stage=LEARNING/);
@@ -101,8 +101,8 @@ test.describe("Discovery visual QA: breakpoints", () => {
     await startAndFillStudentStage(page);
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=GOALS/);
-    await page.getByRole("checkbox", { name: "Athletics", exact: true }).uncheck();
-    await page.getByRole("checkbox", { name: "Athletics", exact: true }).check();
+    await page.getByRole("checkbox", { name: "More time for athletics", exact: true }).uncheck();
+    await page.getByRole("checkbox", { name: "More time for athletics", exact: true }).check();
     await page.getByRole("checkbox", { name: "Flexibility", exact: true }).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=LEARNING/);
@@ -186,7 +186,7 @@ test.describe("Discovery visual QA: interaction states", () => {
     await startAndFillStudentStage(page);
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page).toHaveURL(/stage=GOALS/);
-    const athletics = page.getByRole("checkbox", { name: "Athletics", exact: true });
+    const athletics = page.getByRole("checkbox", { name: "More time for athletics", exact: true });
     await athletics.uncheck();
     await athletics.check();
     await page.getByRole("button", { name: "Continue" }).click();

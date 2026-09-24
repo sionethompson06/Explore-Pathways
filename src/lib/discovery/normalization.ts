@@ -141,13 +141,13 @@ export function computeEffectiveAnswers(raw: RawAnswers): EffectiveAnswers {
       (v) => v !== "NONE" && v !== "UNKNOWN",
     );
 
+  // Phase 3F.1: ADVANCED_COURSES/COLLEGE_ADVANCEMENT are now legacy
+  // aliases of ACADEMIC_ACCELERATION (contracts/legacy-aliases.json),
+  // so they can never appear in the already-normalized discoveryReasons
+  // array below -- checking for ACADEMIC_ACCELERATION alone is
+  // equivalent and keeps this list free of dead literals.
   const supplementalNeed =
-    includesAny(discoveryReasons, [
-      "ACADEMIC_SUPPORT",
-      "ACADEMIC_ACCELERATION",
-      "ADVANCED_COURSES",
-      "COLLEGE_ADVANCEMENT",
-    ]) ||
+    includesAny(discoveryReasons, ["ACADEMIC_SUPPORT", "ACADEMIC_ACCELERATION"]) ||
     includesAny(asStringArray(raw.reported_support_needs), [
       "READING",
       "WRITING",
@@ -223,13 +223,22 @@ function deriveSupportStructureNeed(activeRaw: ActiveRawReader): SupportStructur
  * DISC_013 sets the subjective baseline; a real scheduling constraint
  * can only raise it -- a mild "somewhat important" answer (or no
  * answer yet) next to a genuine weekly conflict is not treated as the
- * family's true need. discovery_reasons (ATHLETICS/TRAVEL/ARTS) is
- * read directly, not through activeRaw, because it is show_when "ALL"
- * and so already-answered regardless of DISC_013; flexibility_reasons
+ * family's true need. discovery_reasons ATHLETICS is read directly,
+ * not through activeRaw, because it is show_when "ALL" and so
+ * already-answered regardless of DISC_013; flexibility_reasons
  * (DISC_014), by contrast, is itself gated behind
  * isFlexibilitySomewhatOrHigher and so can never independently supply
  * this "already exists" signal for a family who rated flexibility
  * NOT_IMPORTANT or hasn't answered DISC_013 at all.
+ *
+ * Phase 3F.1: TRAVEL and ARTS were retired from DISC_006's new-entry
+ * choices (their detail is gathered later instead), so a future
+ * submission can no longer supply this signal through discoveryReasons
+ * for those two -- FAMILY_TRAVEL was already checked below via
+ * flexibility_reasons; ARTS is added to the same list so the signal
+ * keeps its new home rather than disappearing. TRAVEL has no
+ * flexibility_reasons equivalent of its own beyond FAMILY_TRAVEL,
+ * which already covers it.
  */
 function deriveScheduleFlexibilityNeed(
   activeRaw: ActiveRawReader,
@@ -246,6 +255,7 @@ function deriveScheduleFlexibilityNeed(
       "COMPETITION",
       "ATHLETIC_TRAVEL",
       "FAMILY_TRAVEL",
+      "ARTS",
       "WORK",
       "BUSINESS",
     ]) ||
