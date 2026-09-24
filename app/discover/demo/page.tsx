@@ -42,9 +42,15 @@ export default async function DiscoveryDemoPage({
 
   return (
     <Section tone="default" ariaLabelledBy="discovery-demo-heading">
-      <h1 id="discovery-demo-heading" className="visually-hidden">
+      {/* Phase 5.1a (DEC-Q7): a non-heading landmark label, not an H1 --
+          this route's actual H1 lives inside DiscoveryDemoQuestionnaire
+          itself (visually-hidden while questionnaire/Review is showing,
+          absent once a report renders, so the ReportHero's own H1
+          becomes the page's sole H1 then). aria-labelledby only needs
+          an element with an accessible name, not a heading. */}
+      <span id="discovery-demo-heading" className="visually-hidden">
         Discovery Preview Demo
-      </h1>
+      </span>
       {/* Phase 5.1: NOT `narrow` -- the questionnaire constrains its own
           width (DiscoveryQuestionnaire.module.css .wrapper), so a generated
           report can render at the full premium Phase 5 report width

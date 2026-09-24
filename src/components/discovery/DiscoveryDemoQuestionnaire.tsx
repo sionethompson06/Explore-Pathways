@@ -343,6 +343,15 @@ export function DiscoveryDemoQuestionnaire({
 
   return (
     <div className={styles.wrapper}>
+      {/* Phase 5.1a (DEC-Q7): the page's own landmark label
+          (app/discover/demo/page.tsx) is a non-heading <span> so it
+          never competes with a document H1. This client-rendered,
+          visually-hidden H1 is the page's sole H1 while the
+          questionnaire/Review is showing; it stops rendering the
+          instant a report exists (see the `report` branch above),
+          where the ReportHero's own H1 becomes the page's sole H1
+          instead -- never two H1s at once. */}
+      <h1 className="visually-hidden">Discovery Preview Demo</h1>
       <div className={styles.notice}>
         <p className={styles.noticeHeading}>DEMO PREVIEW</p>
         <p>

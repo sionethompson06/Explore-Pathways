@@ -87,10 +87,11 @@ async function generateReport(page: Page) {
 function expectReportSectionsVisible(page: Page) {
   return {
     async assertAll() {
-      // Hero (R01) -- excludes the page's own pre-existing visually-hidden
-      // landmark H1 (the same pattern already used by the golden-fixture
-      // demo route, see discovery-demo.spec.ts).
-      const hero = page.locator("h1:not(#discovery-demo-heading)");
+      // Hero (R01) -- exactly one H1 on the page (DEC-Q7, resolved in
+      // Phase 5.1a: the page's own landmark heading is a non-H1 span,
+      // and the questionnaire's own hidden H1 stops rendering once a
+      // report exists, so this is always the ReportHero's heading).
+      const hero = page.locator("h1");
       await expect(hero).toHaveCount(1);
       await expect(hero).toHaveText(REPORT_HEADLINE);
 
@@ -159,7 +160,7 @@ test.describe("Interactive Discovery demo -> real Phase 5 report (Phase 5.1 sect
     await page.setViewportSize({ width: 375, height: 900 });
     await completeToReview(page, "Alex");
     await generateReport(page);
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toBeVisible();
+    await expect(page.locator("h1")).toBeVisible();
     const hasOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
     );
@@ -195,6 +196,57 @@ test.describe("Editing answers and regenerating reflects the updated answers, no
     await expect(page.getByText("Jordan's Discovery Report", { exact: true })).toBeVisible();
     await expect(page.getByText("Alex's Discovery Report")).toHaveCount(0);
   });
+
+  /**
+   * Phase 5.1a (DEC-R1): the test above proves the DTO is regenerated,
+   * but a display name never touches Phase 4 -- it can't prove the
+   * updated answers actually flow through normalization -> the real
+   * engine -> the real assembler. `school_change_preference` ("Which
+   * best describes what you're hoping for right now?") does: left
+   * unanswered on the stable K-4 path, it's real Phase 4 input
+   * (src/lib/engine/candidates.ts's engine-native B01 continuity
+   * check) that has no qualifying/displayed candidate, giving
+   * contentStatus LIMITED_INFORMATION. Answering it "Improve what we
+   * already have" (STAY_CURRENT) is confirmed, directly against the
+   * real pipeline (no mocked engine, no test-only engine logic), to
+   * flip contentStatus to PERSONALIZED with B01 displayed -- a
+   * genuinely different educational report, not a cosmetic change.
+   */
+  test("changing a material Phase 4 answer (school_change_preference) and regenerating changes the educational report result", async ({
+    page,
+  }) => {
+    await completeToReview(page);
+    await generateReport(page);
+
+    // Initial result: no qualifying candidate, the LIMITED_EXPLORATION empty state.
+    await expect(page.locator("h1")).toHaveText(REPORT_HEADLINE);
+    await expect(page.locator("#r03-heading")).toHaveText(R03_EMPTY_HEADING);
+    await expect(page.getByText("Build on the Current School Arrangement")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Review or Edit My Answers" }).click();
+    await expect(page.getByRole("heading", { name: "Student" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Edit Student" }).click();
+    await expect(page.getByText("What grade is your student currently in?")).toBeVisible();
+    await page
+      .getByRole("radio", { name: "Improve what we already have", exact: true })
+      .check();
+    await page.getByRole("button", { name: "Continue" }).click(); // Student -> Goals
+    await page.getByRole("button", { name: "Continue" }).click(); // Goals (unchanged)
+    await page.getByRole("button", { name: "Continue" }).click(); // Learning (unchanged)
+    await page.getByRole("button", { name: "Continue" }).click(); // Schedule (unchanged)
+    await page.getByRole("button", { name: "Continue" }).click(); // Family (unchanged) -> Review
+
+    await generateReport(page);
+
+    // Updated result: B01 now qualifies and displays -- a real archetype change.
+    await expect(page.locator("h1")).toHaveText(
+      "Your Discovery answers are pointing toward a direction worth exploring.",
+    );
+    await expect(page.locator("h1")).not.toHaveText(REPORT_HEADLINE);
+    await expect(page.locator("#r03-heading")).not.toHaveText(R03_EMPTY_HEADING);
+    await expect(page.getByText("Build on the Current School Arrangement")).toBeVisible();
+  });
 });
 
 test.describe("Start Demo Again clears everything and restarts (Phase 5.1 section 24)", () => {
@@ -211,7 +263,11 @@ test.describe("Start Demo Again clears everything and restarts (Phase 5.1 sectio
     await expect(page.getByText("What grade is your student currently in?")).toBeVisible();
     await expect(page.getByRole("radio", { name: "2nd grade", exact: true })).not.toBeChecked();
     await expect(page.getByText("Alex's Discovery Report")).toHaveCount(0);
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toHaveCount(0);
+    // Back to exactly one H1 -- the questionnaire's own hidden H1 (DEC-Q7),
+    // never the report's; proves the report's heading is truly gone, not
+    // just visually hidden behind it.
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveText("Discovery Preview Demo");
     await expect(page.getByText(DEMO_LABEL)).toHaveCount(0);
   });
 });
@@ -229,7 +285,9 @@ test.describe("A page refresh restarts the demo even after a report has been gen
     await expect(page.getByText("What grade is your student currently in?")).toBeVisible();
     await expect(page.getByRole("radio", { name: "2nd grade", exact: true })).not.toBeChecked();
     await expect(page.getByText("Alex's Discovery Report")).toHaveCount(0);
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toHaveCount(0);
+    // Back to exactly one H1 -- the questionnaire's own hidden H1 (DEC-Q7).
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveText("Discovery Preview Demo");
   });
 });
 

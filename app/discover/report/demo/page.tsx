@@ -77,9 +77,14 @@ export default async function DiscoveryReportDemoPage({
   return (
     <>
       <Section tone="alt" ariaLabelledBy="demo-selector-heading">
-        <h1 id="demo-selector-heading" className="visually-hidden">
+        {/* Phase 5.1a (DEC-Q7): a non-heading landmark label, not an H1 --
+            this route always renders a real report below via
+            <ReportView>, whose own ReportHero H1 is the page's sole H1.
+            aria-labelledby only needs an element with an accessible
+            name, not a heading. */}
+        <span id="demo-selector-heading" className="visually-hidden">
           Discovery Report Demo Fixture Selector
-        </h1>
+        </span>
         <nav aria-label="Golden report fixture selector" style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
           {KNOWN_FIXTURE_IDS.map((id) => (
             <a

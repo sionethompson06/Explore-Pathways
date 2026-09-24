@@ -350,3 +350,25 @@ Owner-authorized. Full record at `docs/pathways/DECISION_LOG.md` section Q and `
 ### tests/e2e/discovery-demo-integration.spec.ts (new), plus updates to discovery-demo.spec.ts, discovery-profile.spec.ts, discovery-scroll.spec.ts, discovery-visual-qa.spec.ts
 
 - New end-to-end coverage for the interactive demo's questionnaire → report → edit → regenerate → restart → refresh-reset → persistence-safety flow; existing specs updated for the new button wording and report-based completion state. Full Playwright suite: 160 passed. Full Vitest suite: 693 pre-existing + 25 new = 718 passed.
+
+## Phase 5.1a — Final end-to-end demo acceptance cleanup
+
+Owner-authorized narrow acceptance cleanup on top of Phase 5.1. Full record at `docs/pathways/DECISION_LOG.md` section R and the addendum to `docs/pathways/PHASE5_1_END_TO_END_DEMO_INTEGRATION.md`. No question bank, rules, scoring policy, taxonomy, report content, Golden Profile, or Golden Report contract changed. Not merged to main; no AI, no persistence added.
+
+### tests/e2e/discovery-demo-integration.spec.ts
+
+- New material structured-answer edit/regenerate test: changes `school_change_preference` from unanswered to `STAY_CURRENT` between report generations on the stable K-4 input path, and asserts the regenerated report's `contentStatus`/displayed candidate/headlines actually change (a real Phase 4 engine input, verified against the real pipeline). Kept alongside the existing student-name-change test.
+- Every `h1:not(#discovery-demo-heading)` selector replaced with a plain `page.locator("h1")` count-1 assertion, now that DEC-Q7 is resolved.
+
+### app/discover/demo/page.tsx, app/discover/report/demo/page.tsx
+
+- The route-landmark heading used only for `<Section>`'s `aria-labelledby` is now a non-heading, visually-hidden `<span>` instead of an `<h1>`. No visual change.
+
+### src/components/discovery/DiscoveryDemoQuestionnaire.tsx
+
+- Now renders its own visually-hidden `<h1>Discovery Preview Demo</h1>` directly, but only while no report exists; once a report exists, this heading stops rendering and `ReportHero`'s own `<h1>` becomes the page's sole H1. Resolves DEC-Q7: exactly one H1 in the questionnaire state, exactly one in the interactive report state, and exactly one on the Golden fixture demo route (verified in real Chromium).
+
+### tests/e2e/discovery-demo.spec.ts, discovery-scroll.spec.ts
+
+- Remaining `h1:not(#discovery-demo-heading)` workarounds replaced with plain `page.locator("h1")` assertions.
+- `discovery-scroll.spec.ts`'s report-scroll test also fixed a pre-existing, unrelated test bug found during reverification (DEC-R4): it checked the ReportHero H1's own position for "scrolled to top," when the H1 sits well below the demo label/top actions/hero eyebrow-title-badge; now checks the demo label (the anchor container's real first content) instead.

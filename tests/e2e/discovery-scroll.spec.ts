@@ -146,13 +146,24 @@ test.describe("Preview Demo Mode: scroll/focus after stage navigation", () => {
     await scrollToBottom(page);
     await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
 
-    // Excludes the page's own pre-existing visually-hidden landmark H1
-    // (the same pattern already used by the golden-fixture demo route)
-    // so this resolves to exactly the report's own heading.
-    const heading = page.locator("h1:not(#discovery-demo-heading)");
-    await expect(heading).toBeVisible();
+    // Exactly one H1 on the page (DEC-Q7 -- Phase 5.1a resolved the
+    // page's own landmark heading down to a non-H1 span, so this is
+    // never ambiguous).
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toBeVisible();
+
+    // The scroll target is the anchor div wrapping the WHOLE report
+    // (demo label, top actions, then ReportHero) -- checking its own
+    // first visible content (the demo label) near the top proves the
+    // report scrolled into view. The H1 itself sits well below that
+    // (past the demo label, top actions, and ReportHero's own
+    // eyebrow/title/badge), so it is never near y=0 even when the
+    // scroll worked correctly -- checking it directly was never a
+    // reliable proxy for "scrolled to the beginning of the report".
+    const reportTop = page.getByText("Interactive Discovery demo — answers are not saved");
+    await expect(reportTop).toBeVisible();
     await expect(async () => {
-      const box = await heading.boundingBox();
+      const box = await reportTop.boundingBox();
       expect(box).not.toBeNull();
       expect(box!.y).toBeGreaterThanOrEqual(-2);
       expect(box!.y).toBeLessThan(300);

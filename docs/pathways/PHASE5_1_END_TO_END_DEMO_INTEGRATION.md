@@ -118,11 +118,21 @@ Existing Playwright specs (`discovery-demo.spec.ts`, `discovery-profile.spec.ts`
 
 ## 30. Visual scope
 
-No visual redesign of the report was performed. One layout consequence of the integration itself was found and fixed in test authoring only (not app code): both demo routes' pages carry their own pre-existing visually-hidden landmark `<h1>` (for the surrounding `<Section>`'s `aria-labelledby`) alongside the report's own `<h1>` once a report renders — the same pattern the Golden fixture demo route has always had. This is a real, pre-existing minor semantic duplication (two `<h1>`s on the page), not something this phase's integration introduced net-new; it is noted here for the owner's awareness rather than redesigned, since fixing it would mean changing the pre-existing Golden fixture demo route's markup too, which is out of this phase's scope.
+No visual redesign of the report was performed. One layout consequence of the integration itself was found in test authoring: both demo routes' pages carried their own pre-existing visually-hidden landmark `<h1>` (for the surrounding `<Section>`'s `aria-labelledby`) alongside the report's own `<h1>` once a report rendered — the same pattern the Golden fixture demo route always had. **Resolved in Phase 5.1a** (see the addendum below) with a markup-only fix — no visual change.
+
+## Phase 5.1a addendum — final end-to-end demo acceptance cleanup
+
+Two narrow gaps identified in acceptance review of Phase 5.1, closed without any report redesign, Phase 4/5 content change, or persistence added. Full decision record at `docs/pathways/DECISION_LOG.md` section R.
+
+**1. Material structured-answer edit/regenerate test.** The original edit/regenerate Playwright test (section 23 above) only changed the student's display name — proof the DTO is regenerated, but not proof a decision-relevant answer flows through normalization → Phase 4 → Phase 5. A new test changes `school_change_preference` ("Which best describes what you're hoping for right now?") from unanswered to "Improve what we already have" (`STAY_CURRENT`) on the same stable K-4 input path, and asserts the regenerated report's educational content actually changes: `contentStatus` `LIMITED_INFORMATION` → `PERSONALIZED`, zero direction cards → a displayed `B01` card, and a different hero/insight/pathway headline. This is a real, unmodified Phase 4 engine input (the engine-native B01 continuity check in `src/lib/engine/candidates.ts`), verified directly against the real pipeline (no mocked engine, no test-only engine logic) before being encoded as a UI test. The original name-change test is kept alongside it, not replaced.
+
+**2. DEC-Q7 resolved — exactly one H1 per rendered experience.** `app/discover/demo/page.tsx` and `app/discover/report/demo/page.tsx`'s route-landmark heading (used only as an `aria-labelledby` target, never as visible content) is now a non-heading, visually-hidden `<span>` instead of an `<h1>`. `DiscoveryDemoQuestionnaire.tsx` now renders its own visually-hidden `<h1>Discovery Preview Demo</h1>` directly, but only while no report exists; the moment a report exists, that heading stops rendering and the report's own `ReportHero` `<h1>` becomes the page's sole H1. `/discover/report/demo` always renders a report, so its landmark-to-`<span>` change alone was sufficient there. Verified in real Chromium: exactly one `<h1>` in the questionnaire state, exactly one in the interactive report state, and exactly one on the Golden fixture demo route. Every `h1:not(#discovery-demo-heading)` Playwright workaround was replaced with a plain, unscoped `page.locator("h1")` count-1 assertion.
+
+**Incidental finding (DEC-R4).** Reverifying the full Playwright suite surfaced one pre-existing, unrelated test bug (confirmed unrelated to this addendum's changes by reproducing it against the pre-Phase-5.1a markup too): `discovery-scroll.spec.ts`'s report-scroll test checked the ReportHero H1's own position to confirm the report "scrolled to the beginning," but the H1 sits well below the demo label, top actions, and the hero's own eyebrow/title/badge, so it was never a reliable proxy even when the scroll behavior was correct. Fixed by checking the demo label (the anchor container's actual first visible content) instead — a test-only fix, no app behavior changed.
 
 ## 31. Documentation
 
-This document; `docs/pathways/DECISION_LOG.md` section Q; `contracts/CHANGELOG.md`'s Phase 5.1 entry.
+This document (including the Phase 5.1a addendum above); `docs/pathways/DECISION_LOG.md` sections Q and R; `contracts/CHANGELOG.md`'s Phase 5.1 and Phase 5.1a entries.
 
 ## 32. Contract versioning
 

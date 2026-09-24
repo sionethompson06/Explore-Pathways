@@ -115,12 +115,10 @@ test.describe("Preview Demo Mode: K-4 sample profile", () => {
 
     await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
     // Phase 5.1: a real personalized report now renders (never the old
-    // "Discovery Demo Complete" placeholder) -- one real report H1
-    // (excluding the page's own pre-existing visually-hidden landmark
-    // H1, the same pattern already used by the golden-fixture demo
-    // route), the interactive demo's own subordinate label, and the
-    // two report top actions.
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toHaveCount(1);
+    // "Discovery Demo Complete" placeholder) -- exactly one H1 (DEC-Q7,
+    // resolved in Phase 5.1a), the interactive demo's own subordinate
+    // label, and the two report top actions.
+    await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByText("Interactive Discovery demo — answers are not saved")).toBeVisible();
     await expect(page.getByRole("button", { name: "Review or Edit My Answers" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Start Demo Again" })).toBeVisible();
@@ -154,7 +152,7 @@ test.describe("Preview Demo Mode: middle-school athlete sample profile", () => {
     await expect(page.getByRole("heading", { name: "Athletics" })).toBeVisible();
 
     await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByText("Interactive Discovery demo — answers are not saved")).toBeVisible();
   });
 });
@@ -262,7 +260,7 @@ test.describe("Preview Demo Mode: inline \"Other\" free text (Phase 3F, required
     await page.getByRole("button", { name: "Continue" }).click(); // Schedule (unchanged)
     await page.getByRole("button", { name: "Continue" }).click(); // Family (unchanged)
     await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByText("Interactive Discovery demo — answers are not saved")).toBeVisible();
 
     // Unchecking Other removes it from Review's line entirely.
@@ -280,7 +278,7 @@ test.describe("Preview Demo Mode: inline \"Other\" free text (Phase 3F, required
     expect(bodyText).not.toContain("We split time between two homes.");
 
     await page.getByRole("button", { name: "See My Personalized Discovery Report" }).click();
-    await expect(page.locator("h1:not(#discovery-demo-heading)")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByText("Interactive Discovery demo — answers are not saved")).toBeVisible();
   });
 
