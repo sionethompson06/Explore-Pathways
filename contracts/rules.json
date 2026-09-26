@@ -1,0 +1,2833 @@
+{
+  "version": "2.0.0-phase4-engine",
+  "status": "PHASE4_OWNER_CALIBRATED",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md DEC-C2, C4, C6, DEC-H2, DEC-H3+, DEC-N and docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/rules.json). RETIRED rules are kept in this array for explainability but must be skipped during evaluation by the Phase 4 engine (src/lib/engine); only rules without a status of RETIRED are evaluated. Phase 3E retired ADV_003 (replaced by ADV_004) and COST_001 (cost is feasibility, not an educational-alignment score input -- DEC-H2), added ADV_009-013 to reach previously dead-end DISC_022 options, and updated ADV_004/ADV_006/ENV_001's conditions for the calibrated question-bank's canonical enum values. Phase 3F narrowed ADV_006 to HIGH_SCHOOL_EARLY only (ADVANCED_MATH/ADVANCED_SCIENCE/ADVANCED_ELA retired from DISC_022, now alias to CHALLENGING_COURSEWORK) and added ADV_014/ADV_015 for the new combined HONORS_AP/CAREER_CTE_CREDENTIALS cards. Phase 4 (DEC-N) moves schedule and support-structure base-model scoring onto the schedule_flexibility_need/support_structure_need DERIVED facts rather than raw single-question fields (retiring FLEX_001/ATH_002/IND_002/CONF_001 in favor of SCHED_HIGH_001/SCHED_VERYHIGH_001/SUPPORT_HIGH_001/SUPPORT_MODERATE_001/SUPPORT_LOW_SELFPACED_001/SUPPORT_LOW_SELFPACED_HOMESCHOOL_001/SUPPORT_HIGH_ONLINE_TRADEOFF), splits ONLINE_SELF_PACED from ONLINE_TEACHER_SUPPORTED (DELIVERY_001/DELIVERY_001B), retires the blanket PAR_001 PROGRAM_MANAGES reward and moves PAR_002 onto the family_management_preference derived fact plus the new REV_PROGRAM_MANAGEMENT review signal, retires ACAD_007 (replaced by ACAD_ORG_001 on the canonical ORGANIZATION_STUDY_HABITS value) and adds ACAD_ENGAGE_001/ACAD_SCIENCE_001/ACAD_ATTENDANCE_001/ACAD_COMMUNICATION_001, adds OPP_002B (flexibility_reasons ARTS trigger, alongside the unchanged legacy OPP_002 discovery_reasons ARTS trigger), adds COST_ALIGNMENT_REVIEW (feasibility-only, empty score_effects), and retires CURR_001/CURR_002 in favor of an engine-native, general (non-persona-keyed) B01 continuity function in src/lib/engine/candidates.ts, since the closed eq/in/contains_any condition operator set cannot express OPEN_TO_CHANGE's 'no direct model-change signal already selected' test as a single JSON rule condition.",
+  "normalized_fact_fields": [
+    "grade_band",
+    "athletics_interest",
+    "homeschool_interest",
+    "home_or_online_interest",
+    "frequent_travel",
+    "foundation_concern",
+    "supplemental_need",
+    "support_structure_need",
+    "schedule_flexibility_need",
+    "athletic_schedule_demand",
+    "family_management_preference",
+    "advancement_opportunities"
+  ],
+  "rules": [
+    {
+      "id": "FLEX_001",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "flexibility_importance",
+            "op": "in",
+            "value": [
+              "VERY_IMPORTANT",
+              "ESSENTIAL"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 2,
+        "B04": 2,
+        "B06": 3,
+        "B07": 2,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP16"
+        ],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "Your family said schedule flexibility matters. Actual program schedules still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md section 13): base-model schedule scoring now reads the schedule_flexibility_need DERIVED fact (which folds in the Phase 4 athlete-identity-is-not-a-conflict correction and the real-constraint elevation ladder -- src/lib/discovery/normalization.ts) instead of the raw flexibility_importance answer directly, and separates the flat VERY_IMPORTANT/ESSENTIAL treatment into distinct HIGH/VERY_HIGH tiers with different per-model bonuses. Superseded by SCHED_HIGH_001 (HIGH) and SCHED_VERYHIGH_001 (VERY_HIGH).",
+      "replacement_rule_id": "SCHED_HIGH_001"
+    },
+    {
+      "id": "SCHED_HIGH_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "schedule",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 13 (schedule alignment, HIGH tier): reads the schedule_flexibility_need derived fact rather than raw flexibility_importance, so a bare athlete identity or mild subjective answer next to a genuine weekly conflict cannot inflate this tier -- see src/lib/discovery/normalization.ts deriveScheduleFlexibilityNeed.",
+      "when": {
+        "all": [
+          {
+            "field": "schedule_flexibility_need",
+            "op": "eq",
+            "value": "HIGH"
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 2,
+        "B04": 2,
+        "B06": 2,
+        "B07": 2,
+        "B08": 2,
+        "B09": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP16"
+        ],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "Your family said schedule flexibility matters. Actual program schedules still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "SCHED_VERYHIGH_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "schedule",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 13 (schedule alignment, VERY_HIGH tier). See SCHED_HIGH_001's added_reason for why this reads the derived fact rather than the raw question field.",
+      "when": {
+        "all": [
+          {
+            "field": "schedule_flexibility_need",
+            "op": "eq",
+            "value": "VERY_HIGH"
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 3,
+        "B04": 3,
+        "B06": 3,
+        "B07": 2,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP16"
+        ],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "Your family said schedule flexibility matters a great deal. Actual program schedules still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "FLEX_002",
+      "version": "1.1.0-phase4.1-engine",
+      "group": "schedule",
+      "added_reason": "Phase 4.1 (DEC-N7 resolution, PHASE4_DECISION_ENGINE_SPEC_V1.md section 11a): B06 dropped from +3 to +2, matching B03. Unavailable academic times are generic remote/virtual-schedule evidence -- they do not establish that generic PRIVATE ONLINE schooling (B06) is inherently more schedule-compatible than generic PUBLIC VIRTUAL schooling (B03). Public/private funding model is not educational schedule evidence, so B03 and B06 must receive identical schedule-group credit from this rule. B04/B07/B08/B09 are unchanged.",
+      "when": {
+        "all": [
+          {
+            "field": "unavailable_academic_times",
+            "op": "contains_any",
+            "value": [
+              "MORNING",
+              "AFTERNOON",
+              "EVENING",
+              "VARIES"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 2,
+        "B04": 2,
+        "B06": 2,
+        "B07": 1,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "reason_template": "You identified times when scheduled instruction would not work.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED",
+      "added_reason": "Phase 4: review_model_scope added so the engine treats REV_SCHEDULE_COMPATIBILITY as the candidate-scoped material review scoring-policy.json's material_review_mapping declares it to be, not a global signal.",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "FLEX_003",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "frequent_travel",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 3,
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [
+          "O05"
+        ],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_SCHEDULE_COMPATIBILITY"
+        ]
+      },
+      "added_reason": "Phase 4: REV_STATE_AVAILABILITY removed from this rule's own activation and review_model_scope added for REV_SCHEDULE_COMPATIBILITY. REV_STATE_AVAILABILITY is now attached engine-natively (src/lib/engine/considerations.ts) to any qualifying candidate in scoring-policy.json's material_review_mapping.REV_STATE_AVAILABILITY scope regardless of which rule qualified it, per PHASE4_DECISION_ENGINE_SPEC_V1.md section 26 -- declaring it here too would double-source the same signal and, since a single rule's review_model_scope applies to every review it activates, would incorrectly also scope REV_SCHEDULE_COMPATIBILITY down to REV_STATE_AVAILABILITY's narrower candidate set (no B07).",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ],
+      "reason_template": "Travel makes location and attendance requirements important to investigate.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "DELIVERY_001",
+      "version": "2.0.0-phase4-engine",
+      "group": "delivery",
+      "added_reason": "Phase 4 (PHASE4_DECISION_ENGINE_SPEC_V1.md section 14) splits ONLINE_SELF_PACED from ONLINE_TEACHER_SUPPORTED, which now carry different per-model bonuses and only the teacher-supported variant activates S07/REV_LIVE_SUPPORT. See new rule DELIVERY_001B for ONLINE_TEACHER_SUPPORTED.",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 3,
+        "B06": 3,
+        "B04": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family wants to explore self-paced online schooling; program requirements remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "DELIVERY_001B",
+      "version": "1.0.0-phase4-engine",
+      "group": "delivery",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 14: ONLINE_TEACHER_SUPPORTED is evidence for a different set of models (adds B07) and a lower bonus than ONLINE_SELF_PACED, and activates S07 plus a candidate-scoped REV_LIVE_SUPPORT reminder to verify the actual teacher-support arrangement -- ONLINE_SELF_PACED, by definition, does not carry that same verification need.",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_TEACHER_SUPPORTED"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 2,
+        "B06": 2,
+        "B07": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S07"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_LIVE_SUPPORT"
+        ]
+      },
+      "reason_template": "Your family wants to explore online schooling with teacher support; the actual teacher-support arrangement still needs verification.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "DELIVERY_002",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "HYBRID"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B07": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You expressed interest in a mix of remote and in-person education.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "DELIVERY_003",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "IN_PERSON"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 3,
+        "B05": 3,
+        "B07": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You want to consider an in-person learning arrangement.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HOME_001",
+      "version": "1.0.0-candidate",
+      "group": "delivery",
+      "when": {
+        "all": [
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [
+          "O08"
+        ],
+        "supports": [
+          "S11"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_STATE_HOMESCHOOL"
+        ]
+      },
+      "reason_template": "You expressed interest in supported homeschooling.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HOME_002",
+      "version": "2.0.0-phase4-engine",
+      "group": "family_role",
+      "added_reason": "Phase 4: reads the family_management_preference derived fact (a direct 1:1 map of desired_parent_involvement -- src/lib/discovery/normalization.ts deriveFamilyManagementPreference) instead of the raw question field, per PHASE4_DECISION_ENGINE_SPEC_V1.md section 16 and section 6's preference for derived facts as first-class scoring inputs. Behaviorally identical to the prior condition since the map is 1:1.",
+      "when": {
+        "all": [
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "family_management_preference",
+            "op": "in",
+            "value": [
+              "HIGH_FAMILY_INVOLVEMENT",
+              "SHARED_RESPONSIBILITY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You want an active role in day-to-day learning.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HOME_003",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "desired_parent_involvement",
+            "op": "eq",
+            "value": "PROGRAM_MANAGES"
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": -3,
+        "B09": -2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_PRIORITY_TRADEOFF"
+        ]
+      },
+      "reason_template": "Home-based arrangements vary in how much instructional management remains with the family.",
+      "reason_type": "CONSIDERATION",
+      "status": "RETIRED",
+      "retired_at": "phase0-corrections",
+      "retired_reason": "Confirmed redundant with PAR_002 (DEC-C6, Phase 0 audit): PAR_002's condition (desired_parent_involvement = PROGRAM_MANAGES) is a strict superset of this rule's condition (the same, plus homeschool_interest = true), and both produce an identical score_effects ({B08: -3, B09: -2}) and identical review_model_scope ([B08, B09]). Every profile that triggers this rule also triggers PAR_002 with the same effect, so retiring this rule changes no score and removes no unique behavior -- confirmed by direct comparison of both rules' conditions and effects, not merely asserted. Kept in this array, not deleted, so historical engine runs that recorded this rule ID remain explainable. The Phase 4 engine must not evaluate a RETIRED rule.",
+      "replacement_rule_id": "PAR_002",
+      "review_model_scope": [
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "PAR_001",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "desired_parent_involvement",
+            "op": "eq",
+            "value": "PROGRAM_MANAGES"
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 2,
+        "B03": 2,
+        "B05": 2,
+        "B06": 2,
+        "B07": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You prefer a program to manage instruction; actual supervision needs still need review.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 16): wanting a program to manage instruction is not itself positive evidence that every non-family-led model (B02/B03/B05/B06/B07) fits this student better -- a family choosing PROGRAM_LED family management still needs its actual delivery/support/schedule fit established by the other alignment rules. This blanket reward is retired with no direct replacement; PAR_002 (unchanged group, now reading family_management_preference = PROGRAM_LED) remains the sole scored effect of this preference, and it is a considered negative for the home-based models plus the new REV_PROGRAM_MANAGEMENT review, never a positive for any model.",
+      "review_model_scope": [
+        "B02",
+        "B03",
+        "B05",
+        "B06",
+        "B07"
+      ]
+    },
+    {
+      "id": "IND_001",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "learning_support_pattern",
+            "op": "in",
+            "value": [
+              "REGULAR_GUIDANCE",
+              "CLOSE_ADULT_SUPPORT",
+              "INDEPENDENT_WORK_DIFFICULT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S07",
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_LIVE_SUPPORT"
+        ]
+      },
+      "reason_template": "Your answers suggest regular human guidance should be part of the plan.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "added_reason": "Phase 4: review_model_scope added so the engine treats REV_LIVE_SUPPORT as the candidate-scoped material review scoring-policy.json's material_review_mapping declares it to be, not a global signal.",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "IND_002",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "learning_support_pattern",
+            "op": "in",
+            "value": [
+              "INDEPENDENT",
+              "OCCASIONAL_CHECK_INS"
+            ]
+          },
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "SELF_PACED",
+              "BLEND"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 2,
+        "B09": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report some comfort with independent learning and an interest in self-paced or blended work.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 15): superseded by the support_structure_need derived-fact rules. This rule's raw learning_support_pattern condition (INDEPENDENT, OCCASIONAL_CHECK_INS) is a superset of the derived fact's LOW tier -- OCCASIONAL_CHECK_INS alone can also derive MODERATE when a structure/live-support secondary signal is present (src/lib/discovery/normalization.ts deriveSupportStructureNeed) -- and this rule's unconditional B09+1 contradicted the spec's explicit requirement that the B09 homeschool bonus applies ONLY when homeschool_interest is actually true. Superseded by SUPPORT_LOW_SELFPACED_001 (B03/B04/B06) and SUPPORT_LOW_SELFPACED_HOMESCHOOL_001 (B09, homeschool-gated), which together reproduce this rule's effects only when they are actually correct per the derived fact and the homeschool gate.",
+      "replacement_rule_id": "SUPPORT_LOW_SELFPACED_001"
+    },
+    {
+      "id": "SUPPORT_HIGH_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "support_structure",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 15 (support-structure alignment, HIGH tier): high support need is positive evidence for the models built around close human structure (B02/B05/B07), not merely a caution against self-paced options.",
+      "when": {
+        "all": [
+          {
+            "field": "support_structure_need",
+            "op": "eq",
+            "value": "HIGH"
+          }
+        ]
+      },
+      "score_effects": {
+        "B07": 3,
+        "B02": 2,
+        "B05": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S07",
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report a need for close adult guidance; a structured or in-person support model may fit well.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "SUPPORT_MODERATE_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "support_structure",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 15 (support-structure alignment, MODERATE tier).",
+      "when": {
+        "all": [
+          {
+            "field": "support_structure_need",
+            "op": "eq",
+            "value": "MODERATE"
+          }
+        ]
+      },
+      "score_effects": {
+        "B07": 2,
+        "B02": 1,
+        "B05": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report a moderate need for adult guidance; a hybrid or in-person model may fit well.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "SUPPORT_LOW_SELFPACED_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "support_structure",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 15 (support-structure alignment, LOW tier + self-paced/blended preference). Replaces IND_002 (see its retired_reason).",
+      "when": {
+        "all": [
+          {
+            "field": "support_structure_need",
+            "op": "eq",
+            "value": "LOW"
+          },
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "SELF_PACED",
+              "BLEND"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report comfort with independent learning and an interest in self-paced or blended work.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "SUPPORT_LOW_SELFPACED_HOMESCHOOL_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "support_structure",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 15: the B09 homeschool bonus for low support need + self-paced/blended preference applies ONLY when the family has actually expressed homeschool_interest -- a family with low support need who simply likes self-paced online work is not thereby evidence for homeschooling specifically. Split out from SUPPORT_LOW_SELFPACED_001 to keep that gate explicit and enforced by contract, not merely by convention.",
+      "when": {
+        "all": [
+          {
+            "field": "support_structure_need",
+            "op": "eq",
+            "value": "LOW"
+          },
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "SELF_PACED",
+              "BLEND"
+            ]
+          },
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B09": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report comfort with independent learning alongside interest in homeschooling.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "SUPPORT_HIGH_ONLINE_TRADEOFF",
+      "version": "1.0.0-phase4-engine",
+      "group": "support_structure",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 15: high reported support need alongside an ONLINE_SELF_PACED preference is a genuine tension, not a hard exclusion -- the family's stated independence preference and their reported need for close guidance must be surfaced together for review rather than silently averaged away. Replaces CONF_001 (see its retired_reason), which used the raw learning_support_pattern field (a superset of the HIGH tier that could also fire at MODERATE) and had no score effect at all.",
+      "when": {
+        "all": [
+          {
+            "field": "support_structure_need",
+            "op": "eq",
+            "value": "HIGH"
+          },
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": -2,
+        "B04": -2,
+        "B06": -2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_LIVE_SUPPORT",
+          "REV_PRIORITY_TRADEOFF"
+        ]
+      },
+      "reason_template": "The desired independence and the reported need for close support should be considered together.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06"
+      ]
+    },
+    {
+      "id": "LEARN_001",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "LIVE_TEACHER",
+              "ONE_TO_ONE",
+              "SMALL_GROUP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 2,
+        "B05": 2,
+        "B07": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S07"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Direct teacher interaction is one of your stated preferences.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 15): confirmed to independently duplicate evidence the support_structure_need derived fact already incorporates -- LIVE_TEACHER/SMALL_GROUP/ONE_TO_ONE in preferred_learning_environment is exactly deriveSupportStructureNeed's own liveSupportSignal input (src/lib/discovery/normalization.ts), which can elevate LOW->MODERATE or REGULAR_GUIDANCE->HIGH. Under the Phase 4 two-group qualification gate this raw-field rule firing ALONGSIDE the derived-fact-driven SUPPORT_HIGH_001/SUPPORT_MODERATE_001 created a spurious extra positive support_structure-group data point that let candidates (e.g. B07 for the elementary-homeschool P04 and traveling-athlete P06 golden profiles) qualify on evidence the owner-calibrated acceptance tests do not intend to count. Retired with no direct replacement -- SUPPORT_HIGH_001/SUPPORT_MODERATE_001/SUPPORT_LOW_SELFPACED_001 are the sole support_structure-group scoring source for this evidence going forward.",
+      "review_model_scope": [
+        "B02",
+        "B05",
+        "B07"
+      ]
+    },
+    {
+      "id": "LEARN_002",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "BLEND"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B06": 1
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You prefer a combination of independent work and live support; availability must be checked.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED",
+      "added_reason": "Phase 4 (DEC-N): B07's own +3 removed from this rule's score_effects -- confirmed redundant with (dominated by) SUPPORT_HIGH_001/SUPPORT_MODERATE_001 whenever support_structure_need is actually HIGH/MODERATE, and a spurious extra positive support_structure-group data point that let B07 over-qualify under the Phase 4 two-group gate when support_structure_need was only LOW (confirmed against the P06 golden profile, where B07 must not qualify from athletic schedule demand plus a bare BLEND preference alone). B03/B06 are kept: unlike B02/B05/B07, the virtual family never receives ANY support_structure-group score from the HIGH/MODERATE tiers (PHASE4_DECISION_ENGINE_SPEC_V1.md section 15 credits only B02/B05/B07 there), so this remains the sole legitimate positive support_structure evidence available to B03/B06 when a family's preference is teacher-supported/blended virtual learning with genuine support needs -- confirmed necessary for the P03 golden profile, where B03/B06 must qualify precisely because of this evidence."
+    },
+    {
+      "id": "LEARN_003",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "preferred_learning_environment",
+            "op": "contains_any",
+            "value": [
+              "HANDS_ON",
+              "MOVEMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP17"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Hands-on experiences are among the activities your student enjoys.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ELEM_001",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "daytime_support_availability",
+            "op": "in",
+            "value": [
+              "OCCASIONAL",
+              "NOT_ARRANGED"
+            ]
+          },
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": -3,
+        "B09": -3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ADULT_SUPPORT"
+        ]
+      },
+      "reason_template": "The practical daytime support arrangement needs to be established before choosing home-based learning.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "added_reason": "Phase 4 (PHASE4_DECISION_ENGINE_SPEC_V1.md section 17): review_model_scope widened to include B07 -- hybrid elementary learning may still require meaningful daytime home support depending on actual program design, so a family with the same daytime-support gap deserves the same reminder there.",
+      "review_model_scope": [
+        "B07",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "ELEM_002",
+      "version": "1.0.0-candidate",
+      "group": "family_role",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "homeschool_interest",
+            "op": "eq",
+            "value": true
+          },
+          {
+            "field": "daytime_support_availability",
+            "op": "eq",
+            "value": "MOST_LEARNING_DAYS"
+          },
+          {
+            "field": "desired_parent_involvement",
+            "op": "in",
+            "value": [
+              "VERY_INVOLVED",
+              "REGULAR_SUPPORT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": 3,
+        "B09": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You want to be involved and report that daytime adult support can be available.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ELEM_003",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "daytime_support_availability",
+            "op": "in",
+            "value": [
+              "UNKNOWN",
+              "NOT_ARRANGED"
+            ]
+          },
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED",
+              "ONLINE_TEACHER_SUPPORTED",
+              "HOMESCHOOL"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ADULT_SUPPORT"
+        ]
+      },
+      "reason_template": "For a young student, the daytime adult-support plan is an important part of evaluating home-based options.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "SOCIAL_001",
+      "version": "1.0.0-candidate",
+      "group": "social",
+      "when": {
+        "all": [
+          {
+            "field": "in_person_peer_preference",
+            "op": "eq",
+            "value": "VERY_IMPORTANT"
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 3,
+        "B05": 3,
+        "B07": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP14"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Regular in-person time with peers is important to your family.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "SOCIAL_002",
+      "version": "1.0.0-candidate",
+      "group": "social",
+      "when": {
+        "all": [
+          {
+            "field": "in_person_peer_preference",
+            "op": "eq",
+            "value": "VERY_IMPORTANT"
+          },
+          {
+            "field": "home_or_online_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP14"
+        ],
+        "reviews": [
+          "REV_SOCIAL_PLAN"
+        ]
+      },
+      "reason_template": "An online or home-based plan should address the in-person community your family values.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "ACAD_001",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_academic_position",
+            "op": "eq",
+            "value": "AHEAD"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP01"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "You report a need for more challenge; academic readiness has not been verified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_academic_position",
+            "op": "eq",
+            "value": "MIXED"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O07"
+        ],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ACADEMIC_CONTEXT"
+        ]
+      },
+      "reason_template": "You describe different needs across subjects, so subject-specific planning may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_003",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_academic_position",
+            "op": "in",
+            "value": [
+              "STRUGGLING",
+              "SIGNIFICANT_CONCERNS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S02"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_ACADEMIC_CONTEXT"
+        ]
+      },
+      "reason_template": "You would like a clearer understanding of where additional academic support could help.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_004",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "READING"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S03"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified reading as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_005",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "WRITING"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S05"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified writing as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_006",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "MATH"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S04"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified math as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_007",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "ROUTINES",
+              "ORGANIZATION",
+              "TIME_MANAGEMENT",
+              "TASK_COMPLETION",
+              "STUDY_SKILLS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S06",
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You identified learning routines or organization as an area to support.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 19): ROUTINES/ORGANIZATION/TIME_MANAGEMENT/TASK_COMPLETION/STUDY_SKILLS are all consolidated into the canonical ORGANIZATION_STUDY_HABITS value in effective answers (contracts/legacy-aliases.json question_value_aliases.reported_support_needs, Phase 3F), so this rule's condition on the retired literal values can never fire again for a current submission -- the exact dead-rule pattern already identified and fixed for other fields at Phase 3E/3F. Superseded by ACAD_ORG_001, which matches the canonical value directly and activates the identical S06/S12 targets.",
+      "replacement_rule_id": "ACAD_ORG_001"
+    },
+    {
+      "id": "ACAD_ORG_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "support_structure",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 19. Replaces ACAD_007 (see its retired_reason) with a condition on the canonical, current ORGANIZATION_STUDY_HABITS value instead of the retired literal values it consolidates.",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "ORGANIZATION_STUDY_HABITS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S06",
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You identified learning routines or organization as an area to support.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_ENGAGE_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "academic",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 19. Deliberately signal-only (empty score_effects) and framed as a context-gathering review, never a diagnosis of motivation, mental health or confidence.",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "ENGAGEMENT_CONFIDENCE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S12"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_ACADEMIC_CONTEXT"
+        ]
+      },
+      "reason_template": "You identified engagement or confidence as an area to understand better; this is a context signal, not a diagnosis.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_SCIENCE_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "academic",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 19: reported_support_needs = SCIENCE previously activated no support, a dead end alongside ACAD_004/005/006's READING/WRITING/MATH treatment.",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "SCIENCE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S02"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family identified science as an area where support may help.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_ATTENDANCE_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "academic",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 19: attendance concerns are a global context signal (never school-model-scoped) so an advisor can determine whether schedule, environment, logistics, health, family circumstances or another factor is affecting attendance before drawing conclusions. Never infers a cause.",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "ATTENDANCE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ATTENDANCE_CONTEXT"
+        ]
+      },
+      "reason_template": "You identified attendance as an area to understand better before drawing any conclusions.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ACAD_COMMUNICATION_001",
+      "version": "1.0.0-phase4-engine",
+      "group": "academic",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 19: clarifies what communication/coordination support the family is seeking; no school-model score.",
+      "when": {
+        "all": [
+          {
+            "field": "reported_support_needs",
+            "op": "contains_any",
+            "value": [
+              "COMMUNICATION"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_COMMUNICATION_CONTEXT"
+        ]
+      },
+      "reason_template": "You identified communication or coordination as an area to clarify.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "FOUND_001",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "foundation_concern",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O06"
+        ],
+        "supports": [
+          "S02"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_FOUNDATIONAL_SKILLS"
+        ]
+      },
+      "reason_template": "Foundational learning is an area your family would like to understand more clearly.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "FOUND_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "ELEMENTARY"
+          },
+          {
+            "field": "subject_advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "MATH",
+              "READING",
+              "WRITING",
+              "SCIENCE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [
+          "OP18"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "You want to explore additional challenge in a specific subject; this does not establish readiness to accelerate.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_001",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "athletics_interest",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O01"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP10"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Athletics is one of your family's stated planning priorities.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_002",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "weekly_athletic_commitment",
+            "op": "in",
+            "value": [
+              "HOURS_16_20",
+              "HOURS_21_PLUS"
+            ]
+          },
+          {
+            "field": "flexibility_importance",
+            "op": "in",
+            "value": [
+              "VERY_IMPORTANT",
+              "ESSENTIAL"
+            ]
+          }
+        ]
+      },
+      "score_effects": {
+        "B03": 1,
+        "B04": 1,
+        "B06": 2,
+        "B07": 1,
+        "B08": 2,
+        "B09": 2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You report a substantial athletic schedule and a need for flexibility.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 21): confirmed redundant, not merely asserted -- whenever this rule's own condition (weekly_athletic_commitment HOURS_16_20/21_PLUS AND flexibility_importance VERY_IMPORTANT/ESSENTIAL) is met, SCHED_HIGH_001/SCHED_VERYHIGH_001 (schedule_flexibility_need HIGH/VERY_HIGH) always fire in the same schedule group with an equal-or-larger positive effect for every model this rule scores, and group aggregation keeps only the single largest positive effect per group. Retiring this rule therefore changes no score for any profile. Also directly serves the section 21 requirement that athletic_level/prestige and being an athlete alone contribute ZERO base-model score -- removing this rule leaves only derived, real-constraint-based schedule evidence (schedule_flexibility_need) as the schedule score input.",
+      "replacement_rule_id": "SCHED_HIGH_001"
+    },
+    {
+      "id": "ATH_003",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "college_athletics_interest",
+            "op": "in",
+            "value": [
+              "DEFINITELY",
+              "POSSIBLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S09"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_COLLEGE_ATHLETICS"
+        ]
+      },
+      "reason_template": "College athletics is a future interest to include in planning.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_004",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "college_athletics_interest",
+            "op": "in",
+            "value": [
+              "DEFINITELY",
+              "POSSIBLY"
+            ]
+          },
+          {
+            "field": "ncaa_interest",
+            "op": "in",
+            "value": [
+              "YES",
+              "MAYBE",
+              "UNKNOWN"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_NCAA"
+        ]
+      },
+      "reason_template": "Relevant college-athletic academic requirements would need review; no eligibility determination has been made.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ATH_005",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "reclassification_interest",
+            "op": "in",
+            "value": [
+              "YES",
+              "POSSIBLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_RECLASSIFICATION"
+        ]
+      },
+      "reason_template": "Grade-placement questions require individualized academic and athletic review.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_001",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "HONORS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP02"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_002",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "AP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP03"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_003",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "DUAL_ENROLLMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O03"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP04"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase3e-discovery-calibration",
+      "retired_reason": "DISC_022's DUAL_ENROLLMENT and COLLEGE_COURSES are merged into one family-facing concept, canonical value COLLEGE_LEVEL_COURSES (DISCOVERY_CALIBRATION_SPEC_V2.md section 9) -- both legacy values normalize to it in effective answers (contracts/legacy-aliases.json), so this rule's DUAL_ENROLLMENT-only condition can never again be met by a current submission. Kept for explainability of any prior run recorded against it; ADV_004 (updated to match on COLLEGE_LEVEL_COURSES) is the sole rule for this concept going forward.",
+      "replacement_rule_id": "ADV_004"
+    },
+    {
+      "id": "ADV_004",
+      "version": "1.1.0-phase3e-discovery-calibration",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "COLLEGE_LEVEL_COURSES"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O03"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP05"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore this academic opportunity; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_005",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "EARLY_GRADUATION"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_GRADUATION"
+        ]
+      },
+      "reason_template": "Early graduation requires a broader academic and future-planning review.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_006",
+      "version": "1.2.0-phase3f-ux-simplification",
+      "group": "academic",
+      "added_reason": "Phase 3F narrowed this condition to HIGH_SCHOOL_EARLY only: ADVANCED_MATH/ADVANCED_SCIENCE/ADVANCED_ELA are retired from DISC_022 new-entry use and alias to CHALLENGING_COURSEWORK (contracts/legacy-aliases.json), which already activates this same O02+OP01+REV_ADVANCEMENT_READINESS target via ADV_010 -- no distinct Phase-4-relevant signal is lost by dropping them here.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "HIGH_SCHOOL_EARLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP01"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family wants to investigate a more challenging subject pathway.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_001",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "reported_graduation_status",
+            "op": "in",
+            "value": [
+              "NO",
+              "MOSTLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S10"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_TRANSCRIPT",
+          "REV_GRADUATION"
+        ]
+      },
+      "reason_template": "Graduation progress should be reviewed using actual records; the cause of any concern is not yet established.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "reported_graduation_status",
+            "op": "eq",
+            "value": "UNKNOWN"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_GRADUATION_UNKNOWN"
+        ]
+      },
+      "reason_template": "Your current graduation status is not yet clear from the information provided.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_003",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "credit_recovery_need",
+            "op": "in",
+            "value": [
+              "YES",
+              "POSSIBLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O04"
+        ],
+        "supports": [
+          "S10"
+        ],
+        "opportunities": [],
+        "reviews": [
+          "REV_TRANSCRIPT"
+        ]
+      },
+      "reason_template": "You indicated that missing credits may need attention; no course prescription has been made.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "HS_004",
+      "version": "1.0.0-candidate",
+      "group": "continuity",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "HIGH_SCHOOL"
+          },
+          {
+            "field": "school_change_preference",
+            "op": "in",
+            "value": [
+              "OPEN_TO_CHANGE",
+              "SEEKING_CHANGE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_CREDIT_TRANSFER"
+        ]
+      },
+      "reason_template": "Before changing schools, review how completed coursework would be considered by the receiving institution.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "COST_001",
+      "version": "1.0.0-candidate",
+      "group": "cost",
+      "when": {
+        "all": [
+          {
+            "field": "cost_preference",
+            "op": "eq",
+            "value": "PREFER_TUITION_FREE"
+          }
+        ]
+      },
+      "score_effects": {
+        "B02": 2,
+        "B03": 3,
+        "B04": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "Your family would prefer to explore publicly funded schooling options; eligibility and any separate service costs still need review.",
+      "reason_type": "FEASIBILITY",
+      "status": "RETIRED",
+      "retired_at": "phase3e-discovery-calibration",
+      "retired_reason": "DEC-H2 (docs/pathways/DECISION_LOG.md): cost belongs to PRACTICAL FEASIBILITY, not EDUCATIONAL ALIGNMENT (DISCOVERY_CALIBRATION_SPEC_V2.md section 12) -- a family preferring tuition-free options is not evidence that a tuition-free base model is a better educational fit for their student, so this rule's direct score_effects on B02/B03/B04 is exactly the anti-pattern the architectural change forbids. Cost still reaches the report through REV_COST_ALIGNMENT (scoring-policy.json postprocess_rules / material_review_mapping), which surfaces cost as a discussion point rather than inflating a base model's score. No replacement rule: this concern is deliberately not re-implemented as a scoring rule.",
+      "review_model_scope": [
+        "B02",
+        "B03",
+        "B04"
+      ]
+    },
+    {
+      "id": "COST_ALIGNMENT_REVIEW",
+      "version": "1.0.0-phase4-engine",
+      "group": "cost",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 25: cost is practical feasibility only -- a preference for tuition-free options must never raise B02/B03/B04 or lower B05/B06's educational score, and must never reorder educational alignment. When a private-tuition model (B05/B06) qualifies educationally on its own evidence and the family prefers tuition-free options, that tension is a discussion point for the actual family, never a reason to change the model's educational standing. score_effects is deliberately empty -- see contract validation's FEASIBILITY-rules-must-have-empty-score_effects guarantee.",
+      "when": {
+        "all": [
+          {
+            "field": "cost_preference",
+            "op": "eq",
+            "value": "PREFER_TUITION_FREE"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_COST_ALIGNMENT"
+        ]
+      },
+      "reason_template": "Your family would prefer to explore publicly funded schooling options; no exact budget or income has been inferred.",
+      "reason_type": "FEASIBILITY",
+      "status": "PILOT_UNVALIDATED",
+      "review_model_scope": [
+        "B05",
+        "B06"
+      ]
+    },
+    {
+      "id": "CURR_001",
+      "version": "1.0.0-candidate",
+      "group": "continuity",
+      "when": {
+        "all": [
+          {
+            "field": "school_change_preference",
+            "op": "eq",
+            "value": "STAY_CURRENT"
+          }
+        ]
+      },
+      "score_effects": {
+        "B01": 4
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "You prefer to improve the current educational arrangement rather than change schools.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 12): B01's continuity logic is now engine-native (src/lib/engine/candidates.ts), not a JSON rule -- it must also (a) objectively exclude B01 when current_education_model = NOT_ENROLLED, never apply the STAY_CURRENT special qualification when current_education_model is UNKNOWN/missing, and (b) for OPEN_TO_CHANGE, grant only a modest +1 and only when no direct model-change signal (ONLINE/HOMESCHOOL/BETTER_FIT_ENVIRONMENT/SCHEDULE_FLEXIBILITY) is already selected in discovery_reasons. That last, general (non-persona-keyed) test is a negative/'not contains' condition the closed eq/in/contains_any rule-condition operator set (PHASE4_DECISION_ENGINE_SPEC_V1.md section 31) cannot express as a single JSON rule condition, so this concern moves to engine-native code that participates in the same group-aggregation pipeline as an ordinary rule contribution.",
+      "review_model_scope": [
+        "B01"
+      ]
+    },
+    {
+      "id": "CURR_002",
+      "version": "1.0.0-candidate",
+      "group": "academic",
+      "when": {
+        "all": [
+          {
+            "field": "school_change_preference",
+            "op": "in",
+            "value": [
+              "STAY_CURRENT",
+              "OPEN_TO_CHANGE"
+            ]
+          },
+          {
+            "field": "supplemental_need",
+            "op": "eq",
+            "value": true
+          }
+        ]
+      },
+      "score_effects": {
+        "B01": 3
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "The stated academic or enrichment goal may be explored through added support before deciding whether to change schools.",
+      "reason_type": "ALIGNMENT",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N: see CURR_001's retired_reason -- the B01 supplemental-need bonus is part of the same engine-native continuity function (src/lib/engine/candidates.ts), general and keyed only on current_education_model/school_change_preference/supplemental_need, never on a persona or profile identity.",
+      "review_model_scope": [
+        "B01"
+      ]
+    },
+    {
+      "id": "ENV_001",
+      "version": "1.1.0-phase3e-discovery-calibration",
+      "group": "context",
+      "when": {
+        "all": [
+          {
+            "field": "discovery_reasons",
+            "op": "contains_any",
+            "value": [
+              "BETTER_FIT_ENVIRONMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_ENVIRONMENT"
+        ]
+      },
+      "reason_template": "You identified the learning environment as something to discuss with an advisor.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "CONF_001",
+      "version": "1.0.0-candidate",
+      "group": "support_structure",
+      "when": {
+        "all": [
+          {
+            "field": "desired_delivery",
+            "op": "contains_any",
+            "value": [
+              "ONLINE_SELF_PACED"
+            ]
+          },
+          {
+            "field": "learning_support_pattern",
+            "op": "in",
+            "value": [
+              "REGULAR_GUIDANCE",
+              "CLOSE_ADULT_SUPPORT",
+              "INDEPENDENT_WORK_DIFFICULT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_PRIORITY_TRADEOFF",
+          "REV_LIVE_SUPPORT"
+        ]
+      },
+      "reason_template": "The desired independence and the reported support needs should be considered together.",
+      "reason_type": "CONSIDERATION",
+      "status": "RETIRED",
+      "retired_at": "phase4-engine",
+      "retired_reason": "DEC-N (PHASE4_DECISION_ENGINE_SPEC_V1.md section 15): superseded by SUPPORT_HIGH_ONLINE_TRADEOFF, which reads the support_structure_need derived fact's HIGH tier specifically (this rule's raw learning_support_pattern condition also fires at what the derived fact would call MODERATE, e.g. REGULAR_GUIDANCE with no secondary signal) and, per the spec, also applies an actual negative score effect for the tension rather than leaving score_effects empty.",
+      "replacement_rule_id": "SUPPORT_HIGH_ONLINE_TRADEOFF",
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B08",
+        "B09"
+      ]
+    },
+    {
+      "id": "OPP_001",
+      "version": "1.0.0-candidate",
+      "group": "future",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "CAREER_CTE"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP08"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Career-related learning is an interest your family wants to explore.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "OPP_002",
+      "version": "1.0.0-candidate",
+      "group": "schedule",
+      "when": {
+        "all": [
+          {
+            "field": "discovery_reasons",
+            "op": "contains_any",
+            "value": [
+              "ARTS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O10"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP11"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Arts or performance activities are part of the schedule you want education to support.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "OPP_002B",
+      "version": "1.0.0-phase4-engine",
+      "group": "schedule",
+      "added_at": "phase4-engine",
+      "added_reason": "PHASE4_DECISION_ENGINE_SPEC_V1.md section 22: ARTS was removed from DISC_006's new-entry option set at Phase 3F.1, so OPP_002's discovery_reasons = ARTS trigger can no longer fire from a current submission. The current/future new-entry trigger is flexibility_reasons contains ARTS (DISC_013's flexibility_reasons multi-select). OPP_002 itself is kept unchanged so a historical discovery_reasons = ARTS answer remains explainable; this rule is a parallel trigger to the identical activation target, not a replacement.",
+      "when": {
+        "all": [
+          {
+            "field": "flexibility_reasons",
+            "op": "contains_any",
+            "value": [
+              "ARTS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O10"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP11"
+        ],
+        "reviews": []
+      },
+      "reason_template": "Arts or performance activities are part of the schedule you want education to support.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "PAR_002",
+      "version": "2.0.0-phase4-engine",
+      "group": "family_role",
+      "added_reason": "Phase 4 (PHASE4_DECISION_ENGINE_SPEC_V1.md section 16): reads the family_management_preference derived fact (PROGRAM_LED) instead of the raw desired_parent_involvement = PROGRAM_MANAGES value -- a direct 1:1 map, so behaviorally identical -- and now also activates the new REV_PROGRAM_MANAGEMENT review signal (verify actual day-to-day instruction, scheduling, progress monitoring, communication and family-coordination the program provides) alongside the existing REV_PRIORITY_TRADEOFF. Neither review signal implies any positive educational score.",
+      "when": {
+        "all": [
+          {
+            "field": "family_management_preference",
+            "op": "eq",
+            "value": "PROGRAM_LED"
+          }
+        ]
+      },
+      "score_effects": {
+        "B08": -3,
+        "B09": -2
+      },
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_PRIORITY_TRADEOFF",
+          "REV_PROGRAM_MANAGEMENT"
+        ]
+      },
+      "review_model_scope": [
+        "B03",
+        "B04",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ],
+      "reason_template": "Family-led or assembled home learning may require more coordination than your family wants to manage; review the actual support arrangement.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED",
+      "dedup_key": "HOME_MANAGEMENT_TRADEOFF"
+    },
+    {
+      "id": "ADV_007",
+      "version": "1.1.0-phase0-corrected",
+      "group": "future",
+      "added_at": "phase0-corrections",
+      "added_reason": "Resolves DEC-C2 (Phase 0 audit): DISC_022 offered RESEARCH as a selectable advancement interest, and taxonomy defined OP06 to represent it, but no rule connected them, so a parent selecting Research received no acknowledgment anywhere in the system.",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "RESEARCH"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP06"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore research or independent projects; this is an interest signal, not evidence of readiness, and does not affect any base-model score.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_008",
+      "version": "1.1.0-phase0-corrected",
+      "group": "future",
+      "added_at": "phase0-corrections",
+      "added_reason": "Resolves DEC-C4 (Phase 0 audit): S08 (college planning) had no activating rule despite DISC_023 (college_intent) being an obvious, already-collected trigger. This is deliberately a signal-only rule with empty score_effects so it never influences base-model ranking, per owner instruction.",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "in",
+            "value": [
+              "MIDDLE",
+              "HIGH_SCHOOL"
+            ]
+          },
+          {
+            "field": "college_intent",
+            "op": "in",
+            "value": [
+              "DEFINITELY",
+              "PROBABLY"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [
+          "S08"
+        ],
+        "opportunities": [],
+        "reviews": []
+      },
+      "reason_template": "College is part of your family's future plan; college planning support is one possible service to explore. This does not imply AP, dual-enrollment, admissions or college readiness.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_009",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "academic",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022's ENRICHMENT (the grade-tiered option shown to elementary families) previously activated no overlay, opportunity or review -- a genuine dead end (DISCOVERY_CALIBRATION_SPEC_V2.md section 9). Wired to the same foundational challenge/enrichment opportunity (OP18) already used for elementary foundational-priorities, since both express 'more than the standard curriculum' at an elementary level; not a new opportunity.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "ENRICHMENT"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP18"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore enrichment beyond the standard curriculum; this is an interest signal, not evidence of readiness.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_010",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "academic",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022's CHALLENGING_COURSEWORK (the grade-tiered option shown to middle/undetermined families who are not yet ready for HONORS/AP-specific language) previously activated nothing, another dead end DISCOVERY_CALIBRATION_SPEC_V2.md section 9 requires fixing. Shares OP01 with ADV_006 rather than a new opportunity -- both express general academic challenge.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "CHALLENGING_COURSEWORK"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP01"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore more challenging coursework; this is an interest signal, not evidence of readiness.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_011",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "future",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022 now captures work-based learning/internship interest directly (DISCOVERY_CALIBRATION_SPEC_V2.md section 9), so OP07 (previously RESERVED at Phase 0 because no question captured it -- DEC-C3) can move to ACTIVE and become reachable without speculative wiring.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "WORK_BASED_LEARNING"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP07"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore work-based learning or internship opportunities; this is an interest signal, not a placement or employer commitment.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_012",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "future",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022 now captures industry-credential interest directly, so OP09 (previously RESERVED, same DEC-C3 reasoning as OP07) can move to ACTIVE.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "INDUSTRY_CREDENTIALS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP09"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore industry certifications or credentials; this is an interest signal, not a qualification determination.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_013",
+      "version": "1.0.0-phase3e-discovery-calibration",
+      "group": "future",
+      "added_at": "phase3e-discovery-calibration",
+      "added_reason": "DISC_022 now captures entrepreneurship interest directly, so OP12 (previously RESERVED, same DEC-C3 reasoning as OP07) can move to ACTIVE.",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "ENTREPRENEURSHIP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP12"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore entrepreneurship opportunities; this is an interest signal, not a program guarantee.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_014",
+      "version": "1.0.0-phase3f-ux-simplification",
+      "group": "future",
+      "added_at": "phase3f-ux-simplification",
+      "added_reason": "DISC_022's HIGH_SCHOOL tier now offers one combined \"Honors/AP\" card (HONORS_AP) instead of separate HONORS/AP cards, since most families do not need to distinguish the two at Discovery time. Rather than force that technical distinction, one broad selection activates both OP02 (Honors) and OP03 (AP) for later review. Legacy HONORS-only/AP-only raw answers are NOT aliased to HONORS_AP and keep activating their own more precise single-opportunity rule (ADV_001/ADV_002 respectively).",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "HONORS_AP"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O02"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP02",
+          "OP03"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore Honors and/or AP coursework; eligibility, readiness and availability remain unverified.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "ADV_015",
+      "version": "1.0.0-phase3f-ux-simplification",
+      "group": "future",
+      "added_at": "phase3f-ux-simplification",
+      "added_reason": "DISC_022's HIGH_SCHOOL tier now offers one combined \"Career/CTE or industry credentials\" card (CAREER_CTE_CREDENTIALS) instead of separate CAREER_CTE/INDUSTRY_CREDENTIALS cards. One broad selection activates both OP08 and OP09 for later review, rather than making the parent choose the technical distinction. MIDDLE tier keeps plain CAREER_CTE alone (industry credentials was never offered at that tier).",
+      "when": {
+        "all": [
+          {
+            "field": "advancement_interests",
+            "op": "contains_any",
+            "value": [
+              "CAREER_CTE_CREDENTIALS"
+            ]
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [
+          "O09"
+        ],
+        "supports": [],
+        "opportunities": [
+          "OP08",
+          "OP09"
+        ],
+        "reviews": [
+          "REV_ADVANCEMENT_READINESS"
+        ]
+      },
+      "reason_template": "Your family asked to explore career/technical education and industry-credential opportunities; this is an interest signal, not a qualification determination.",
+      "reason_type": "ALIGNMENT",
+      "status": "PILOT_UNVALIDATED"
+    },
+    {
+      "id": "GRADE_001",
+      "version": "1.1.0-phase0-corrected",
+      "group": "context",
+      "added_at": "phase0-corrections",
+      "added_reason": "Resolves DEC-C5 (Phase 0 audit) for REV_AGE_GRADE_CONTEXT, which was declared in taxonomy.json but never emitted by any rule. Deliberately has empty score_effects: this is a neutral clarification need, not a scored evidence dimension, and must never be read as an age-versus-grade risk score or as presuming retention, acceleration, disability or eligibility problems.",
+      "when": {
+        "all": [
+          {
+            "field": "grade_band",
+            "op": "eq",
+            "value": "UNDETERMINED"
+          }
+        ]
+      },
+      "score_effects": {},
+      "activate": {
+        "overlays": [],
+        "supports": [],
+        "opportunities": [],
+        "reviews": [
+          "REV_AGE_GRADE_CONTEXT"
+        ]
+      },
+      "reason_template": "Your student's grade level wasn't clear from your answers. A few clarifying details would help identify the educational pathways worth exploring.",
+      "reason_type": "CONSIDERATION",
+      "status": "PILOT_UNVALIDATED"
+    }
+  ],
+  "review_signal_notes": {
+    "REV_SERVICE_AVAILABILITY": "Resolves DEC-C5 (Phase 0 audit) for the other previously-unwired review signal. Per owner instruction, this signal is NOT triggered by any rule in this file and must not be: whether Pathways advising/consultation is actually live for a family's stated location is an operational/service-configuration concern, resolved by the consultation adapter (Phase 6) outside the educational scoring function entirely. It affects the report's CTA and service-availability explanation, never educational fit or candidate scoring. An unconfigured service must never be presented as available; REQUEST_ONLY mode is permissible only when request-intake is actually authorized and configured."
+  }
+}

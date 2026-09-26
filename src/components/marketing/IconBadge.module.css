@@ -1,0 +1,24 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.tint {
+  background: var(--color-accent-tint);
+  color: var(--color-accent-strong);
+}
+
+.navy {
+  background: var(--color-navy-900);
+  color: var(--color-warm-white);
+}
+
+.inverse {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--color-warm-white);
+}

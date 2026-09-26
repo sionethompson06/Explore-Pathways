@@ -1,0 +1,1215 @@
+{
+  "version": "2.1.0-discovery-ux-simplified",
+  "status": "PHASE_3F_UX_SIMPLIFIED_AUTHORITATIVE",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md Section K (Phase 3E) for the full calibration rationale: parent-facing wording, positive framing, question-option changes, adaptive branching, normalization, and legacy compatibility. Phase 0 corrections (DEC-C1) are preserved verbatim below; Phase 3E only rewords/re-enumerates, it never removes a canonical question. Source pack version: 1.0.0-candidate (preserved verbatim at docs/pathways/pack/contracts/question-bank.json). Prior version: 1.1.0-phase0-corrected.",
+  "questions": [
+    {
+      "id": "DISC_001",
+      "field": "student_display_name",
+      "parent_wording": "What should we call your student? A first name or nickname is fine.",
+      "input_type": "short_text",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Optional presentation only. Never affects fit. Maximum 40 characters; fallback: your student. Never scoring evidence, never AI/recommendation input (Phase 3E owner decision, unchanged)."
+    },
+    {
+      "id": "DISC_002",
+      "field": "current_grade",
+      "parent_wording": "What grade is your student currently in?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "helper_text": "This helps us ask the questions that are most relevant right now.",
+      "matching_use": "K-4 ELEMENTARY; 5-8 MIDDLE; 9-12 HIGH_SCHOOL; other/unknown UNDETERMINED. Do not infer grade from age. The sole authority for grade_band.",
+      "allowed_values": [
+        "K",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_003",
+      "field": "student_age",
+      "parent_wording": "How old is your student?",
+      "input_type": "integer_or_unknown",
+      "show_when": "AGE_CONTEXT_USEFUL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: no longer shown universally -- only when age context is genuinely useful (current_grade OTHER/UNKNOWN, or grade-placement/reclassification planning is active via DISC_006's GRADE_PLANNING reason). Optional age in years, not date of birth. No automatic eligibility, placement, acceleration, or retention decision. Under-5 or adult entries receive neutral advisor review."
+    },
+    {
+      "id": "DISC_004",
+      "field": "residence",
+      "parent_wording": "Where is your student currently based?",
+      "input_type": "location",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "helper_text": "Education options can vary by state. This helps us keep future pathways relevant to where you live.",
+      "matching_use": "State: US states and DC plus US_TERRITORY, OUTSIDE_US, UNKNOWN. ZIP optional string, never numeric. No browser geolocation. Do not infer legal residency, local eligibility, location permission, or service/provider availability. State-only does not block generic Discovery."
+    },
+    {
+      "id": "DISC_005",
+      "field": "current_education_model",
+      "parent_wording": "How is your student learning today?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "helper_text": "There's no right answer -- we just want to understand your starting point.",
+      "matching_use": "Starting context only. UNKNOWN is not NOT_ENROLLED. No automatic school-change conclusion.",
+      "allowed_values": [
+        "TRADITIONAL_PUBLIC",
+        "CHARTER",
+        "PRIVATE",
+        "ONLINE",
+        "HOMESCHOOL",
+        "HYBRID",
+        "INDEPENDENT_STUDY",
+        "NOT_ENROLLED",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_006",
+      "field": "discovery_reasons",
+      "parent_wording": "What brought you to Pathways?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Phase 3F.1 (cleanup patch): reduced from 15-18 new-entry choices to 11 broad parent-facing reasons (10 at ELEMENTARY, GRADE_PLANNING still hidden K-4) -- ADVANCED_COURSES and COLLEGE_ADVANCEMENT retired from new-entry use in favor of the broader ACADEMIC_ACCELERATION (\"More academic challenge or advancement\"); CREDIT_RECOVERY retired in favor of ACADEMIC_SUPPORT (\"More academic support or help getting back on track\"); SMALLER_ENVIRONMENT retired in favor of BETTER_FIT_ENVIRONMENT (\"A learning environment that feels like a better fit\" -- the smaller-environment nuance is still reachable via family_priorities' SMALL_ENVIRONMENT). All four are aliased to their surviving value in contracts/legacy-aliases.json so historical answers keep an equivalent effective meaning. TRAVEL, ARTS, and FAMILY_INVOLVEMENT are retired from new-entry use with NO alias (their detail is now gathered later -- TRAVEL/ARTS via flexibility_reasons' FAMILY_TRAVEL/ARTS values, FAMILY_INVOLVEMENT via desired_parent_involvement -- and their historical meaning is not equivalent to any surviving DISC_006 value, so it remains its own distinct effective answer rather than being folded into one). CURRENT_SCHOOL_CONCERN/DIFFERENT_ENVIRONMENT/ENVIRONMENT_CONCERN remain retired-and-aliased to BETTER_FIT_ENVIRONMENT from Phase 3E. K-4 still hides GRADE_PLANNING (and, as before CREDIT_RECOVERY/COLLEGE_ADVANCEMENT were retired, would have hidden them too). EXPLORING stays exclusive. \"OTHER\" reveals an inline short-text field (discovery_reasons_other_text, max 150 characters) that is REQUIRED, both at stage Continue and at final Review/Submit, whenever OTHER is selected -- it is context only for a future advisor and never feeds automated scoring or any derived fact.",
+      "allowed_values": [
+        "SCHEDULE_FLEXIBILITY",
+        "ATHLETICS",
+        "HOMESCHOOL",
+        "ONLINE",
+        "ACADEMIC_ACCELERATION",
+        "ADVANCED_COURSES",
+        "COLLEGE_ADVANCEMENT",
+        "CREDIT_RECOVERY",
+        "GRADE_PLANNING",
+        "TRAVEL",
+        "ARTS",
+        "CURRENT_SCHOOL_CONCERN",
+        "ACADEMIC_SUPPORT",
+        "DIFFERENT_ENVIRONMENT",
+        "PERSONALIZED_LEARNING",
+        "ENVIRONMENT_CONCERN",
+        "BETTER_FIT_ENVIRONMENT",
+        "SMALLER_ENVIRONMENT",
+        "FAMILY_INVOLVEMENT",
+        "OTHER",
+        "EXPLORING"
+      ],
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "SCHEDULE_FLEXIBILITY",
+          "ATHLETICS",
+          "HOMESCHOOL",
+          "ONLINE",
+          "ACADEMIC_ACCELERATION",
+          "ACADEMIC_SUPPORT",
+          "BETTER_FIT_ENVIRONMENT",
+          "PERSONALIZED_LEARNING",
+          "EXPLORING",
+          "OTHER"
+        ],
+        "MIDDLE": [
+          "SCHEDULE_FLEXIBILITY",
+          "ATHLETICS",
+          "HOMESCHOOL",
+          "ONLINE",
+          "ACADEMIC_ACCELERATION",
+          "ACADEMIC_SUPPORT",
+          "BETTER_FIT_ENVIRONMENT",
+          "PERSONALIZED_LEARNING",
+          "GRADE_PLANNING",
+          "EXPLORING",
+          "OTHER"
+        ],
+        "HIGH_SCHOOL": [
+          "SCHEDULE_FLEXIBILITY",
+          "ATHLETICS",
+          "HOMESCHOOL",
+          "ONLINE",
+          "ACADEMIC_ACCELERATION",
+          "ACADEMIC_SUPPORT",
+          "BETTER_FIT_ENVIRONMENT",
+          "PERSONALIZED_LEARNING",
+          "GRADE_PLANNING",
+          "EXPLORING",
+          "OTHER"
+        ],
+        "UNDETERMINED": [
+          "SCHEDULE_FLEXIBILITY",
+          "ATHLETICS",
+          "HOMESCHOOL",
+          "ONLINE",
+          "ACADEMIC_ACCELERATION",
+          "ACADEMIC_SUPPORT",
+          "BETTER_FIT_ENVIRONMENT",
+          "PERSONALIZED_LEARNING",
+          "GRADE_PLANNING",
+          "EXPLORING",
+          "OTHER"
+        ]
+      },
+      "other_text_field": "discovery_reasons_other_text"
+    },
+    {
+      "id": "DISC_007",
+      "field": "primary_discovery_reason",
+      "parent_wording": "If we could help you make progress on one thing first, which would matter most?",
+      "input_type": "single_from_previous",
+      "show_when": "MULTIPLE_DISCOVERY_REASONS",
+      "required_when_shown": true,
+      "matching_use": "Values restricted to current DISC_006 choices. Auto-derive if exactly one choice. No hidden default."
+    },
+    {
+      "id": "DISC_008",
+      "field": "desired_primary_change",
+      "parent_wording": "What would you most like your student's education to provide?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3F: reworded and simplified; OUTSIDE_OPPORTUNITIES retired from new-entry use (question_value_removals) in favor of a plain OTHER card -- no inline text on this single-choice question, per Phase 3F section 2's list of the five multi-select fields that get inline Other elaboration (this is not one of them). K-4 still hides COLLEGE_COURSES.",
+      "allowed_values": [
+        "TIME_CONTROL",
+        "CHALLENGE",
+        "SUPPORT",
+        "ATHLETICS_TIME",
+        "LOCATION_FLEXIBILITY",
+        "COLLEGE_COURSES",
+        "DIFFERENT_ENVIRONMENT",
+        "BACK_ON_TRACK",
+        "PERSONALIZATION",
+        "OUTSIDE_OPPORTUNITIES",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "TIME_CONTROL",
+          "CHALLENGE",
+          "SUPPORT",
+          "ATHLETICS_TIME",
+          "LOCATION_FLEXIBILITY",
+          "DIFFERENT_ENVIRONMENT",
+          "BACK_ON_TRACK",
+          "PERSONALIZATION",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "TIME_CONTROL",
+          "CHALLENGE",
+          "SUPPORT",
+          "ATHLETICS_TIME",
+          "LOCATION_FLEXIBILITY",
+          "COLLEGE_COURSES",
+          "DIFFERENT_ENVIRONMENT",
+          "BACK_ON_TRACK",
+          "PERSONALIZATION",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "TIME_CONTROL",
+          "CHALLENGE",
+          "SUPPORT",
+          "ATHLETICS_TIME",
+          "LOCATION_FLEXIBILITY",
+          "COLLEGE_COURSES",
+          "DIFFERENT_ENVIRONMENT",
+          "BACK_ON_TRACK",
+          "PERSONALIZATION",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "TIME_CONTROL",
+          "CHALLENGE",
+          "SUPPORT",
+          "ATHLETICS_TIME",
+          "LOCATION_FLEXIBILITY",
+          "COLLEGE_COURSES",
+          "DIFFERENT_ENVIRONMENT",
+          "BACK_ON_TRACK",
+          "PERSONALIZATION",
+          "OTHER",
+          "UNKNOWN"
+        ]
+      }
+    },
+    {
+      "id": "DISC_009",
+      "field": "reported_academic_position",
+      "parent_wording": "How is your student's learning going now?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Phase 3F: wording shortened; Phase 3E's positive labels (AHEAD/ON_LEVEL/MIXED/STRUGGLING/SIGNIFICANT_CONCERNS/UNKNOWN) are unchanged.",
+      "allowed_values": [
+        "AHEAD",
+        "ON_LEVEL",
+        "MIXED",
+        "STRUGGLING",
+        "SIGNIFICANT_CONCERNS",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_010",
+      "field": "reported_support_needs",
+      "parent_wording": "Where would you need the most support?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3F: reworded, helper sentence removed, max 3 selections added (wording now says \"most support\"). Consolidated ROUTINES/ORGANIZATION/TIME_MANAGEMENT/TASK_COMPLETION/STUDY_SKILLS into new canonical ORGANIZATION_STUDY_HABITS, and ENGAGEMENT/CONFIDENCE into new canonical ENGAGEMENT_CONFIDENCE, both aliased from every legacy value in contracts/legacy-aliases.json. PHONICS retired from this universal screen -- still available via DISC_E01's elementary foundational follow-up. MISSING_CREDITS (\"Credits or graduation\") grade-tiered to HIGH_SCHOOL/UNDETERMINED only. Added OTHER with inline free-text elaboration.",
+      "allowed_values": [
+        "READING",
+        "PHONICS",
+        "WRITING",
+        "MATH",
+        "SCIENCE",
+        "ROUTINES",
+        "ORGANIZATION",
+        "TIME_MANAGEMENT",
+        "ENGAGEMENT",
+        "TASK_COMPLETION",
+        "ATTENDANCE",
+        "MISSING_CREDITS",
+        "STUDY_SKILLS",
+        "COMMUNICATION",
+        "CONFIDENCE",
+        "ORGANIZATION_STUDY_HABITS",
+        "ENGAGEMENT_CONFIDENCE",
+        "OTHER",
+        "NONE",
+        "UNKNOWN"
+      ],
+      "max_selections": 3,
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "READING",
+          "WRITING",
+          "MATH",
+          "SCIENCE",
+          "ORGANIZATION_STUDY_HABITS",
+          "ENGAGEMENT_CONFIDENCE",
+          "ATTENDANCE",
+          "COMMUNICATION",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "READING",
+          "WRITING",
+          "MATH",
+          "SCIENCE",
+          "ORGANIZATION_STUDY_HABITS",
+          "ENGAGEMENT_CONFIDENCE",
+          "ATTENDANCE",
+          "COMMUNICATION",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "READING",
+          "WRITING",
+          "MATH",
+          "SCIENCE",
+          "ORGANIZATION_STUDY_HABITS",
+          "ENGAGEMENT_CONFIDENCE",
+          "ATTENDANCE",
+          "MISSING_CREDITS",
+          "COMMUNICATION",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "READING",
+          "WRITING",
+          "MATH",
+          "SCIENCE",
+          "ORGANIZATION_STUDY_HABITS",
+          "ENGAGEMENT_CONFIDENCE",
+          "ATTENDANCE",
+          "MISSING_CREDITS",
+          "COMMUNICATION",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ]
+      },
+      "other_text_field": "reported_support_needs_other_text"
+    },
+    {
+      "id": "DISC_011",
+      "field": "learning_support_pattern",
+      "parent_wording": "How does your student work best?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Phase 3F: reworded to a simpler 5-answer set; INDEPENDENT_WORK_DIFFICULT retired from new-entry use and aliased to CLOSE_ADULT_SUPPORT (semantically compatible -- both represent a need for closer support) in contracts/legacy-aliases.json, so support_structure_need's HIGH-tier signal is preserved for historical answers. DISC_012 (preferred_learning_environment) now precedes this question in evaluation/display order (Phase 3F section 9); this question stays show_when ALL (broadly active) rather than a DISC_012-gated follow-up, since most DISC_012 answers (LIVE_TEACHER/HANDS_ON/SMALL_GROUP/ONE_TO_ONE/MOVEMENT) would otherwise lose their only support_structure_need signal -- see docs/pathways/DISCOVERY_UX_SIMPLIFICATION_PHASE3F.md.",
+      "allowed_values": [
+        "INDEPENDENT",
+        "OCCASIONAL_CHECK_INS",
+        "REGULAR_GUIDANCE",
+        "CLOSE_ADULT_SUPPORT",
+        "INDEPENDENT_WORK_DIFFICULT",
+        "UNKNOWN"
+      ],
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "INDEPENDENT",
+          "OCCASIONAL_CHECK_INS",
+          "REGULAR_GUIDANCE",
+          "CLOSE_ADULT_SUPPORT",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "INDEPENDENT",
+          "OCCASIONAL_CHECK_INS",
+          "REGULAR_GUIDANCE",
+          "CLOSE_ADULT_SUPPORT",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "INDEPENDENT",
+          "OCCASIONAL_CHECK_INS",
+          "REGULAR_GUIDANCE",
+          "CLOSE_ADULT_SUPPORT",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "INDEPENDENT",
+          "OCCASIONAL_CHECK_INS",
+          "REGULAR_GUIDANCE",
+          "CLOSE_ADULT_SUPPORT",
+          "UNKNOWN"
+        ]
+      }
+    },
+    {
+      "id": "DISC_012",
+      "field": "preferred_learning_environment",
+      "parent_wording": "How does your student learn best?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "helper_text": "Choose up to three.",
+      "matching_use": "Phase 3F: reworded and moved to precede learning_support_pattern in evaluation/display order (the new \"contextual lead question\" for the Learning section). Added a plain OTHER card with no inline text (judged unnecessary complexity for this question, per Phase 3F section 8's explicit discretion) -- BOOKS/TECHNOLOGY remain retired from new-entry use.",
+      "allowed_values": [
+        "SELF_PACED",
+        "LIVE_TEACHER",
+        "BLEND",
+        "HANDS_ON",
+        "SMALL_GROUP",
+        "ONE_TO_ONE",
+        "BOOKS",
+        "TECHNOLOGY",
+        "MOVEMENT",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "max_selections": 3,
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "BLEND",
+          "HANDS_ON",
+          "SMALL_GROUP",
+          "ONE_TO_ONE",
+          "MOVEMENT",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "BLEND",
+          "HANDS_ON",
+          "SMALL_GROUP",
+          "ONE_TO_ONE",
+          "MOVEMENT",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "BLEND",
+          "HANDS_ON",
+          "SMALL_GROUP",
+          "ONE_TO_ONE",
+          "MOVEMENT",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "BLEND",
+          "HANDS_ON",
+          "SMALL_GROUP",
+          "ONE_TO_ONE",
+          "MOVEMENT",
+          "OTHER",
+          "UNKNOWN"
+        ]
+      }
+    },
+    {
+      "id": "DISC_013",
+      "field": "flexibility_importance",
+      "parent_wording": "How much flexibility would be helpful?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Phase 3E: rewording only. Scheduling preference does not establish any provider capability. Feeds derived schedule_flexibility_need.",
+      "allowed_values": [
+        "NOT_IMPORTANT",
+        "SOMEWHAT",
+        "VERY_IMPORTANT",
+        "ESSENTIAL",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_014",
+      "field": "flexibility_reasons",
+      "parent_wording": "What would greater flexibility make possible?",
+      "input_type": "multi",
+      "show_when": "FLEXIBILITY_SOMEWHAT_OR_HIGHER",
+      "required_when_shown": false,
+      "helper_text": "Choose up to three.",
+      "matching_use": "Phase 3F: reduced to 8 (elementary/middle) or 10 (HS/undetermined) new-entry choices. ATHLETIC_TRAINING is now the new-entry umbrella for athletics/training/competition; COMPETITION and ATHLETIC_TRAVEL retired from new-entry use and aliased to it. WORK is the new-entry umbrella for work/entrepreneurship; BUSINESS retired and aliased to it. FAMILY_TIME retired from new-entry use (not aliased -- FAMILY_RESPONSIBILITIES/OTHER are not a safely equivalent meaning); historical FAMILY_TIME answers remain their own effective value. Added inline Other free-text elaboration.",
+      "allowed_values": [
+        "ATHLETIC_TRAINING",
+        "COMPETITION",
+        "ATHLETIC_TRAVEL",
+        "FAMILY_TRAVEL",
+        "ARTS",
+        "WORK",
+        "BUSINESS",
+        "APPOINTMENTS",
+        "COLLEGE_COURSES",
+        "PACE",
+        "FAMILY_RESPONSIBILITIES",
+        "FAMILY_TIME",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "max_selections": 3,
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "ATHLETIC_TRAINING",
+          "FAMILY_TRAVEL",
+          "ARTS",
+          "APPOINTMENTS",
+          "PACE",
+          "FAMILY_RESPONSIBILITIES",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "ATHLETIC_TRAINING",
+          "FAMILY_TRAVEL",
+          "ARTS",
+          "APPOINTMENTS",
+          "PACE",
+          "FAMILY_RESPONSIBILITIES",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "ATHLETIC_TRAINING",
+          "FAMILY_TRAVEL",
+          "ARTS",
+          "WORK",
+          "APPOINTMENTS",
+          "COLLEGE_COURSES",
+          "PACE",
+          "FAMILY_RESPONSIBILITIES",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "ATHLETIC_TRAINING",
+          "FAMILY_TRAVEL",
+          "ARTS",
+          "WORK",
+          "APPOINTMENTS",
+          "COLLEGE_COURSES",
+          "PACE",
+          "FAMILY_RESPONSIBILITIES",
+          "OTHER",
+          "UNKNOWN"
+        ]
+      },
+      "other_text_field": "flexibility_reasons_other_text"
+    },
+    {
+      "id": "DISC_015",
+      "field": "preferred_academic_time",
+      "parent_wording": "When would focused academic work fit best?",
+      "input_type": "single",
+      "show_when": "FLEXIBILITY_SOMEWHAT_OR_HIGHER",
+      "required_when_shown": false,
+      "matching_use": "Preference only. Never translate preferred times into unavailable times.",
+      "allowed_values": [
+        "MORNING",
+        "AFTERNOON",
+        "EVENING",
+        "THROUGHOUT_DAY",
+        "VARIES",
+        "NO_PREFERENCE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_016",
+      "field": "primary_sport",
+      "parent_wording": "What sport or athletic activity is your student most involved in?",
+      "input_type": "short_text",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Optional; 60 characters maximum. Personalization/advisor context only. No educational scoring, no prestige weighting."
+    },
+    {
+      "id": "DISC_017",
+      "field": "athletic_level",
+      "parent_wording": "Which best describes your student's current athletic experience?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: positive labels, no prestige framing (see labels.ts). Advisor context only. Not educational ability, family value, recruiting potential, or score multiplier. Never used to derive athletic_schedule_demand.",
+      "allowed_values": [
+        "RECREATIONAL",
+        "SCHOOL",
+        "CLUB_TRAVEL",
+        "REGIONAL",
+        "NATIONAL",
+        "ACADEMY",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_018",
+      "field": "weekly_athletic_commitment",
+      "parent_wording": "About how much time does athletics usually require in a typical week?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "helper_text": "Include training, practices, games or competitions.",
+      "matching_use": "Scheduling context, not automatic proof of missing school. Feeds derived athletic_schedule_demand.",
+      "allowed_values": [
+        "UNDER_5",
+        "HOURS_5_10",
+        "HOURS_11_15",
+        "HOURS_16_20",
+        "HOURS_21_PLUS",
+        "VARIES",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_019",
+      "field": "athletic_travel_frequency",
+      "parent_wording": "How often does athletics take your student away from home for training or competition?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Travel does not equal permission to attend a virtual public school from anywhere. Feeds derived athletic_schedule_demand.",
+      "allowed_values": [
+        "RARELY",
+        "FEW_YEAR",
+        "MONTHLY",
+        "SEVERAL_MONTH",
+        "WEEKLY",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_020",
+      "field": "college_athletics_interest",
+      "parent_wording": "Is competing in college something your student may want to explore in the future?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST_AND_MIDDLE_OR_HS",
+      "required_when_shown": false,
+      "matching_use": "Optional and future-oriented in middle grades. No implied division or eligibility. A DEFINITELY/POSSIBLY answer shows the formal follow-up question DISC_020A (ncaa_interest).",
+      "allowed_values": [
+        "DEFINITELY",
+        "POSSIBLY",
+        "PROBABLY_NOT",
+        "NO",
+        "TOO_EARLY",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_020A",
+      "field": "ncaa_interest",
+      "parent_wording": "Would it be helpful to include NCAA academic requirements in your student's planning?",
+      "input_type": "single",
+      "show_when": "ATHLETICS_INTEREST_AND_MIDDLE_OR_HS_AND_COLLEGE_ATHLETICS_DEFINITELY_OR_POSSIBLY",
+      "required_when_shown": false,
+      "helper_text": "We can help identify what should be reviewed; this does not determine NCAA eligibility.",
+      "matching_use": "show_when resolves to: DISC_020's branch (ATHLETICS_INTEREST_AND_MIDDLE_OR_HS) is active AND DISC_020 was answered DEFINITELY or POSSIBLY. Never shown for K-4. Do not infer NCAA interest from athletic participation alone; this question must be explicitly answered to produce ncaa_interest. An explicitly selected UNKNOWN is a recorded answer and may support review signal REV_NCAA (per rule ATH_004). A skipped, missing, or branch-inactive (hidden) question produces an effective value of NOT_APPLICABLE, not UNKNOWN.",
+      "allowed_values": [
+        "YES",
+        "MAYBE",
+        "NO",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "YES": "Yes",
+        "MAYBE": "Possibly",
+        "NO": "No",
+        "UNKNOWN": "I'm not sure"
+      }
+    },
+    {
+      "id": "DISC_021",
+      "field": "reclassification_interest",
+      "parent_wording": "Would you like grade placement or reclassification to be part of your student's educational planning review?",
+      "input_type": "single",
+      "show_when": "GRADE_PLANNING_REASON_AND_MIDDLE_OR_HS",
+      "required_when_shown": false,
+      "helper_text": "This is an individualized academic planning question; selecting it does not mean a grade change is being recommended.",
+      "matching_use": "Phase 3E: rewording only. Review only; never recommend repeating a grade or promise another eligibility year.",
+      "allowed_values": [
+        "YES",
+        "POSSIBLY",
+        "NO",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "YES": "Yes",
+        "POSSIBLY": "Possibly -- we'd like to understand it better",
+        "NO": "No",
+        "UNKNOWN": "We're not sure"
+      }
+    },
+    {
+      "id": "DISC_022",
+      "field": "advancement_interests",
+      "parent_wording": "Which opportunities would you be interested in exploring for your student?",
+      "input_type": "multi",
+      "show_when": "ADVANCEMENT_INTEREST_OR_REPORTED_AHEAD_OR_MIXED",
+      "required_when_shown": false,
+      "helper_text": "You don't need to know whether your student currently qualifies -- these are just possibilities to explore.",
+      "matching_use": "Phase 3F: reduced grade-tiered lists (K-4 ~5, middle ~10, HS ~11) since DISC_034 now owns subject-area detail and DISC_022 owns opportunity TYPE only. ADVANCED_MATH/ADVANCED_SCIENCE/ADVANCED_ELA retired from new-entry use and aliased to CHALLENGING_COURSEWORK (identical ADV_010 activation target, so no Phase-4-relevant distinction is lost). New canonical HONORS_AP (\"Honors/AP\") activates both OP02 and OP03 via new rule ADV_014 -- legacy HONORS-only/AP-only answers are NOT aliased to it and keep activating their own original single-opportunity rule (ADV_001/ADV_002), since they are more precise than the combined card. New canonical CAREER_CTE_CREDENTIALS (\"Career/CTE or industry credentials\", HIGH_SCHOOL tier only) activates both OP08 and OP09 via new rule ADV_015; MIDDLE tier keeps plain CAREER_CTE (\"Career/technical exploration\", grade-conditional label) since INDUSTRY_CREDENTIALS was never a MIDDLE-tier option. Added inline Other free-text elaboration; NONE_CURRENTLY stays exclusive.",
+      "allowed_values": [
+        "ENRICHMENT",
+        "HONORS",
+        "AP",
+        "ADVANCED_MATH",
+        "ADVANCED_SCIENCE",
+        "ADVANCED_ELA",
+        "CHALLENGING_COURSEWORK",
+        "HIGH_SCHOOL_EARLY",
+        "COLLEGE_LEVEL_COURSES",
+        "DUAL_ENROLLMENT",
+        "COLLEGE_COURSES",
+        "EARLY_GRADUATION",
+        "RESEARCH",
+        "CAREER_CTE",
+        "WORK_BASED_LEARNING",
+        "INDUSTRY_CREDENTIALS",
+        "ENTREPRENEURSHIP",
+        "HONORS_AP",
+        "CAREER_CTE_CREDENTIALS",
+        "NONE_CURRENTLY",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "ENRICHMENT",
+          "CHALLENGING_COURSEWORK",
+          "OTHER",
+          "NONE_CURRENTLY",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "CHALLENGING_COURSEWORK",
+          "HIGH_SCHOOL_EARLY",
+          "COLLEGE_LEVEL_COURSES",
+          "RESEARCH",
+          "CAREER_CTE",
+          "WORK_BASED_LEARNING",
+          "ENTREPRENEURSHIP",
+          "OTHER",
+          "NONE_CURRENTLY",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "CHALLENGING_COURSEWORK",
+          "HONORS_AP",
+          "COLLEGE_LEVEL_COURSES",
+          "RESEARCH",
+          "CAREER_CTE_CREDENTIALS",
+          "WORK_BASED_LEARNING",
+          "ENTREPRENEURSHIP",
+          "EARLY_GRADUATION",
+          "OTHER",
+          "NONE_CURRENTLY",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "CHALLENGING_COURSEWORK",
+          "HIGH_SCHOOL_EARLY",
+          "COLLEGE_LEVEL_COURSES",
+          "RESEARCH",
+          "CAREER_CTE",
+          "WORK_BASED_LEARNING",
+          "ENTREPRENEURSHIP",
+          "OTHER",
+          "NONE_CURRENTLY",
+          "UNKNOWN"
+        ]
+      },
+      "other_text_field": "advancement_interests_other_text"
+    },
+    {
+      "id": "DISC_023",
+      "field": "college_intent",
+      "parent_wording": "How does college fit into your student's plans right now?",
+      "input_type": "single",
+      "show_when": "HIGH_SCHOOL_OR_MIDDLE_WITH_ADVANCEMENT_INTEREST",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording + one new explicit exploratory value (EXPLORING) rather than overloading UNKNOWN. College interest alone does not activate dual enrollment or advanced-course readiness. College not being in the plan has no negative recommendation consequence. Never shown for K-4.",
+      "allowed_values": [
+        "DEFINITELY",
+        "PROBABLY",
+        "EXPLORING",
+        "PROBABLY_NOT",
+        "NOT_CURRENTLY",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "DEFINITELY": "Definitely part of the plan",
+        "PROBABLY": "Probably part of the plan",
+        "EXPLORING": "We're still exploring",
+        "PROBABLY_NOT": "Probably not part of the current plan",
+        "NOT_CURRENTLY": "Not part of the plan right now",
+        "UNKNOWN": "We're not sure yet"
+      }
+    },
+    {
+      "id": "DISC_024",
+      "field": "reported_graduation_status",
+      "parent_wording": "How clear is your student's path to graduation?",
+      "input_type": "single",
+      "show_when": "HIGH_SCHOOL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording only. Parent-reported; not an audit/transcript conclusion. NO triggers graduation review, not an assertion that credits are missing.",
+      "allowed_values": [
+        "YES",
+        "MOSTLY",
+        "NO",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "YES": "On track based on what we know",
+        "MOSTLY": "Mostly on track, with a few things we may need to review",
+        "NO": "We may need help getting back on track",
+        "UNKNOWN": "We're not sure yet"
+      }
+    },
+    {
+      "id": "DISC_025",
+      "field": "credit_recovery_need",
+      "parent_wording": "Would reviewing or recovering credits be helpful as part of the plan?",
+      "input_type": "single",
+      "show_when": "HIGH_SCHOOL_AND_GRADUATION_OR_CREDIT_CONCERN",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording only. Only YES/POSSIBLY activates credit-recovery exploration. Never automatically equated with online or alternative school. May coexist with advancement interest -- not mutually exclusive.",
+      "allowed_values": [
+        "YES",
+        "POSSIBLY",
+        "NO",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_026",
+      "field": "family_priorities",
+      "parent_wording": "When you picture the right educational fit, what matters most?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "matching_use": "Phase 3F: helper sentence removed (max 3 still enforced by max_selections without needing the explanation); new-entry list reduced from 14-16 to 11-12 by retiring ATHLETIC_FLEXIBILITY and LOCATION_FLEXIBILITY (athletics/schedule questions already capture why flexibility matters), ADVANCED_COURSES (covered by ACADEMIC_ADVANCEMENT + later advancement questions), and ACCREDITATION/DIPLOMA (judged not necessary to preserve as a combined concept -- neither was reachable by any rule and scoring-policy.json already treats both as proving nothing about generic-model superiority). None of these five are aliased to any survivor -- they are simply retired, consistent with ACADEMIC_QUALITY's Phase 3E precedent. Added inline Other free-text elaboration.",
+      "allowed_values": [
+        "FLEXIBILITY",
+        "ACADEMIC_QUALITY",
+        "PERSONAL_SUPPORT",
+        "COLLEGE_PREPARATION",
+        "ATHLETIC_FLEXIBILITY",
+        "ACCREDITATION",
+        "DIPLOMA",
+        "AFFORDABILITY",
+        "ADVANCED_COURSES",
+        "SELF_PACED",
+        "LIVE_TEACHER",
+        "SOCIAL",
+        "LOCATION_FLEXIBILITY",
+        "ACADEMIC_ADVANCEMENT",
+        "SMALL_ENVIRONMENT",
+        "STRUCTURE_ACCOUNTABILITY",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "max_selections": 3,
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "FLEXIBILITY",
+          "PERSONAL_SUPPORT",
+          "STRUCTURE_ACCOUNTABILITY",
+          "ACADEMIC_ADVANCEMENT",
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "SOCIAL",
+          "AFFORDABILITY",
+          "SMALL_ENVIRONMENT",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "FLEXIBILITY",
+          "PERSONAL_SUPPORT",
+          "STRUCTURE_ACCOUNTABILITY",
+          "ACADEMIC_ADVANCEMENT",
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "SOCIAL",
+          "AFFORDABILITY",
+          "COLLEGE_PREPARATION",
+          "SMALL_ENVIRONMENT",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "FLEXIBILITY",
+          "PERSONAL_SUPPORT",
+          "STRUCTURE_ACCOUNTABILITY",
+          "ACADEMIC_ADVANCEMENT",
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "SOCIAL",
+          "AFFORDABILITY",
+          "COLLEGE_PREPARATION",
+          "SMALL_ENVIRONMENT",
+          "OTHER",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "FLEXIBILITY",
+          "PERSONAL_SUPPORT",
+          "STRUCTURE_ACCOUNTABILITY",
+          "ACADEMIC_ADVANCEMENT",
+          "SELF_PACED",
+          "LIVE_TEACHER",
+          "SOCIAL",
+          "AFFORDABILITY",
+          "COLLEGE_PREPARATION",
+          "SMALL_ENVIRONMENT",
+          "OTHER",
+          "UNKNOWN"
+        ]
+      },
+      "other_text_field": "family_priorities_other_text"
+    },
+    {
+      "id": "DISC_027",
+      "field": "desired_parent_involvement",
+      "parent_wording": "What role would you ideally like to have in your student's day-to-day learning?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": true,
+      "helper_text": "Families support learning in different ways. We're interested in what would work best for yours.",
+      "matching_use": "Phase 3E: rewording only. Desired involvement remains distinct from actual availability. PROGRAM_MANAGES does not mean no supervision exists. Feeds derived family_management_preference.",
+      "allowed_values": [
+        "VERY_INVOLVED",
+        "REGULAR_SUPPORT",
+        "CHECK_INS",
+        "PROGRAM_MANAGES",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_028",
+      "field": "cost_preference",
+      "parent_wording": "What should we keep in mind about cost as we explore options?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording only, and an architectural clarification: cost belongs to PRACTICAL FEASIBILITY, not educational fit (docs/pathways/DISCOVERY_CALIBRATION_SPEC_V2.md section 12) -- a Phase 4 evaluator must never treat a tuition-free preference as proof that a public-school category is a better educational fit (see DECISION_LOG DEC-H2; contracts/rules.json COST_001 retired accordingly). Preference, not budget ceiling or income. Never make a family less worthy of advice. Pathways fees disclosed separately.",
+      "allowed_values": [
+        "PREFER_TUITION_FREE",
+        "OPEN_AFFORDABLE_PAID",
+        "OPEN_PRIVATE_TUITION",
+        "DEPENDS_ON_VALUE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_029",
+      "field": "desired_start_timeline",
+      "parent_wording": "When would you like to begin putting the next step in place?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording only. Operations only. Never educational scoring, never emotional-pressure logic. Excluded from educational facts/scoring inputs.",
+      "allowed_values": [
+        "ASAP",
+        "WITHIN_30_DAYS",
+        "NEXT_SEMESTER",
+        "NEXT_SCHOOL_YEAR",
+        "EXPLORING",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_030",
+      "field": "parent_context",
+      "parent_wording": "Is there anything else you'd want a Pathways advisor to understand about your student or family's goals?",
+      "input_type": "short_text",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "helper_text": "Optional. You don't need to repeat anything you've already shared. Please don't include medical records, Social Security numbers, student ID numbers, or other sensitive documents here.",
+      "matching_use": "Optional 750 characters; sanitized display. Advisor-only. Excluded from recommendation scoring, AI input, and analytics/pixels. The automated report never appears to have interpreted this text."
+    },
+    {
+      "id": "DISC_E01",
+      "field": "foundational_learning_priorities",
+      "parent_wording": "Which foundations would you most like to strengthen?",
+      "input_type": "multi",
+      "show_when": "ELEMENTARY_AND_SUPPORT_PRIORITIES_NOT_ALREADY_KNOWN",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording only. Do not repeat known support questions. NONE/UNKNOWN exclusive.",
+      "allowed_values": [
+        "READING",
+        "PHONICS",
+        "COMPREHENSION",
+        "WRITING",
+        "MATH",
+        "PROBLEM_SOLVING",
+        "LEARNING_ROUTINES",
+        "NONE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_E02",
+      "field": "daytime_support_person",
+      "parent_wording": "If learning happens partly at home, who could be part of your student's daytime support?",
+      "input_type": "single",
+      "show_when": "HOME_OR_REMOTE_SUPPORT_CONTEXT",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording + narrowed branch (HOME_OR_REMOTE_SUPPORT_CONTEXT replaces the old ELEMENTARY_OR_HOME_BASED_INTEREST_WITH_SUPPORT_NEED, which incorrectly asked every elementary family regardless of whether home/remote learning was actually being considered). Person type does not prove capacity, teacher qualification, or sufficient supervision.",
+      "allowed_values": [
+        "PARENT_GUARDIAN",
+        "FAMILY_MEMBER",
+        "TUTOR_COACH",
+        "CHILDCARE_PROVIDER",
+        "LEARNING_PROGRAM",
+        "VARIES",
+        "NOT_ARRANGED",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_E03",
+      "field": "in_person_peer_preference",
+      "parent_wording": "How important is in-person learning with other students?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3F: reworded and helper removed; this question measures IN-PERSON PEER LEARNING PREFERENCE specifically (whether a fully remote/home pathway would need a deliberate in-person social/learning plan) -- it is not a general social-development or psychological measure, and must never be read or reported as one.",
+      "allowed_values": [
+        "VERY_IMPORTANT",
+        "SOMEWHAT",
+        "NICE_TO_HAVE",
+        "NOT_PRIORITY",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "VERY_IMPORTANT": "Very important",
+        "SOMEWHAT": "Important, but it doesn't need to happen every day",
+        "NICE_TO_HAVE": "Nice to have",
+        "NOT_PRIORITY": "Not a major priority",
+        "UNKNOWN": "We're not sure yet"
+      }
+    },
+    {
+      "id": "DISC_E04",
+      "field": "daytime_support_availability",
+      "parent_wording": "If learning happens partly at home, how much daytime adult support could realistically be available?",
+      "input_type": "single",
+      "show_when": "HOME_OR_REMOTE_SUPPORT_CONTEXT",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording + narrowed branch (see DISC_E02). Availability, not willingness. No assumption of unattended learning being suitable.",
+      "allowed_values": [
+        "MOST_LEARNING_DAYS",
+        "PART_OF_DAY",
+        "OCCASIONAL",
+        "NOT_ARRANGED",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_031",
+      "field": "school_change_preference",
+      "parent_wording": "Which best describes what you're hoping for right now?",
+      "input_type": "single",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "matching_use": "Phase 3F: card order fixed to STAY_CURRENT/SEEKING_CHANGE/OPEN_TO_CHANGE/UNKNOWN (owner-specified) and descriptive per-option helper text removed for a simpler screen; continuity semantics unchanged from Phase 3E.",
+      "allowed_values": [
+        "STAY_CURRENT",
+        "SEEKING_CHANGE",
+        "OPEN_TO_CHANGE",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "STAY_CURRENT": "Improve what we already have",
+        "SEEKING_CHANGE": "Explore a different educational fit",
+        "OPEN_TO_CHANGE": "Open to both",
+        "UNKNOWN": "We're still figuring it out"
+      }
+    },
+    {
+      "id": "DISC_032",
+      "field": "unavailable_academic_times",
+      "parent_wording": "Are there times when regularly scheduled classes would be difficult to attend?",
+      "input_type": "multi",
+      "show_when": "SCHEDULE_CONSTRAINT_CONTEXT",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording + broadened branch (SCHEDULE_CONSTRAINT_CONTEXT replaces FLEXIBILITY_VERY_OR_ESSENTIAL-only: now also shown for SOMEWHAT flexibility, or when schedule-intensive context already exists -- athletics, travel, arts/performance, work). NONE/UNKNOWN exclusive; do not infer minimum-hours waivers.",
+      "allowed_values": [
+        "MORNING",
+        "AFTERNOON",
+        "EVENING",
+        "VARIES",
+        "NONE",
+        "UNKNOWN"
+      ],
+      "display_labels": {
+        "MORNING": "Mornings",
+        "AFTERNOON": "Afternoons",
+        "EVENING": "Evenings",
+        "VARIES": "It varies from week to week",
+        "NONE": "No major schedule restrictions",
+        "UNKNOWN": "We're not sure yet"
+      }
+    },
+    {
+      "id": "DISC_033",
+      "field": "desired_delivery",
+      "parent_wording": "What learning opportunities are you open to exploring?",
+      "input_type": "multi",
+      "show_when": "ALL",
+      "required_when_shown": false,
+      "helper_text": "Choose any that feel worth considering. You don't need to know which is best yet.",
+      "matching_use": "Phase 3E: new canonical OPEN_TO_RECOMMENDATIONS added -- distinct from UNKNOWN, and must never default to any model or receive an automatic scoring bonus (docs/pathways/DISCOVERY_CALIBRATION_SPEC_V2.md section 13). Distinguishes delivery interest from preferred activity.",
+      "allowed_values": [
+        "ONLINE_SELF_PACED",
+        "ONLINE_TEACHER_SUPPORTED",
+        "HYBRID",
+        "IN_PERSON",
+        "HOMESCHOOL",
+        "OPEN_TO_RECOMMENDATIONS",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "id": "DISC_034",
+      "field": "subject_advancement_interests",
+      "parent_wording": "Are there subjects where your student would enjoy more challenge or depth?",
+      "input_type": "multi",
+      "show_when": "ADVANCEMENT_INTEREST_OR_REPORTED_AHEAD_OR_MIXED",
+      "required_when_shown": false,
+      "matching_use": "Phase 3E: rewording + two new canonical values (ELA replaces the generic READING/WRITING pairing for older students; SOCIAL_STUDIES_HUMANITIES is new). Subject-specific advancement kept distinct from overall academic position; not demonstrated ability. K-4 continues age-appropriate subject wording via grade_band_allowed_values.",
+      "allowed_values": [
+        "MATH",
+        "READING",
+        "WRITING",
+        "ELA",
+        "SCIENCE",
+        "SOCIAL_STUDIES_HUMANITIES",
+        "OTHER",
+        "NONE",
+        "UNKNOWN"
+      ],
+      "grade_band_allowed_values": {
+        "ELEMENTARY": [
+          "MATH",
+          "READING",
+          "WRITING",
+          "SCIENCE",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ],
+        "MIDDLE": [
+          "MATH",
+          "ELA",
+          "SCIENCE",
+          "SOCIAL_STUDIES_HUMANITIES",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ],
+        "HIGH_SCHOOL": [
+          "MATH",
+          "ELA",
+          "SCIENCE",
+          "SOCIAL_STUDIES_HUMANITIES",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ],
+        "UNDETERMINED": [
+          "MATH",
+          "ELA",
+          "SCIENCE",
+          "SOCIAL_STUDIES_HUMANITIES",
+          "OTHER",
+          "NONE",
+          "UNKNOWN"
+        ]
+      }
+    }
+  ],
+  "global_rules": [
+    "Required means an answer may be UNKNOWN; do not force certainty.",
+    "NONE, UNKNOWN, EXPLORING and NONE_CURRENTLY are exclusive where specified.",
+    "Do not initialize a real answer by default.",
+    "Branch changes remove hidden answers from effective evaluation; preserve only necessary revision history under retention policy.",
+    "Do not claim a fixed question count or completion time before measuring actual branches.",
+    "Render friendly labels for enum values; technical values are never displayed.",
+    "Display name is optional and excluded from scoring and AI requests.",
+    "No transcripts, diagnoses, medical documents, full address, date of birth, Social Security number or NCAA identifier in Discovery.",
+    "An explicitly selected UNKNOWN is a recorded answer and may support a review signal where a rule documents that (e.g. DISC_020A -> REV_NCAA via ATH_004). A skipped, missing, or branch-inactive (hidden) question is never treated as an explicit UNKNOWN -- its effective value is NOT_APPLICABLE -- and must not satisfy any rule condition or trigger any signal. This applies to every question in this registry, not only DISC_020A.",
+    "Phase 3E: a legacy/retired enum value remains a valid, readable historical raw answer and is never rewritten in storage; it is normalized (aliased to its replacement, or dropped) only when computing EFFECTIVE answers (contracts/legacy-aliases.json question_value_aliases / question_value_removals), never when rendering a family's own Review screen.",
+    "Phase 3E: no mid-survey interpretive/reflective summary card exists anywhere in the Discovery flow (Questions -> adaptive questions -> Review -> Complete only); any future reflective synthesis belongs to the Phase 5 Discovery Report, not this questionnaire."
+  ]
+}

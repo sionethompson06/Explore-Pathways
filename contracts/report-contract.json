@@ -1,0 +1,104 @@
+{
+  "version": "2.0.0-phase5-report",
+  "corrections_applied": "Phase 5 (docs/pathways/PHASE5_DISCOVERY_REPORT_SPEC_V1.md): the public_dto shape below is now implemented exactly by src/lib/report/types.ts's DiscoveryReportDTO and produced by src/lib/report/assemble.ts. contracts/report-content.json (new, 1.0.0-phase5-report) holds the actual wording/templates; this file stays the narrow shape/forbidden-field contract. No Phase 4 field listed under internal_record changed.",
+  "public_dto": {
+    "report_id": "opaque ID, requires an authorized session",
+    "profile_revision_id": "opaque ID, nonauthorizing",
+    "scope_label": "INITIAL_EXPLORATION_NOT_PLACEMENT",
+    "content_status": [
+      "PERSONALIZED",
+      "LIMITED_INFORMATION",
+      "ADVISOR_FIRST"
+    ],
+    "sections": {
+      "R01": [
+        "display_name_or_fallback",
+        "approved_headline",
+        "attributed_summary",
+        "actual_priority_chips",
+        "scope_statement"
+      ],
+      "R02": [
+        "insight_or_summary"
+      ],
+      "R03": "0-2 model cards: base_id, friendly label, public_fit_label, fit explanation, visible considerations",
+      "R04": "0-2 interest-grounded opportunities with planning horizon, not eligibility",
+      "R05": "relevant planning questions; material concerns remain visible even beyond nominal count",
+      "R06": "preliminary composed pathway; no institution or enrollment promise",
+      "R07": "CTA from verified service config plus optional save"
+    },
+    "saved_state": [
+      "GUEST",
+      "VERIFIED_SAVED"
+    ],
+    "consultation_state": [
+      "NONE",
+      "REQUESTED",
+      "PENDING_VERIFICATION",
+      "BOOKED",
+      "CANCELLED",
+      "COMPLETED",
+      "NO_SHOW"
+    ],
+    "created_at": "server timestamp"
+  },
+  "internal_record": {
+    "engine_run": [
+      "effective_profile_hash",
+      "triggered_rule_ids",
+      "positive_groups_by_model",
+      "scoped_review_signals",
+      "contributions",
+      "internal_sort_score",
+      "excluded_candidates",
+      "display_gate_reasons"
+    ],
+    "versions": [
+      "profile",
+      "questions",
+      "rules",
+      "taxonomy",
+      "knowledge",
+      "content",
+      "report_template",
+      "ai_prompt",
+      "model_id_if_used"
+    ],
+    "generation_state": [
+      "TEMPLATE",
+      "AI_ASSISTED",
+      "FALLBACK",
+      "FAILED"
+    ],
+    "identity": [
+      "authorized_guest_session_or_guardian_relationship"
+    ],
+    "provenance": [
+      "answer_ids",
+      "content_ids",
+      "rule_ids"
+    ],
+    "lead_context": "Separate record, never engine input"
+  },
+  "forbidden_in_public": [
+    "internal_sort_score",
+    "sales_priority",
+    "raw_parent_context",
+    "staff_notes",
+    "unshared_records",
+    "auth_tokens",
+    "api_keys",
+    "raw_model_prompt"
+  ],
+  "llm_output_schema": {
+    "summary": {
+      "text": "bounded text",
+      "evidence_ids": "approved IDs only"
+    },
+    "insight": {
+      "text": "bounded text or null",
+      "evidence_ids": "approved IDs only"
+    }
+  },
+  "llm_validation_note": "Schema adherence and evidence IDs do not establish factual support. Invalid, unsupported, doubtful or overclaiming text is discarded in favor of approved templates."
+}
