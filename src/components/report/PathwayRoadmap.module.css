@@ -71,6 +71,14 @@
   color: var(--color-text);
 }
 
+/* Marker class only -- parallel pathways keep the default vertical
+   spine layout above at every viewport, so no rules are scoped to
+   this selector; it exists so the structural distinction in
+   PathwayRoadmap.tsx is explicit and testable. */
+.parallelPathway {
+  flex-direction: column;
+}
+
 /* The parallel step: the node marks the split point; the bracket
    visibly forks into two priority tracks and rejoins the line for
    the next stage (sections 14/39/47 -- "obvious without reading the
@@ -149,5 +157,40 @@
 @media (min-width: 900px) {
   .label {
     padding-top: var(--space-2);
+  }
+}
+
+/* Purely sequential pathways (no parallel group) get a compact
+   horizontal progression at desktop -- parallel pathways never match
+   this selector, so GR12's vertical split/rejoin treatment above is
+   completely unaffected (section 6/7 of the Phase 5.2b instruction).
+   Mobile/tablet stays the default vertical spine stepper. */
+@media (min-width: 900px) {
+  .stages.sequentialPathway {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .stages.sequentialPathway::before {
+    left: 18px;
+    right: 18px;
+    top: 18px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+
+  .stages.sequentialPathway .stage {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+    min-width: 0;
+  }
+
+  .stages.sequentialPathway .label {
+    padding-top: 0;
   }
 }

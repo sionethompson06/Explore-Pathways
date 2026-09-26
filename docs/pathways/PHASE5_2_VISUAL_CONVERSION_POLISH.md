@@ -74,3 +74,21 @@ None of the P0/P1 items in the authorizing instruction were deferred. The one P2
 ## 9. Explicitly not started
 
 Phase 6, provider/school matching, the Blueprint product, advisor workflow tooling, booking, payments, AI/LLM integration, CRM/lead capture, analytics, and any merge to `main` — none of these were touched, per the phase's own stop boundary.
+
+## 10. Phase 5.2a — visual acceptance pass (freeze-candidate review)
+
+A subsequent owner review pass (Phase 5.2a) ran full manual visual QA (local dev server, screenshots at 375/768/1440px) across the organic report and the GR03/GR12/GR09/GR15 fixtures. It found and fixed one real rendering bug, and flagged two open decisions rather than changing them unilaterally. Full record: `docs/pathways/DECISION_LOG.md` section S (DEC-S11).
+
+- **Fixed:** R06's numbered stage node was absolutely positioned without actually reserving flex-gap space for it, so every stage label rendered overlapping its own number, at every breakpoint, on every fixture and the organic report -- blocking visual review of R06 entirely. Fixed in commit `1cc7e57` (pure CSS, no layout/behavior change beyond restoring legibility).
+- **Flagged, not changed:** the ADVISOR_FIRST/LIMITED_INFORMATION inline CTA copy implemented in Phase 5.2 was an unauthorized paraphrase of the actually-approved wording. Resolved in Phase 5.2b (below).
+- **Flagged, not changed:** whether R06 should stay a single vertical stepper for purely sequential pathways, or return to a horizontal desktop layout with the vertical split/rejoin treatment reserved for parallel pathways only. Resolved in Phase 5.2b (below).
+
+## 11. Phase 5.2b — final report pathway and CTA polish (freeze candidate)
+
+Two scoped owner decisions, both implemented as pure presentation-layer changes with no DTO, contract, or Phase 4 impact:
+
+**A. R06 layout now depends only on the assembled data shape.** `PathwayRoadmap.tsx` computes `hasParallelPathway` from the already-grouped steps (`steps.some((step) => step.stages.length > 1)`) -- never from a persona, archetype, or fixture id. Purely sequential pathways (GR03, GR06, GR09, GR14, GR15, and the organic report in this pass) render a compact horizontal progression at desktop (>=900px, numbered nodes evenly distributed left-to-right, a single horizontal connector line, no card-like boxes) and the existing vertical spine-connected stepper below that breakpoint. Pathways containing a parallel group (GR12) are completely unaffected: they keep the exact same vertical split/rejoin treatment at every viewport, since they never match the new `.sequentialPathway` CSS selector. The horizontal layout was built without repeating the Phase 5.2a bug: the numbered node stays a normal (non-absolutely-positioned) flex item, so no gap-reservation mismatch is possible.
+
+**B. The owner-approved inline CTA copy is restored verbatim** in `ReportView.tsx`'s `inlineConversionCopy()`: PERSONALIZED is unchanged; ADVISOR_FIRST and LIMITED_INFORMATION now use the exact approved headline/body pairs (see `docs/pathways/DECISION_LOG.md` DEC-S12 for the exact strings). `report.actions.primary` and CTA-resolution logic (`src/lib/report/cta.ts`) were not touched; UNCONFIGURED still always resolves to "See What Comes Next" at `/how-it-works`.
+
+New Playwright coverage in `tests/e2e/report-visual-polish.spec.ts`: exact approved-copy assertions (with explicit "never the old paraphrase" checks), CTA operational-safety assertions across GR03/GR09/GR15, horizontal-desktop/vertical-mobile assertions for GR03/GR09/GR15/GR06, GR12's unchanged vertical split/rejoin behavior at desktop and mobile, and a permanent regression guard asserting no numbered node ever overlaps its stage label/bracket (protecting against the exact Phase 5.2a bug class, not just re-testing that one instance).

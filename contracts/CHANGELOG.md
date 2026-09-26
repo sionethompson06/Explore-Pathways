@@ -416,3 +416,27 @@ Owner-authorized presentation-layer redesign of the Discovery Report. Full recor
 ### tests/e2e/report-visual-polish.spec.ts (new)
 
 - 24 new tests: no visible candidate IDs; evidence/action as separate regions; visible R03 heading; equal-weight two-card check; R04 ecosystem eyebrow; R05 new heading/subcopy; GR12 parallel group structure (desktop side-by-side, mobile grouped-stacked, no overflow); CTA safety across 5 fixtures; contentStatus-specific inline copy; GR09/GR15 never read as an error; utility header content. Full suite reverified: 185 Playwright tests, 781 Vitest tests (including the DB-backed suites), zero regressions.
+
+## Phase 5.2a — visual acceptance pass (rendering bug fix)
+
+Owner-run visual QA pass (screenshots at 375/768/1440px, local dev server) across the organic report and GR03/GR12/GR09/GR15. Full record: `docs/pathways/DECISION_LOG.md` DEC-S11.
+
+### src/components/report/PathwayRoadmap.module.css
+
+- Fixed the numbered stage node overlapping its own label at every breakpoint/fixture (an absolutely-positioned node with no reserved flex-gap space). The node is now a normal flex item again; no visual design change beyond restoring legibility.
+
+## Phase 5.2b — final report pathway and CTA polish (freeze candidate)
+
+Two scoped owner decisions from the Phase 5.2a review. Full record: `docs/pathways/DECISION_LOG.md` section S (DEC-S12/S13/S14). No question bank, rules, scoring policy, taxonomy, report content, Golden Profile, or Golden Report contract changed; no version bumped; `DiscoveryReportDTO` unchanged. Not merged to main.
+
+### src/components/report/ReportView.tsx
+
+- `inlineConversionCopy()`'s ADVISOR_FIRST and LIMITED_INFORMATION strings replaced with the owner-approved wording, verbatim, in place of the Phase 5.2 paraphrase. PERSONALIZED unchanged. `report.actions.primary` and CTA-resolution logic untouched.
+
+### src/components/report/PathwayRoadmap.tsx, .module.css
+
+- R06 layout now depends only on the assembled data shape (`hasParallelPathway`, computed from the existing grouped steps -- never a persona/archetype/fixture id). Purely sequential pathways render a compact horizontal progression at desktop (>=900px) and the existing vertical spine stepper below that. Pathways containing a parallel group (GR12) are unaffected -- they never match the new `.sequentialPathway` selector, so they keep the exact Phase 5.2/5.2a vertical split/rejoin treatment at every viewport.
+
+### tests/e2e/report-visual-polish.spec.ts
+
+- Inline-copy assertions updated to the exact owner-approved wording (with explicit assertions that the old paraphrase is absent). New coverage: CTA operational safety (label + exact href) across GR03/GR09/GR15; horizontal-desktop/vertical-mobile layout assertions for GR03/GR09/GR15/GR06; GR12's unchanged vertical split/rejoin behavior at desktop and mobile; a permanent node/label non-overlap regression guard at 375/1440px for a sequential and a parallel fixture, protecting against the Phase 5.2a bug class structurally, not only visually.

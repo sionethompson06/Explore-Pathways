@@ -134,24 +134,196 @@ test.describe("R07: CTA safety is preserved through the visual redesign (section
   }
 });
 
-test.describe("R07: contextual inline conversion copy by contentStatus (section 21)", () => {
-  test("PERSONALIZED (GR03) shows the options-comparison inline copy", async ({ page }) => {
+test.describe("R07: owner-approved inline conversion copy by contentStatus (section 21, restored exactly in Phase 5.2b)", () => {
+  test("PERSONALIZED (GR03) shows the exact approved options-comparison inline copy", async ({ page }) => {
     await page.goto("/discover/report/demo?fixture=GR03");
-    await expect(page.getByText("Want help comparing the actual options?")).toBeVisible();
+    await expect(page.getByText("Want help comparing the actual options?", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Pathways can help turn these directions into a complete plan.", { exact: true }),
+    ).toBeVisible();
   });
 
-  test("ADVISOR_FIRST (GR09) shows the advisor-review inline copy, never the options-comparison copy", async ({
+  test("ADVISOR_FIRST (GR09) shows the exact approved advisor-review inline copy, never the Phase 5.2 paraphrase or the options-comparison copy", async ({
     page,
   }) => {
     await page.goto("/discover/report/demo?fixture=GR09");
-    await expect(page.getByText("Ready to have this reviewed with Pathways?")).toBeVisible();
+    await expect(page.getByText("Want help reviewing this decision carefully?", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(
+        "Pathways can help organize the questions, information, and next steps before you choose a direction.",
+        { exact: true },
+      ),
+    ).toBeVisible();
     await expect(page.getByText("Want help comparing the actual options?")).toHaveCount(0);
+    await expect(page.getByText("Ready to have this reviewed with Pathways?")).toHaveCount(0);
+    await expect(page.getByText(/walk through this with your family before any school-model decision/)).toHaveCount(0);
   });
 
-  test("LIMITED_INFORMATION (GR15) shows the clarify-next-steps inline copy", async ({ page }) => {
+  test("LIMITED_INFORMATION (GR15) shows the exact approved clarify inline copy, never the Phase 5.2 paraphrase", async ({
+    page,
+  }) => {
     await page.goto("/discover/report/demo?fixture=GR15");
-    await expect(page.getByText("Want help figuring out what to look for next?")).toBeVisible();
+    await expect(page.getByText("Want help getting clearer?", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Pathways can help turn these open questions into a clearer set of options and next steps.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(page.getByText("Want help figuring out what to look for next?")).toHaveCount(0);
+    await expect(page.getByText(/clarify the right questions before you explore further/)).toHaveCount(0);
   });
+});
+
+test.describe("R07: CTA operational safety after the Phase 5.2b copy restoration (section 12)", () => {
+  for (const fixture of ["GR03", "GR09", "GR15"]) {
+    test(`${fixture}: UNCONFIGURED still resolves to "See What Comes Next" at the safe destination`, async ({
+      page,
+    }) => {
+      await page.goto(`/discover/report/demo?fixture=${fixture}`);
+      const ctas = page.getByRole("link", { name: "See What Comes Next" });
+      await expect(ctas.first()).toBeVisible();
+      const hrefs = await ctas.evaluateAll((links) => links.map((l) => (l as HTMLAnchorElement).getAttribute("href")));
+      expect(hrefs.length).toBeGreaterThan(0);
+      for (const href of hrefs) {
+        expect(href).toBe("/how-it-works");
+      }
+      const body = await page.locator("body").innerText();
+      expect(body).not.toContain("Build My Student's Pathway");
+    });
+  }
+});
+
+test.describe("R06: sequential pathways render horizontally at desktop, vertically at mobile (Phase 5.2b sections 4/5)", () => {
+  for (const fixture of ["GR03", "GR09", "GR15", "GR06"]) {
+    test(`${fixture}: desktop (1440px) -- no parallel group, stages progress left-to-right with no overlap`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 1200 });
+      await page.goto(`/discover/report/demo?fixture=${fixture}`);
+      await expect(page.getByRole("group", { name: "Parallel pathway priorities" })).toHaveCount(0);
+      const stageLabels = page.locator('ol[class*="stages"] > li > span[class*="label"]');
+      const count = await stageLabels.count();
+      expect(count).toBeGreaterThanOrEqual(2);
+      const first = await stageLabels.nth(0).boundingBox();
+      const second = await stageLabels.nth(1).boundingBox();
+      expect(first).not.toBeNull();
+      expect(second).not.toBeNull();
+      expect(Math.abs(first!.y - second!.y)).toBeLessThan(6);
+      expect(second!.x).toBeGreaterThan(first!.x);
+      const hasOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+      );
+      expect(hasOverflow).toBe(false);
+    });
+
+    test(`${fixture}: mobile (375px) -- stages stack vertically, no overlap/overflow`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 1200 });
+      await page.goto(`/discover/report/demo?fixture=${fixture}`);
+      const stageLabels = page.locator('ol[class*="stages"] > li > span[class*="label"]');
+      const count = await stageLabels.count();
+      expect(count).toBeGreaterThanOrEqual(2);
+      const first = await stageLabels.nth(0).boundingBox();
+      const second = await stageLabels.nth(1).boundingBox();
+      expect(first).not.toBeNull();
+      expect(second).not.toBeNull();
+      expect(second!.y).toBeGreaterThan(first!.y);
+      const hasOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+      );
+      expect(hasOverflow).toBe(false);
+    });
+  }
+});
+
+test.describe("R06: GR12 parallel pathway keeps the vertical split/rejoin treatment (Phase 5.2b section 6)", () => {
+  test("desktop (1440px): main stages stay vertical, parallel branches render side by side, no overflow", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1200 });
+    await page.goto("/discover/report/demo?fixture=GR12");
+    const group = page.getByRole("group", { name: "Parallel pathway priorities" });
+    await expect(group).toBeVisible();
+    await expect(group.getByText("Resolve Credit Gaps")).toBeVisible();
+    await expect(group.getByText("Protect Advanced Opportunities")).toBeVisible();
+
+    const branchA = page.getByText("Resolve Credit Gaps", { exact: true });
+    const branchB = page.getByText("Protect Advanced Opportunities", { exact: true });
+    const [boxA, boxB] = await Promise.all([branchA.boundingBox(), branchB.boundingBox()]);
+    expect(boxA).not.toBeNull();
+    expect(boxB).not.toBeNull();
+    expect(Math.abs(boxA!.y - boxB!.y)).toBeLessThan(4);
+    expect(boxA!.x).not.toBeCloseTo(boxB!.x, 0);
+
+    // The subsequent main stage (after the parallel group) appears below it, not beside it --
+    // the main roadmap stays vertical even though the branches inside are side by side.
+    const nextStage = page.getByText("Flexible / Teacher-Supported Learning", { exact: true });
+    const nextBox = await nextStage.boundingBox();
+    expect(nextBox).not.toBeNull();
+    expect(nextBox!.y).toBeGreaterThan(boxA!.y);
+
+    const hasOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    );
+    expect(hasOverflow).toBe(false);
+  });
+
+  test("mobile (375px): parallel group stays visible and grouped, branches stack, no overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 1200 });
+    await page.goto("/discover/report/demo?fixture=GR12");
+    const group = page.getByRole("group", { name: "Parallel pathway priorities" });
+    await expect(group).toBeVisible();
+    const branchA = group.getByText("Resolve Credit Gaps", { exact: true });
+    const branchB = group.getByText("Protect Advanced Opportunities", { exact: true });
+    const [boxA, boxB] = await Promise.all([branchA.boundingBox(), branchB.boundingBox()]);
+    expect(boxA).not.toBeNull();
+    expect(boxB).not.toBeNull();
+    expect(boxB!.y).toBeGreaterThan(boxA!.y);
+
+    const nextStage = page.getByText("Flexible / Teacher-Supported Learning", { exact: true });
+    const nextBox = await nextStage.boundingBox();
+    expect(nextBox).not.toBeNull();
+    expect(nextBox!.y).toBeGreaterThan(boxB!.y);
+
+    const hasOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    );
+    expect(hasOverflow).toBe(false);
+  });
+});
+
+test.describe("R06: regression guard for the Phase 5.2a node/label overlap bug (1cc7e57)", () => {
+  async function assertNoNodeLabelOverlap(page: import("@playwright/test").Page) {
+    const overlapCount = await page.evaluate(() => {
+      const stages = Array.from(document.querySelectorAll('ol[class*="stages"] > li'));
+      let overlaps = 0;
+      for (const stage of stages) {
+        const node = stage.querySelector('[class*="node"]');
+        const label = stage.querySelector('[class*="label"], [class*="parallelBracket"]');
+        if (!node || !label) continue;
+        const n = node.getBoundingClientRect();
+        const l = label.getBoundingClientRect();
+        const overlapsX = n.left < l.right && n.right > l.left;
+        const overlapsY = n.top < l.bottom && n.bottom > l.top;
+        if (overlapsX && overlapsY) overlaps += 1;
+      }
+      return overlaps;
+    });
+    expect(overlapCount).toBe(0);
+  }
+
+  for (const width of [375, 1440]) {
+    test(`GR03 (sequential) at ${width}px: no numbered node overlaps its stage label`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1200 });
+      await page.goto("/discover/report/demo?fixture=GR03");
+      await assertNoNodeLabelOverlap(page);
+    });
+
+    test(`GR12 (parallel) at ${width}px: no numbered node overlaps its stage label/bracket`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1200 });
+      await page.goto("/discover/report/demo?fixture=GR12");
+      await assertNoNodeLabelOverlap(page);
+    });
+  }
 });
 
 test.describe("Zero-card special states read as intentional, never as an error (section 11/48/49)", () => {

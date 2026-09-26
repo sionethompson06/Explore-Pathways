@@ -28,26 +28,36 @@ function ForkIcon() {
 
 /**
  * R06 -- Preliminary Pathway (section 25/45, redesigned Phase 5.2
- * sections 14-17). A single vertical stepper at every viewport, with a
- * continuous connector line threading the numbered stages -- for
- * genuinely sequential pathways this is simply a clean, premium
- * stepper (section 16: no artificial branching). For a step whose
- * stages share a parallelGroup (P12/GR12), that step visibly SPLITS
- * into side-by-side priority tracks and then REJOINS the single line
- * for the next stage, so the concept reads without needing the
- * subordinate paragraph. Accessible reading order stays a single
- * <ol>, one <li> per parallel group, with an explicit group label
- * (section 15) -- never two separate lists, never a canvas diagram.
+ * sections 14-17, layout split in Phase 5.2b). One semantic renderer,
+ * two presentational variants chosen purely from the assembled data
+ * shape (whether any grouped step shares a parallelGroup) -- never
+ * from a persona, archetype, or fixture id:
+ *
+ * - Purely SEQUENTIAL pathways (no parallel group) render a compact
+ *   horizontal progression at desktop (>=900px) and the vertical
+ *   spine-connected stepper on mobile/tablet.
+ * - Pathways containing a PARALLEL group keep the richer vertical
+ *   split/rejoin treatment at every viewport (P12/GR12): the step
+ *   visibly SPLITS into side-by-side priority tracks and then
+ *   REJOINS the single line for the next stage, so the concept reads
+ *   without needing the subordinate paragraph.
+ *
+ * Accessible reading order stays a single <ol>, one <li> per parallel
+ * group, with an explicit group label (section 15) -- never two
+ * separate lists, never a canvas diagram.
  */
 export function PathwayRoadmap({ pathway, headingId }: { pathway: PathwaySection; headingId: string }) {
   const steps = groupStages(pathway.stages);
+  // Layout depends only on the assembled data shape -- never a persona,
+  // archetype, or fixture id (section 3 of the Phase 5.2b instruction).
+  const hasParallelPathway = steps.some((step) => step.stages.length > 1);
   return (
     <div className={styles.wrap}>
       <h2 id={headingId} className={styles.title}>
         {pathway.title}
       </h2>
       {pathway.intro ? <p className={styles.intro}>{pathway.intro}</p> : null}
-      <ol className={styles.stages}>
+      <ol className={`${styles.stages} ${hasParallelPathway ? styles.parallelPathway : styles.sequentialPathway}`}>
         {steps.map((step) =>
           step.stages.length > 1 ? (
             <li key={step.key} className={`${styles.stage} ${styles.stageParallel}`}>

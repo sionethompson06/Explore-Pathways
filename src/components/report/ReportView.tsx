@@ -25,13 +25,13 @@ function inlineConversionCopy(contentStatus: ContentStatus): { headline: string;
   switch (contentStatus) {
     case "ADVISOR_FIRST":
       return {
-        headline: "Ready to have this reviewed with Pathways?",
-        body: "Pathways can walk through this with your family before any school-model decision is made.",
+        headline: "Want help reviewing this decision carefully?",
+        body: "Pathways can help organize the questions, information, and next steps before you choose a direction.",
       };
     case "LIMITED_INFORMATION":
       return {
-        headline: "Want help figuring out what to look for next?",
-        body: "Pathways can help clarify the right questions before you explore further.",
+        headline: "Want help getting clearer?",
+        body: "Pathways can help turn these open questions into a clearer set of options and next steps.",
       };
     case "PERSONALIZED":
     default:
