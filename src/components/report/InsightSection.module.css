@@ -1,5 +1,21 @@
 .wrap {
+  position: relative;
   max-width: var(--max-prose-width);
+  padding-left: var(--space-5);
+}
+
+.accentRule {
+  position: absolute;
+  left: 0;
+  top: var(--space-1);
+  bottom: var(--space-1);
+  width: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-strong);
+}
+
+.limited .accentRule {
+  background: var(--color-neutral-300);
 }
 
 .kicker {
@@ -9,13 +25,17 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-accent-strong);
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-3);
+}
+
+.limited .kicker {
+  color: var(--color-neutral-500);
 }
 
 .headline {
   font-size: var(--font-size-2xl);
   line-height: var(--line-height-snug);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-4);
   color: var(--color-text);
 }
 
@@ -24,4 +44,10 @@
   line-height: var(--line-height-normal);
   color: var(--color-text-muted);
   margin: 0;
+}
+
+@media (max-width: 640px) {
+  .headline {
+    font-size: var(--font-size-xl);
+  }
 }

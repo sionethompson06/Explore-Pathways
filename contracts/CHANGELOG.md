@@ -372,3 +372,47 @@ Owner-authorized narrow acceptance cleanup on top of Phase 5.1. Full record at `
 
 - Remaining `h1:not(#discovery-demo-heading)` workarounds replaced with plain `page.locator("h1")` assertions.
 - `discovery-scroll.spec.ts`'s report-scroll test also fixed a pre-existing, unrelated test bug found during reverification (DEC-R4): it checked the ReportHero H1's own position for "scrolled to top," when the H1 sits well below the demo label/top actions/hero eyebrow-title-badge; now checks the demo label (the anchor container's real first content) instead.
+
+## Phase 5.2 — Discovery Report visual & conversion polish
+
+Owner-authorized presentation-layer redesign of the Discovery Report. Full record at `docs/pathways/DECISION_LOG.md` section S and `docs/pathways/PHASE5_2_VISUAL_CONVERSION_POLISH.md`. No question bank, rules, scoring policy, taxonomy, report content, Golden Profile, or Golden Report contract changed; no version bumped; `DiscoveryReportDTO` unchanged. Not merged to main; no AI, no persistence added.
+
+### src/components/report/ReportUtilityHeader.tsx, .module.css (new)
+
+- New identity/wayfinding row above the report body: the existing `Logo` wordmark + "Discovery Report" label + optional demo badge on the left, edit-answers action + secondary action on the right. Replaces `ReportView`'s previous bare `demoLabel`/`topActions` strip.
+
+### src/components/report/DirectionCard.tsx, .module.css
+
+- The decorative motif no longer renders `card.baseModelId` text (previously visible inside an `aria-hidden` span); replaced with a decorative-only inline SVG. "Why this surfaced" and "What to look for" are now two separate regions ("Why This Surfaced" / "What To Look For") with distinct green/blue-navy tint, left border, and icon — no longer sharing typography or background.
+
+### src/components/report/DirectionGrid.tsx, new DirectionGrid.module.css
+
+- The R03 section heading is now a visible `<h2>` for personalized reports (previously `visually-hidden`). New `contentStatus` prop drives two distinct zero-card presentational variants (ADVISOR_FIRST: navy/blue "under review"; LIMITED_INFORMATION: warm/light "still exploring") over the same DTO content.
+
+### src/components/report/SupportOpportunityMap.tsx, .module.css
+
+- Tiles are smaller, icon-led (distinct SUPPORT vs. OPPORTUNITY glyphs), on a warm-neutral surface with a lighter border and no card shadow — deliberately softer than R03. New "The ecosystem around this direction" eyebrow. Special-state tiles (ADVISOR_FIRST/LIMITED_INFORMATION) get the same two-variant wrapper treatment as R03, over the same `specialHeading`/`specialTiles` content.
+
+### src/components/report/ComparisonGuide.tsx, .module.css
+
+- `guide.title` is now a small eyebrow; new UI-only heading "Questions That Matter Before You Choose" and supporting copy render above the question list (report-content.json unchanged). Larger numbered markers, stronger question typography, subtle top-border separators instead of repeated white cards.
+
+### src/components/report/PathwayRoadmap.tsx, .module.css
+
+- Single continuous vertical stepper at every viewport (the previous ≥900px CSS-grid column layout, which squeezed a parallel group into an unreadable strip, is removed). A connector line threads behind every stage node. The parallel-group step now visibly forks into a bracketed two-track box (`role="group" aria-label="Parallel pathway priorities"`, visible label) and rejoins the line for the next stage.
+
+### src/components/report/ConversionBand.tsx, .module.css
+
+- Stronger CTA sizing/spacing, an arrow icon, full-width mobile CTA, and a presentational `contentStatus` accent variant (green/blue/muted) — `action.label`/`action.href` unchanged in every case. `ReportView.tsx`'s inline post-R03 band now uses `contentStatus`-specific copy instead of hardcoded PERSONALIZED-only copy, still rendering `report.actions.primary`.
+
+### src/components/report/InsightSection.tsx, .module.css / ReportHero.module.css
+
+- R02 gained an accent rule + eyebrow treatment (softer for LIMITED_INFORMATION); exact copy unchanged. R01 hero spacing/hierarchy tightened, with mobile-specific (375px) padding/sizing fixes.
+
+### app/discover/report/demo/page.tsx
+
+- Fixture-selector nav is now `flex-wrap: nowrap` + `overflow-x: auto` (horizontally scrollable on narrow viewports, no wrapping, no new client JS).
+
+### tests/e2e/report-visual-polish.spec.ts (new)
+
+- 24 new tests: no visible candidate IDs; evidence/action as separate regions; visible R03 heading; equal-weight two-card check; R04 ecosystem eyebrow; R05 new heading/subcopy; GR12 parallel group structure (desktop side-by-side, mobile grouped-stacked, no overflow); CTA safety across 5 fixtures; contentStatus-specific inline copy; GR09/GR15 never read as an error; utility header content. Full suite reverified: 185 Playwright tests, 781 Vitest tests (including the DB-backed suites), zero regressions.

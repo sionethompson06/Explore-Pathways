@@ -85,17 +85,29 @@ export default async function DiscoveryReportDemoPage({
         <span id="demo-selector-heading" className="visually-hidden">
           Discovery Report Demo Fixture Selector
         </span>
-        <nav aria-label="Golden report fixture selector" style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
+        <nav
+          aria-label="Golden report fixture selector"
+          style={{
+            display: "flex",
+            gap: "var(--space-3)",
+            flexWrap: "nowrap",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+            paddingBottom: "2px",
+          }}
+        >
           {KNOWN_FIXTURE_IDS.map((id) => (
             <a
               key={id}
               href={`/discover/report/demo?fixture=${id}`}
               aria-current={id === fixtureId ? "page" : undefined}
               style={{
+                flexShrink: 0,
                 padding: "var(--space-2) var(--space-4)",
                 borderRadius: "var(--radius-full)",
                 fontWeight: 600,
                 textDecoration: "none",
+                whiteSpace: "nowrap",
                 color: id === fixtureId ? "var(--color-white)" : "var(--color-text)",
                 background: id === fixtureId ? "var(--color-accent-strong)" : "var(--color-white)",
                 boxShadow: "var(--shadow-card)",

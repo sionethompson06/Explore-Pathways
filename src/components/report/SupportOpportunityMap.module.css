@@ -1,3 +1,18 @@
+.eyebrow {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  margin: 0 0 var(--space-2);
+}
+
+.heading {
+  font-size: var(--font-size-2xl);
+  margin: 0 0 var(--space-5);
+}
+
 .subsection + .subsection {
   margin-top: var(--space-6);
 }
@@ -9,26 +24,55 @@
   color: var(--color-text);
 }
 
+/* Deliberately softer/smaller than DirectionCard's R03 tiles (section
+   9): warm-neutral surface, lighter border, no heavy card shadow --
+   reads as "the ecosystem", not a second row of recommendations. */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-3);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .tile {
-  padding: var(--space-5);
-  background: var(--color-white);
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+}
+
+.tileIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-white);
+}
+
+.tileSupport {
+  border-left: 2px solid var(--color-accent);
+}
+
+.tileOpportunity {
+  border-left: 2px solid var(--color-emphasis);
+}
+
+.tileNeutral {
+  border-left: 2px solid var(--color-neutral-300);
 }
 
 .tileTitle {
   font-size: var(--font-size-base);
   font-weight: 600;
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-1);
 }
 
 .tileBody {
@@ -51,6 +95,31 @@
   font-weight: 700;
   color: var(--color-neutral-500);
   margin-bottom: var(--space-1);
+}
+
+/* Special-state wrapper (ADVISOR_FIRST / LIMITED_INFORMATION), same
+   content-differentiation pattern as DirectionGrid's zero-card
+   states. */
+.specialWrap {
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.specialAdvisor {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-navy-600);
+  border-left: 4px solid var(--color-navy-700);
+}
+
+.specialLimited {
+  background: var(--color-warm-white);
+  border: 1px solid var(--color-border);
+}
+
+.specialHeading {
+  font-size: var(--font-size-xl);
+  margin: 0 0 var(--space-4);
+  color: var(--color-navy-900);
 }
 
 @media (max-width: 720px) {

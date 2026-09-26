@@ -10,15 +10,15 @@
 }
 
 .motif {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   background: var(--color-accent-tint);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-accent-strong);
-  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .headRow {
@@ -29,10 +29,17 @@
   gap: var(--space-2) var(--space-3);
 }
 
+.headText {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 .title {
   font-size: var(--font-size-xl);
   font-weight: 600;
-  margin: var(--space-2) 0 0;
+  margin: 0;
   color: var(--color-text);
 }
 
@@ -62,19 +69,57 @@
   margin: 0;
 }
 
-.subheading {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--color-neutral-500);
-  margin: var(--space-2) 0 var(--space-1);
+/* Evidence zone (Why This Surfaced): green tint, confirming check-mark
+   iconography -- must never share typography/background with the
+   action zone (section 5/37). */
+.evidenceZone {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-tint);
+  border-left: 3px solid var(--color-accent-strong);
 }
 
-.list {
+.evidenceHeading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-accent-strong);
+  margin: 0 0 var(--space-2);
+}
+
+.evidenceList {
   margin: 0;
   padding-left: 1.1em;
-  color: var(--color-text-muted);
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+
+/* Action zone (What To Look For): blue/navy advisory tint, checklist
+   iconography -- deliberately distinct surface + typography from the
+   evidence zone above. */
+.actionZone {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: #eef4fb;
+  border-left: 3px solid var(--color-emphasis);
+}
+
+.actionHeading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-navy-800);
+  margin: 0 0 var(--space-2);
+}
+
+.actionList {
+  margin: 0;
+  padding-left: 1.1em;
+  color: var(--color-text);
   line-height: var(--line-height-normal);
 }
 
