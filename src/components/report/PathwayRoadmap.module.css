@@ -22,7 +22,7 @@
   flex-direction: column;
   gap: var(--space-6);
   margin: 0;
-  padding: 0 0 0 calc(var(--space-2) + 18px);
+  padding: 0;
   list-style: none;
   counter-reset: stage;
 }
@@ -46,9 +46,7 @@
 }
 
 .node {
-  position: absolute;
-  left: calc(-1 * (var(--space-2) + 18px));
-  top: 0;
+  flex-shrink: 0;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -79,10 +77,6 @@
    paragraph"). */
 .stageParallel {
   align-items: stretch;
-}
-
-.stageParallel .node {
-  top: 0;
 }
 
 .parallelBracket {
