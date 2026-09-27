@@ -30,25 +30,13 @@ export const metadata: Metadata = {
  * the database is misconfigured or unreachable.
  */
 export default async function DiscoveryReportPage() {
-  const [
-    { GUEST_SESSION_COOKIE_NAME },
-    { loadDraftByToken, loadLatestCompletedRevision },
-    { db },
-    { validateCompletedProfile },
-    { loadContracts },
-    { evaluateDiscoveryProfile },
-    { assembleDiscoveryReport },
-    { buildReportProfileContext },
-  ] = await Promise.all([
-    import("@/server/session"),
-    import("@/server/discovery-draft"),
-    import("@/db/client"),
-    import("@/lib/discovery/validation"),
-    import("@/lib/contracts/loader"),
-    import("@/lib/engine/evaluate"),
-    import("@/lib/report/assemble"),
-    import("@/lib/report/profile-context"),
-  ]);
+  const [{ GUEST_SESSION_COOKIE_NAME }, { loadDraftByToken }, { db }, { ensureReportOutcomeForSession }] =
+    await Promise.all([
+      import("@/server/session"),
+      import("@/server/discovery-draft"),
+      import("@/db/client"),
+      import("@/server/report-outcome"),
+    ]);
 
   const cookieStore = await cookies();
   const token = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
@@ -61,9 +49,17 @@ export default async function DiscoveryReportPage() {
     redirect("/discover");
   }
 
-  const revision = await loadLatestCompletedRevision(db, draft.sessionId);
+  // Phase 6A (sections 7-10): recomputes the Phase 4 evaluation and
+  // Phase 5 DTO exactly as before, and now also idempotently persists
+  // the outcome as an immutable EngineRun + ReportSnapshot so a later
+  // consultation request can link to the exact revision/report that
+  // converted it. Allowed to throw (caught by app/discover/error.tsx)
+  // on a genuine database failure -- this route already requires a
+  // working database for the reads above, so there is no honest
+  // degraded state to fall back to here.
+  const outcome = await ensureReportOutcomeForSession(db, draft.sessionId);
 
-  if (!revision) {
+  if (!outcome) {
     return (
       <Section tone="default" ariaLabelledBy="report-incomplete-heading" narrow>
         <h1 id="report-incomplete-heading">Your Discovery Profile Isn&apos;t Finished Yet</h1>
@@ -82,33 +78,7 @@ export default async function DiscoveryReportPage() {
     );
   }
 
-  const validation = validateCompletedProfile(revision.rawAnswers);
-  if (!validation.ok || !validation.effective) {
-    // A stored completed revision should always still validate under the
-    // current contracts; if it somehow doesn't (contract/version drift),
-    // fail loudly rather than fabricate a generic recommendation (section 67).
-    throw new Error("Stored completed Discovery profile no longer validates against the current contracts.");
-  }
-
-  const contracts = loadContracts();
-  const evaluation = evaluateDiscoveryProfile(validation.effective, contracts);
-
-  const profile = buildReportProfileContext({
-    rawAnswers: revision.rawAnswers as Record<string, unknown>,
-    profileRevisionId: revision.revisionId,
-    gradeBand: evaluation.derivedFacts.grade_band,
-  });
-  const report = assembleDiscoveryReport(
-    {
-      profile,
-      engine: evaluation,
-      // No live/verified consultation service is configured in this build --
-      // never claim LIVE_VERIFIED or REQUEST_ONLY without one actually existing.
-      operational: { consultationState: "UNCONFIGURED", saveAvailable: false },
-    },
-    contracts,
-    revision.createdAt.toISOString(),
-  );
+  const { report } = outcome;
 
   const editAnswersOverride = (
     <form action={reopenForEditingAction}>

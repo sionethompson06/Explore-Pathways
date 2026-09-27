@@ -65,6 +65,7 @@ export async function resetTestDatabase() {
       advisor_note,
       advisor_assignment,
       booking,
+      consultation_contact,
       consultation_request,
       consent_event,
       report_snapshot,

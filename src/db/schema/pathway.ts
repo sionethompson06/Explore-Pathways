@@ -222,7 +222,20 @@ export const engineRun = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index("engine_run_profile_revision_idx").on(table.profileRevisionId)],
+  (table) => [
+    index("engine_run_profile_revision_idx").on(table.profileRevisionId),
+    // Phase 6A idempotency boundary: repeated report generation under
+    // the exact same profile revision and contract versions reuses the
+    // same engine run rather than accumulating duplicates on every
+    // refresh/retry (see src/server/report-persistence.ts).
+    uniqueIndex("engine_run_idempotency_unique_idx").on(
+      table.profileRevisionId,
+      table.rulesVersion,
+      table.taxonomyVersion,
+      table.scoringPolicyVersion,
+      table.contentVersion,
+    ),
+  ],
 );
 
 // ---------------------------------------------------------------------------
@@ -268,6 +281,15 @@ export const reportSnapshot = pgTable(
   (table) => [
     index("report_snapshot_profile_revision_idx").on(
       table.profileRevisionId,
+    ),
+    // Phase 6A idempotency boundary: the same profile revision producing
+    // the exact same deterministic content (contentHash covers the full
+    // assembled DTO plus contract/provenance versions) reuses this
+    // immutable snapshot rather than creating a duplicate on every
+    // report refresh/retry (see src/server/report-persistence.ts).
+    uniqueIndex("report_snapshot_idempotency_unique_idx").on(
+      table.profileRevisionId,
+      table.contentHash,
     ),
   ],
 );

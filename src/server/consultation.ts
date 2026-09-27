@@ -1,0 +1,247 @@
+import "server-only";
+import { desc, eq } from "drizzle-orm";
+import type { Database } from "@/db/client";
+import {
+  discoverySession,
+  consultationRequest,
+  consultationContact,
+  workflowEvent,
+  type consultationStatusEnum,
+} from "@/db/schema";
+import { generateId } from "./ids";
+import { isUniqueConstraintConflict } from "./db-conflict";
+import { ensureReportOutcomeForSession } from "./report-outcome";
+import { getConsultationCapability } from "./consultation-capability";
+import type { ConsultationContactInput } from "@/lib/consultation/validation";
+import { PLANNING_CONTACT_CONSENT_VERSION } from "@/lib/consultation/constants";
+
+/**
+ * Phase 6A contact-capture domain logic (docs/pathways instruction
+ * sections 17-27). Every function here resolves the acting session
+ * from an already-authenticated sessionId (the caller having read it
+ * from the HttpOnly cookie -- see app/discover/consultation/actions.ts) --
+ * never from a client-supplied consultation/student/revision id.
+ */
+
+const CONSULTATION_REQUEST_IDEMPOTENCY_CONSTRAINT = "consultation_request_profile_revision_unique_idx";
+
+/** Statuses a contact (re)submission must never regress -- only NONE/REQUESTED may move to REQUESTED again on idempotent replay. */
+type ConsultationStatus = (typeof consultationStatusEnum.enumValues)[number];
+const REGRESSABLE_STATUSES: readonly ConsultationStatus[] = ["NONE", "REQUESTED"];
+
+export type SubmitConsultationContactResult =
+  | { ok: true; consultationRequestId: string }
+  | { ok: false; reason: "NO_SESSION" | "NO_COMPLETED_PROFILE" };
+
+/**
+ * The section 27 contact-submission transaction: resolves this
+ * session's own StudentPathwayRecord and exact completed
+ * ProfileRevision/ReportSnapshot (persisting them if they somehow
+ * don't exist yet -- section 64), then idempotently creates or reuses
+ * exactly one ConsultationRequest per originating ProfileRevision
+ * (section 26 -- a double-click/retry never creates a duplicate),
+ * upserts the pre-auth ConsultationContact, and records a WorkflowEvent
+ * only on a genuine status transition (never a duplicate audit row for
+ * a pure network retry). Never downgrades a request that has already
+ * progressed past REQUESTED (e.g. PENDING_VERIFICATION) back to
+ * REQUESTED -- a parent re-submitting this form after already reaching
+ * the scheduler handoff must not undo that progress.
+ */
+export async function submitConsultationContact(
+  db: Database,
+  sessionId: string,
+  input: ConsultationContactInput,
+): Promise<SubmitConsultationContactResult> {
+  const [sessionRow] = await db
+    .select()
+    .from(discoverySession)
+    .where(eq(discoverySession.id, sessionId))
+    .limit(1);
+  if (!sessionRow) return { ok: false, reason: "NO_SESSION" };
+  if (!sessionRow.studentPathwayRecordId) return { ok: false, reason: "NO_COMPLETED_PROFILE" };
+
+  const outcome = await ensureReportOutcomeForSession(db, sessionId);
+  if (!outcome) return { ok: false, reason: "NO_COMPLETED_PROFILE" };
+
+  const studentPathwayRecordId = sessionRow.studentPathwayRecordId;
+  const { revisionId, reportSnapshotId } = outcome;
+
+  const consultationRequestId = await db.transaction(async (tx) => {
+    let requestId: string;
+    let statusBeforeThisCall: ConsultationStatus = "NONE";
+    let isNewRequest = false;
+
+    const candidateId = generateId("crequest");
+    try {
+      await tx.transaction(async (tx2) => {
+        await tx2.insert(consultationRequest).values({
+          id: candidateId,
+          studentPathwayRecordId,
+          profileRevisionId: revisionId,
+          reportSnapshotId,
+          status: "REQUESTED",
+        });
+      });
+      requestId = candidateId;
+      isNewRequest = true;
+    } catch (err) {
+      if (!isUniqueConstraintConflict(err, CONSULTATION_REQUEST_IDEMPOTENCY_CONSTRAINT)) throw err;
+      const [existing] = await tx
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.profileRevisionId, revisionId))
+        .limit(1);
+      if (!existing) throw err; // Constraint name matched but the row vanished -- do not fabricate a result.
+      requestId = existing.id;
+      statusBeforeThisCall = existing.status;
+      if (REGRESSABLE_STATUSES.includes(existing.status) && existing.status !== "REQUESTED") {
+        await tx
+          .update(consultationRequest)
+          .set({ status: "REQUESTED", updatedAt: new Date() })
+          .where(eq(consultationRequest.id, requestId));
+      }
+    }
+
+    const now = new Date();
+    await tx
+      .insert(consultationContact)
+      .values({
+        id: generateId("ccontact"),
+        consultationRequestId: requestId,
+        guardianName: input.guardianName,
+        email: input.email,
+        mobilePhone: input.mobilePhone,
+        preferredCallFormat: input.preferredCallFormat,
+        contactConsentVersion: PLANNING_CONTACT_CONSENT_VERSION,
+        contactConsentGrantedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: consultationContact.consultationRequestId,
+        set: {
+          guardianName: input.guardianName,
+          email: input.email,
+          mobilePhone: input.mobilePhone,
+          preferredCallFormat: input.preferredCallFormat,
+          contactConsentVersion: PLANNING_CONTACT_CONSENT_VERSION,
+          contactConsentGrantedAt: now,
+          updatedAt: now,
+        },
+      });
+
+    const statusChanged = isNewRequest || statusBeforeThisCall !== "REQUESTED";
+    if (statusChanged) {
+      await tx.insert(workflowEvent).values({
+        id: generateId("wfevent"),
+        consultationRequestId: requestId,
+        fromStatus: isNewRequest ? "NONE" : statusBeforeThisCall,
+        toStatus: "REQUESTED",
+        reason: "CONTACT_RECEIVED",
+      });
+    }
+
+    return requestId;
+  });
+
+  return { ok: true, consultationRequestId };
+}
+
+export interface ActiveConsultationRequestView {
+  id: string;
+  status: ConsultationStatus;
+}
+
+/**
+ * Resolves this guest session's own active ConsultationRequest, purely
+ * from the session-derived studentPathwayRecordId -- never from a
+ * client-supplied consultation/request id. Returns null if this
+ * session has no student record or no consultation request yet.
+ */
+export async function getActiveConsultationRequestForSession(
+  db: Database,
+  sessionId: string,
+): Promise<ActiveConsultationRequestView | null> {
+  const [sessionRow] = await db
+    .select()
+    .from(discoverySession)
+    .where(eq(discoverySession.id, sessionId))
+    .limit(1);
+  if (!sessionRow?.studentPathwayRecordId) return null;
+
+  const [request] = await db
+    .select({ id: consultationRequest.id, status: consultationRequest.status })
+    .from(consultationRequest)
+    .where(eq(consultationRequest.studentPathwayRecordId, sessionRow.studentPathwayRecordId))
+    .orderBy(desc(consultationRequest.createdAt))
+    .limit(1);
+  return request ?? null;
+}
+
+export type ScheduleHandoffResult =
+  | { ok: true; scheduleUrl: string }
+  | { ok: false; reason: "NO_ACTIVE_REQUEST" | "SCHEDULING_UNAVAILABLE" };
+
+/** Farther along than REQUESTED -- a handoff never regresses one of these back down (section 30's "if not already farther along"). */
+const STATUSES_FARTHER_THAN_REQUESTED: readonly ConsultationStatus[] = [
+  "PENDING_VERIFICATION",
+  "BOOKED",
+  "CANCELLED",
+  "COMPLETED",
+  "NO_SHOW",
+];
+
+/**
+ * The section 30 Google scheduler handoff: verifies capability is
+ * actually REQUEST_ONLY with a configured URL, locates this session's
+ * own active ConsultationRequest (never a client-supplied id),
+ * transactionally transitions REQUESTED -> PENDING_VERIFICATION only
+ * if not already farther along, appends the WorkflowEvent, and returns
+ * the server-configured schedule URL for the caller to redirect to.
+ * Never returns/accepts any URL not read directly from this server's
+ * own configuration (open-redirect prevention).
+ */
+export async function handOffToGoogleScheduler(
+  db: Database,
+  sessionId: string,
+): Promise<ScheduleHandoffResult> {
+  const capability = getConsultationCapability();
+  if (capability.state !== "REQUEST_ONLY" || !capability.scheduleUrl) {
+    return { ok: false, reason: "SCHEDULING_UNAVAILABLE" };
+  }
+  const scheduleUrl = capability.scheduleUrl;
+
+  const [sessionRow] = await db
+    .select()
+    .from(discoverySession)
+    .where(eq(discoverySession.id, sessionId))
+    .limit(1);
+  if (!sessionRow?.studentPathwayRecordId) return { ok: false, reason: "NO_ACTIVE_REQUEST" };
+  const studentPathwayRecordId = sessionRow.studentPathwayRecordId;
+
+  const found = await db.transaction(async (tx) => {
+    const [request] = await tx
+      .select()
+      .from(consultationRequest)
+      .where(eq(consultationRequest.studentPathwayRecordId, studentPathwayRecordId))
+      .orderBy(desc(consultationRequest.createdAt))
+      .limit(1);
+    if (!request) return false;
+
+    if (!STATUSES_FARTHER_THAN_REQUESTED.includes(request.status)) {
+      await tx
+        .update(consultationRequest)
+        .set({ status: "PENDING_VERIFICATION", updatedAt: new Date() })
+        .where(eq(consultationRequest.id, request.id));
+      await tx.insert(workflowEvent).values({
+        id: generateId("wfevent"),
+        consultationRequestId: request.id,
+        fromStatus: request.status,
+        toStatus: "PENDING_VERIFICATION",
+        reason: "GOOGLE_SCHEDULER_HANDOFF",
+      });
+    }
+    return true;
+  });
+
+  if (!found) return { ok: false, reason: "NO_ACTIVE_REQUEST" };
+  return { ok: true, scheduleUrl };
+}

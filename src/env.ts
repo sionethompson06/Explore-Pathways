@@ -99,6 +99,20 @@ const rawEnvSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+
+  // Phase 6A: the real, server-owned Google Calendar Appointment
+  // Schedule page a parent is handed off to once contact info is
+  // captured. Optional -- its absence (or SCHEDULER_MODE not being
+  // REQUEST_ONLY) is exactly what keeps consultation capability at
+  // UNCONFIGURED (see src/server/consultation-capability.ts). Never
+  // read from a query param, form field, or any client-supplied
+  // input; never exposed to the browser. HTTPS-only -- an external
+  // booking handoff is never sent over plain HTTP.
+  GOOGLE_APPOINTMENT_SCHEDULE_URL: z
+    .string()
+    .url()
+    .refine((v) => v.startsWith("https://"), "GOOGLE_APPOINTMENT_SCHEDULE_URL must be an https:// URL")
+    .optional(),
 });
 
 // Local/test/preview illustrative default only -- see

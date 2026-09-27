@@ -4,10 +4,15 @@ import {
   timestamp,
   pgEnum,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
-import { studentPathwayRecord } from "./pathway";
+import {
+  studentPathwayRecord,
+  profileRevision,
+  reportSnapshot,
+} from "./pathway";
 
 /**
  * Consent, consultation workflow, advisor assignment/notes. Phase 1
@@ -87,6 +92,24 @@ export const consultationRequest = pgTable(
     guardianUserId: text("guardian_user_id").references(() => user.id, {
       onDelete: "set null",
     }),
+    // Phase 6A: the exact Discovery profile revision and report
+    // snapshot this consultation converted from (sections 25/45).
+    // Nullable and backward-compatible -- pre-Phase-6A rows never had a
+    // originating revision recorded and stay exactly as they are; every
+    // new Phase 6A conversion populates both. This pair is also the
+    // idempotency boundary for "one active request per conversion
+    // source" (section 26): a profileRevisionId is already globally
+    // unique per revision, and a Postgres unique index permits multiple
+    // NULLs, so old rows are unaffected while a double-submit against
+    // the same revision is rejected at the database level.
+    profileRevisionId: text("profile_revision_id").references(
+      () => profileRevision.id,
+      { onDelete: "set null" },
+    ),
+    reportSnapshotId: text("report_snapshot_id").references(
+      () => reportSnapshot.id,
+      { onDelete: "set null" },
+    ),
     status: consultationStatusEnum("status").notNull().default("NONE"),
     timeline: consultationTimelineEnum("timeline").notNull().default("UNKNOWN"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -99,6 +122,61 @@ export const consultationRequest = pgTable(
   (table) => [
     index("consultation_request_student_idx").on(
       table.studentPathwayRecordId,
+    ),
+    index("consultation_request_profile_revision_idx").on(
+      table.profileRevisionId,
+    ),
+    index("consultation_request_report_snapshot_idx").on(
+      table.reportSnapshotId,
+    ),
+    uniqueIndex("consultation_request_profile_revision_unique_idx").on(
+      table.profileRevisionId,
+    ),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// ConsultationContact -- Phase 6A pre-auth parent/guardian contact
+// capture. Deliberately NOT named GuardianUser and NOT a Better Auth
+// table: no account, session, or verification record is created here
+// (section 22/23). One row per ConsultationRequest.
+// ---------------------------------------------------------------------------
+
+export const consultationCallFormatEnum = pgEnum("consultation_call_format", [
+  "VIDEO",
+  "PHONE",
+]);
+
+export const consultationContact = pgTable(
+  "consultation_contact",
+  {
+    id: text("id").primaryKey(),
+    consultationRequestId: text("consultation_request_id")
+      .notNull()
+      .references(() => consultationRequest.id, { onDelete: "cascade" }),
+    guardianName: text("guardian_name").notNull(),
+    email: text("email").notNull(),
+    mobilePhone: text("mobile_phone").notNull(),
+    preferredCallFormat: consultationCallFormatEnum("preferred_call_format")
+      .notNull()
+      .default("VIDEO"),
+    // Explicit contact-consent version/timestamp (section 21) --
+    // deliberately separate from consentEvent, which requires an
+    // authenticated guardianUserId this pre-auth flow never has.
+    contactConsentVersion: text("contact_consent_version").notNull(),
+    contactConsentGrantedAt: timestamp("contact_consent_granted_at", {
+      withTimezone: true,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("consultation_contact_request_unique_idx").on(
+      table.consultationRequestId,
     ),
   ],
 );
@@ -228,10 +306,32 @@ export const consultationRequestRelations = relations(
       fields: [consultationRequest.guardianUserId],
       references: [user.id],
     }),
+    profileRevision: one(profileRevision, {
+      fields: [consultationRequest.profileRevisionId],
+      references: [profileRevision.id],
+    }),
+    reportSnapshot: one(reportSnapshot, {
+      fields: [consultationRequest.reportSnapshotId],
+      references: [reportSnapshot.id],
+    }),
+    contact: one(consultationContact, {
+      fields: [consultationRequest.id],
+      references: [consultationContact.consultationRequestId],
+    }),
     bookings: many(booking),
     advisorAssignments: many(advisorAssignment),
     advisorNotes: many(advisorNote),
     workflowEvents: many(workflowEvent),
+  }),
+);
+
+export const consultationContactRelations = relations(
+  consultationContact,
+  ({ one }) => ({
+    consultationRequest: one(consultationRequest, {
+      fields: [consultationContact.consultationRequestId],
+      references: [consultationRequest.id],
+    }),
   }),
 );
 
