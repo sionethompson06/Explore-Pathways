@@ -10,7 +10,7 @@ import {
 } from "@/db/schema";
 import { generateId } from "./ids";
 import { isUniqueConstraintConflict } from "./db-conflict";
-import { ensureReportOutcomeForSession } from "./report-outcome";
+import { resolveReportOutcomeForConsultation } from "./report-outcome";
 import { getConsultationCapability } from "./consultation-capability";
 import type { ConsultationContactInput } from "@/lib/consultation/validation";
 import { PLANNING_CONTACT_CONSENT_VERSION } from "@/lib/consultation/constants";
@@ -25,9 +25,7 @@ import { PLANNING_CONTACT_CONSENT_VERSION } from "@/lib/consultation/constants";
 
 const CONSULTATION_REQUEST_IDEMPOTENCY_CONSTRAINT = "consultation_request_profile_revision_unique_idx";
 
-/** Statuses a contact (re)submission must never regress -- only NONE/REQUESTED may move to REQUESTED again on idempotent replay. */
 type ConsultationStatus = (typeof consultationStatusEnum.enumValues)[number];
-const REGRESSABLE_STATUSES: readonly ConsultationStatus[] = ["NONE", "REQUESTED"];
 
 export type SubmitConsultationContactResult =
   | { ok: true; consultationRequestId: string }
@@ -41,11 +39,16 @@ export type SubmitConsultationContactResult =
  * exactly one ConsultationRequest per originating ProfileRevision
  * (section 26 -- a double-click/retry never creates a duplicate),
  * upserts the pre-auth ConsultationContact, and records a WorkflowEvent
- * only on a genuine status transition (never a duplicate audit row for
- * a pure network retry). Never downgrades a request that has already
- * progressed past REQUESTED (e.g. PENDING_VERIFICATION) back to
- * REQUESTED -- a parent re-submitting this form after already reaching
- * the scheduler handoff must not undo that progress.
+ * only when a NONE->REQUESTED transition genuinely occurred in this
+ * call -- never a duplicate audit row for a pure network retry, and
+ * never a fabricated "fromStatus=PENDING_VERIFICATION toStatus=REQUESTED"
+ * row when the request had already progressed past REQUESTED and this
+ * resubmission left its status untouched (Phase 6A.1 fix: the audit
+ * log must only ever claim a transition that actually happened).
+ * Never downgrades a request that has already progressed past
+ * REQUESTED (e.g. PENDING_VERIFICATION) back to REQUESTED -- a parent
+ * re-submitting this form after already reaching the scheduler handoff
+ * must not undo that progress.
  */
 export async function submitConsultationContact(
   db: Database,
@@ -60,7 +63,11 @@ export async function submitConsultationContact(
   if (!sessionRow) return { ok: false, reason: "NO_SESSION" };
   if (!sessionRow.studentPathwayRecordId) return { ok: false, reason: "NO_COMPLETED_PROFILE" };
 
-  const outcome = await ensureReportOutcomeForSession(db, sessionId);
+  // Phase 6A.1: links to the latest already-persisted ReportSnapshot
+  // for this revision (the report the parent actually saw) rather than
+  // silently recomputing a possibly-different one at submission time;
+  // only falls back to ensure/persist when none exists yet.
+  const outcome = await resolveReportOutcomeForConsultation(db, sessionId);
   if (!outcome) return { ok: false, reason: "NO_COMPLETED_PROFILE" };
 
   const studentPathwayRecordId = sessionRow.studentPathwayRecordId;
@@ -68,8 +75,13 @@ export async function submitConsultationContact(
 
   const consultationRequestId = await db.transaction(async (tx) => {
     let requestId: string;
-    let statusBeforeThisCall: ConsultationStatus = "NONE";
-    let isNewRequest = false;
+    // True only when this call actually moved the row from NONE to
+    // REQUESTED -- either by creating it fresh (implicit NONE origin)
+    // or by updating an existing NONE row. Never derived from
+    // "statusBefore !== REQUESTED" alone, since a farther-along status
+    // (PENDING_VERIFICATION, BOOKED, ...) also satisfies that but must
+    // never be reported as a REQUESTED transition.
+    let didTransitionToRequested = false;
 
     const candidateId = generateId("crequest");
     try {
@@ -83,7 +95,7 @@ export async function submitConsultationContact(
         });
       });
       requestId = candidateId;
-      isNewRequest = true;
+      didTransitionToRequested = true;
     } catch (err) {
       if (!isUniqueConstraintConflict(err, CONSULTATION_REQUEST_IDEMPOTENCY_CONSTRAINT)) throw err;
       const [existing] = await tx
@@ -93,13 +105,16 @@ export async function submitConsultationContact(
         .limit(1);
       if (!existing) throw err; // Constraint name matched but the row vanished -- do not fabricate a result.
       requestId = existing.id;
-      statusBeforeThisCall = existing.status;
-      if (REGRESSABLE_STATUSES.includes(existing.status) && existing.status !== "REQUESTED") {
+      if (existing.status === "NONE") {
         await tx
           .update(consultationRequest)
           .set({ status: "REQUESTED", updatedAt: new Date() })
           .where(eq(consultationRequest.id, requestId));
+        didTransitionToRequested = true;
       }
+      // existing.status === "REQUESTED": already there, no change, no event.
+      // existing.status is farther along (PENDING_VERIFICATION/BOOKED/...):
+      // never regressed, no change, no event.
     }
 
     const now = new Date();
@@ -128,12 +143,11 @@ export async function submitConsultationContact(
         },
       });
 
-    const statusChanged = isNewRequest || statusBeforeThisCall !== "REQUESTED";
-    if (statusChanged) {
+    if (didTransitionToRequested) {
       await tx.insert(workflowEvent).values({
         id: generateId("wfevent"),
         consultationRequestId: requestId,
-        fromStatus: isNewRequest ? "NONE" : statusBeforeThisCall,
+        fromStatus: "NONE",
         toStatus: "REQUESTED",
         reason: "CONTACT_RECEIVED",
       });

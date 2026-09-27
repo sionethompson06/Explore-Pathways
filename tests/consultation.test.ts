@@ -243,6 +243,109 @@ describe.skipIf(!hasTestDatabase)("Phase 6A report persistence + consultation (r
     });
   });
 
+  describe("audit trail correctness (Phase 6A.1)", () => {
+    it("A. a brand-new contact submission records exactly one NONE -> REQUESTED WorkflowEvent", async () => {
+      const db = testDb!;
+      const { issued } = await completeDiscovery(db);
+      const result = await submitConsultationContact(db, issued.id, validContact);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+
+      const events = await db
+        .select()
+        .from(workflowEvent)
+        .where(eq(workflowEvent.consultationRequestId, result.consultationRequestId));
+      expect(events).toHaveLength(1);
+      expect(events[0]!.fromStatus).toBe("NONE");
+      expect(events[0]!.toStatus).toBe("REQUESTED");
+      expect(events[0]!.reason).toBe("CONTACT_RECEIVED");
+    });
+
+    it("B. an ordinary replay while still REQUESTED never appends a duplicate WorkflowEvent", async () => {
+      const db = testDb!;
+      const { issued } = await completeDiscovery(db);
+      const first = await submitConsultationContact(db, issued.id, validContact);
+      expect(first.ok).toBe(true);
+      if (!first.ok) return;
+
+      await submitConsultationContact(db, issued.id, validContact);
+
+      const events = await db
+        .select()
+        .from(workflowEvent)
+        .where(eq(workflowEvent.consultationRequestId, first.consultationRequestId));
+      expect(events).toHaveLength(1);
+    });
+
+    it("C. a request already progressed to PENDING_VERIFICATION never regresses, and a resubmission never fabricates a PENDING_VERIFICATION -> REQUESTED event", async () => {
+      const db = testDb!;
+      const { issued } = await completeDiscovery(db);
+      const first = await submitConsultationContact(db, issued.id, validContact);
+      expect(first.ok).toBe(true);
+      if (!first.ok) return;
+
+      // Simulate the request having already progressed past REQUESTED
+      // (e.g. via the real Google handoff) without exercising that
+      // flow's own env-dependent capability gate here.
+      await db
+        .update(consultationRequest)
+        .set({ status: "PENDING_VERIFICATION" })
+        .where(eq(consultationRequest.id, first.consultationRequestId));
+
+      const second = await submitConsultationContact(db, issued.id, validContact);
+      expect(second.ok).toBe(true);
+      if (!second.ok) return;
+      expect(second.consultationRequestId).toBe(first.consultationRequestId);
+
+      const [request] = await db
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.id, first.consultationRequestId));
+      expect(request!.status).toBe("PENDING_VERIFICATION"); // never regressed
+
+      const events = await db
+        .select()
+        .from(workflowEvent)
+        .where(eq(workflowEvent.consultationRequestId, first.consultationRequestId));
+      // Only the original NONE->REQUESTED event -- no fabricated
+      // PENDING_VERIFICATION->REQUESTED (or any other) transition.
+      expect(events).toHaveLength(1);
+      expect(events[0]!.toStatus).toBe("REQUESTED");
+      expect(events.some((e) => e.toStatus === "REQUESTED" && e.fromStatus === "PENDING_VERIFICATION")).toBe(false);
+    });
+
+    it("D. resubmission against BOOKED/COMPLETED/CANCELLED/NO_SHOW never writes a backwards REQUESTED event either", async () => {
+      const db = testDb!;
+      for (const farStatus of ["BOOKED", "COMPLETED", "CANCELLED", "NO_SHOW"] as const) {
+        await resetTestDatabase();
+        const { issued } = await completeDiscovery(db);
+        const first = await submitConsultationContact(db, issued.id, validContact);
+        expect(first.ok).toBe(true);
+        if (!first.ok) continue;
+
+        await db
+          .update(consultationRequest)
+          .set({ status: farStatus })
+          .where(eq(consultationRequest.id, first.consultationRequestId));
+
+        const second = await submitConsultationContact(db, issued.id, validContact);
+        expect(second.ok).toBe(true);
+
+        const [request] = await db
+          .select()
+          .from(consultationRequest)
+          .where(eq(consultationRequest.id, first.consultationRequestId));
+        expect(request!.status).toBe(farStatus); // never regressed to REQUESTED
+
+        const events = await db
+          .select()
+          .from(workflowEvent)
+          .where(eq(workflowEvent.consultationRequestId, first.consultationRequestId));
+        expect(events).toHaveLength(1); // only the original NONE->REQUESTED event
+      }
+    });
+  });
+
   describe("cross-session security", () => {
     it("guest A's session cannot see or affect guest B's consultation request, even with a completed profile of their own", async () => {
       const db = testDb!;
@@ -362,6 +465,106 @@ describe.skipIf(!hasTestDatabase)("Phase 6A report persistence + consultation (r
         .from(workflowEvent)
         .where(eq(workflowEvent.consultationRequestId, contactResult.consultationRequestId));
       expect(events.filter((e) => e.reason === "GOOGLE_SCHEDULER_HANDOFF")).toHaveLength(1);
+    });
+  });
+
+  describe("report-snapshot provenance (Phase 6A.1)", () => {
+    it("reuses the already-persisted ReportSnapshot for the revision instead of creating a new one", async () => {
+      const db = testDb!;
+      const { issued } = await completeDiscovery(db);
+      const { getLatestPersistedReportSnapshotForRevision, resolveReportOutcomeForConsultation } = await import(
+        "@/server/report-outcome"
+      );
+
+      const snapshotA = await ensureReportOutcomeForSession(db, issued.id);
+      expect(snapshotA).not.toBeNull();
+
+      const resolved = await resolveReportOutcomeForConsultation(db, issued.id);
+      expect(resolved!.reportSnapshotId).toBe(snapshotA!.reportSnapshotId);
+
+      const snaps = await db
+        .select()
+        .from(reportSnapshot)
+        .where(eq(reportSnapshot.profileRevisionId, snapshotA!.revisionId));
+      expect(snaps).toHaveLength(1); // no second snapshot created
+
+      const lookedUp = await getLatestPersistedReportSnapshotForRevision(db, snapshotA!.revisionId);
+      expect(lookedUp!.reportSnapshotId).toBe(snapshotA!.reportSnapshotId);
+
+      const contactResult = await submitConsultationContact(db, issued.id, validContact);
+      expect(contactResult.ok).toBe(true);
+      if (!contactResult.ok) return;
+      const [request] = await db
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.id, contactResult.consultationRequestId));
+      expect(request!.reportSnapshotId).toBe(snapshotA!.reportSnapshotId);
+    });
+
+    it("falls back to the ensure/persist pipeline when no ReportSnapshot exists yet (direct navigation to consultation)", async () => {
+      const db = testDb!;
+      const { issued, result } = await completeDiscovery(db);
+      expect(result.ok).toBe(true);
+
+      // No call to ensureReportOutcomeForSession/the report route yet --
+      // zero EngineRun/ReportSnapshot rows exist for this revision.
+      const preSnaps = await db.select().from(reportSnapshot);
+      expect(preSnaps).toHaveLength(0);
+
+      const contactResult = await submitConsultationContact(db, issued.id, validContact);
+      expect(contactResult.ok).toBe(true);
+      if (!contactResult.ok) return;
+
+      const [request] = await db
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.id, contactResult.consultationRequestId));
+      expect(request!.reportSnapshotId).not.toBeNull();
+
+      const postSnaps = await db.select().from(reportSnapshot);
+      expect(postSnaps).toHaveLength(1); // safely created via the fallback pipeline
+      expect(postSnaps[0]!.id).toBe(request!.reportSnapshotId);
+    });
+
+    it("a consultation-capability change after the report was shown never silently creates/links a second snapshot", async () => {
+      const db = testDb!;
+      const { issued } = await completeDiscovery(db);
+
+      // Report displayed under this environment's real (UNCONFIGURED)
+      // capability -- persists Snapshot A.
+      const snapshotA = await ensureReportOutcomeForSession(db, issued.id);
+      expect(snapshotA).not.toBeNull();
+
+      const ORIGINAL_ENV = { ...process.env };
+      try {
+        process.env = {
+          ...ORIGINAL_ENV,
+          SCHEDULER_MODE: "REQUEST_ONLY",
+          GOOGLE_APPOINTMENT_SCHEDULE_URL: "https://calendar.google.com/appointments/schedules/EXAMPLE",
+        };
+        vi.resetModules();
+        const { submitConsultationContact: freshSubmit } = await import("@/server/consultation");
+
+        const contactResult = await freshSubmit(db, issued.id, validContact);
+        expect(contactResult.ok).toBe(true);
+        if (!contactResult.ok) return;
+
+        const [request] = await db
+          .select()
+          .from(consultationRequest)
+          .where(eq(consultationRequest.id, contactResult.consultationRequestId));
+        // Still links to the snapshot the parent actually saw -- the
+        // capability change never triggered a silent recompute/relink.
+        expect(request!.reportSnapshotId).toBe(snapshotA!.reportSnapshotId);
+
+        const snaps = await db
+          .select()
+          .from(reportSnapshot)
+          .where(eq(reportSnapshot.profileRevisionId, snapshotA!.revisionId));
+        expect(snaps).toHaveLength(1); // never a second, differently-configured snapshot
+      } finally {
+        process.env = { ...ORIGINAL_ENV };
+      }
     });
   });
 });

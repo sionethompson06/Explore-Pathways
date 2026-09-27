@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  * authorization (session-cookie derived only).
  */
 export default async function DiscoveryConsultationPage() {
-  const [{ GUEST_SESSION_COOKIE_NAME }, { loadDraftByToken }, { db }, { ensureReportOutcomeForSession }] =
+  const [{ GUEST_SESSION_COOKIE_NAME }, { loadDraftByToken }, { db }, { resolveReportOutcomeForConsultation }] =
     await Promise.all([
       import("@/server/session"),
       import("@/server/discovery-draft"),
@@ -43,11 +43,12 @@ export default async function DiscoveryConsultationPage() {
     redirect("/discover");
   }
 
-  // Ensures the exact ReportSnapshot this conversion should link to
-  // actually exists (section 64: "missing ReportSnapshot attempts safe
-  // server-side ensure/persist from owned completed revision if
-  // possible"), reusing the identical pipeline the report route uses.
-  const outcome = await ensureReportOutcomeForSession(db, draft.sessionId);
+  // Phase 6A.1: reuses the exact ReportSnapshot the parent already saw
+  // (the latest one persisted for their completed revision) instead of
+  // recomputing a possibly-different one on every visit; only falls
+  // back to the ensure/persist pipeline when no snapshot exists yet at
+  // all (e.g. arriving here without ever visiting the report page).
+  const outcome = await resolveReportOutcomeForConsultation(db, draft.sessionId);
   if (!outcome) {
     redirect("/discover/profile");
   }

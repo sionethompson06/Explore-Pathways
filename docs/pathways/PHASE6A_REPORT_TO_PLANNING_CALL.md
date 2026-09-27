@@ -69,3 +69,23 @@ A Phase 6A case is fully queryable later via `ConsultationRequest → StudentPat
 - No redesign of the staff/admin access-control system.
 - No email sent by Pathways (EMAIL_MODE remains UNCONFIGURED); Google may independently send its own scheduling emails, which Pathways never claims credit for.
 - No real Google Appointment Schedule URL was invented, searched for, or hardcoded for this environment — this repository's actual configuration remains UNCONFIGURED, exactly reflecting that no such URL has been provided.
+
+## Phase 6A.1 addendum — audit integrity + exact report-snapshot provenance
+
+Two narrowly-scoped acceptance repairs on top of Phase 6A, made after owner review. Neither changes report content/design, Phase 4 engine behavior, contact UI, scheduler UX, or Google integration architecture.
+
+### Audit events only ever represent real transitions
+
+`submitConsultationContact()` previously derived "should I write a WorkflowEvent" from `statusBeforeThisCall !== "REQUESTED"` — true not only for a genuinely new/NONE request, but also for a request that had already progressed *past* REQUESTED (e.g. `PENDING_VERIFICATION`, `BOOKED`). A resubmission of the contact form against such a request never actually changed its status (correctly), but the old logic still inserted a `WorkflowEvent` claiming `fromStatus=PENDING_VERIFICATION, toStatus=REQUESTED` — a transition that never happened.
+
+Fixed by tracking an explicit `didTransitionToRequested` boolean, set `true` only when this call (a) inserted a brand-new request, or (b) updated an existing `NONE`-status request to `REQUESTED`. A `WorkflowEvent` is written only when that boolean is true, and its `fromStatus` is always exactly `"NONE"` in that case. A request already at `REQUESTED` (ordinary replay) or farther along never gets a status change *or* an event — contact details may still be updated (the upsert is unconditional), but the audit log never claims a transition that did not occur.
+
+### Consultation reuses the report the parent actually saw
+
+The contact page and contact-submission flow previously called the same evaluate→assemble→persist pipeline the report route uses, on every entry. That is idempotent under identical inputs, but if consultation capability or contract versions change between the parent viewing their report and entering the consultation flow, it could legitimately produce a *different* immutable `ReportSnapshot` — silently changing which snapshot the case gets linked to, away from what the parent actually saw.
+
+New `getLatestPersistedReportSnapshotForRevision()` (`src/server/report-outcome.ts`) looks up the most recently persisted `ReportSnapshot` for a given `ProfileRevision` id, with no recomputation. New `resolveReportOutcomeForConsultation()` composes this with the existing session/revision resolution: resolve the session's latest completed revision, prefer an already-persisted snapshot for it, and only fall back to `ensureReportOutcomeForSession()` (the full pipeline) when no snapshot exists yet at all — e.g. a parent who navigates straight to `/discover/consultation` without ever visiting `/discover/report`. Both `/discover/consultation` (page display) and `submitConsultationContact()` (case linkage) now go through this resolver instead of calling the full pipeline unconditionally. The production report route itself is unchanged — it still always assembles and persists the current outcome on every render, which is exactly the source this resolver prefers to read from.
+
+Authorization is unaffected: the resolver only ever operates on a `profileRevisionId` already derived server-side from the guest session cookie, never a client-supplied id.
+
+**Owner action:** none required. No report content/design change; no Phase 4 change; no Google URL invented or configured; scheduler capability remains honestly UNCONFIGURED in this repository's actual environment.
