@@ -26,20 +26,22 @@ async function resolveSessionId(): Promise<string | null> {
 
 export interface RefreshSlotsActionResult {
   slotsIso: string[];
+  windowStartIso: string;
 }
 
 /** Re-fetches genuinely available slots -- used after a SLOT_TAKEN conflict to refresh the calendar without a full page reload. */
 export async function refreshAvailableSlotsAction(): Promise<RefreshSlotsActionResult> {
+  const fallback = { slotsIso: [], windowStartIso: new Date().toISOString() };
   const sessionId = await resolveSessionId();
-  if (!sessionId) return { slotsIso: [] };
+  if (!sessionId) return fallback;
 
   const [{ getAvailableSlotsForSession }, { db }] = await Promise.all([
     import("@/server/booking"),
     import("@/db/client"),
   ]);
   const result = await getAvailableSlotsForSession(db, sessionId);
-  if (!result.ok || result.alreadyBooked) return { slotsIso: [] };
-  return { slotsIso: result.slots.map((s) => s.toISOString()) };
+  if (!result.ok || result.alreadyBooked) return fallback;
+  return { slotsIso: result.slots.map((s) => s.toISOString()), windowStartIso: result.windowStartIso };
 }
 
 export type ConfirmBookingActionResult =

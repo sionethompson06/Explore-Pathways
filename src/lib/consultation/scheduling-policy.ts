@@ -105,3 +105,37 @@ function calendarIsoWeekday(year: number, month: number, day: number): number {
   const jsDay = new Date(Date.UTC(year, month - 1, day)).getUTCDay(); // 0=Sun..6=Sat
   return jsDay === 0 ? 7 : jsDay;
 }
+
+export interface EligibleCalendarDate {
+  year: number;
+  month: number;
+  day: number;
+  /** "YYYY-MM-DD", zero-padded, unambiguous for map/set keys. */
+  dateKey: string;
+}
+
+/**
+ * Phase 6A.2a (section 14): every Mon-Thu calendar date within the
+ * booking horizon, ignoring hour-of-day -- deliberately independent of
+ * `generatePlanningSlotCandidates`'s flat hourly-slot list. A date can
+ * be "eligible" here yet have zero remaining entries in that list
+ * (every hour already booked, or every hour falls inside the 24h
+ * notice window) -- that distinction is exactly what lets the calendar
+ * UI show a real, in-window business day as visibly-disabled rather
+ * than silently absent, instead of deriving the whole visible calendar
+ * solely from which slots happen to still be open (never confusing
+ * "not a business day"/"outside the horizon" with "fully booked").
+ */
+export function generateEligibleCalendarDates(nowUtc: Date): EligibleCalendarDate[] {
+  const nowParts = getZonedParts(nowUtc, PLANNING_TIME_ZONE);
+  const dates: EligibleCalendarDate[] = [];
+
+  for (let dayOffset = 0; dayOffset <= PLANNING_BOOKING_HORIZON_DAYS; dayOffset++) {
+    const { year, month, day } = addCalendarDays(nowParts.year, nowParts.month, nowParts.day, dayOffset);
+    const isoWeekday = calendarIsoWeekday(year, month, day);
+    if (!PLANNING_AVAILABLE_ISO_WEEKDAYS.includes(isoWeekday)) continue;
+    dates.push({ year, month, day, dateKey: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}` });
+  }
+
+  return dates;
+}

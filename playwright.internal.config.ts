@@ -13,6 +13,14 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e-internal",
   fullyParallel: false,
+  // Every spec file in this suite books real slots against the SAME
+  // shared dev/CI Postgres database and reasons about "the first
+  // available day" -- two files (or two tests) picking that same day
+  // concurrently in separate worker processes is a genuine cross-file
+  // race, not a flake. `fullyParallel: false` alone only serializes
+  // tests *within* one file; Playwright still spawns multiple workers
+  // across files by default, so this suite pins exactly one.
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],

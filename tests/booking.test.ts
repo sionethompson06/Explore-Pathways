@@ -374,4 +374,150 @@ describe.skipIf(!hasTestDatabase)("Phase 6A.2 native booking (real PostgreSQL)",
       expect(await db.select().from(advisorAssignment)).toHaveLength(0);
     });
   });
+
+  describe("Phase 6A.2a: transactional status race guard (sections 2-4, mandatory)", () => {
+    it("a status transition that commits WHILE a booking attempt is in flight is never overwritten to BOOKED", async () => {
+      const db = testDb!;
+      const { sessionId, consultationRequestId } = await completeDiscoveryWithContact(db);
+
+      let releaseCancel!: () => void;
+      const holdCancelOpen = new Promise<void>((resolve) => {
+        releaseCancel = resolve;
+      });
+
+      // Start (and deliberately hold open) a real, separate PostgreSQL
+      // transaction that transitions this exact request to a terminal
+      // status. Its own UPDATE takes the row lock the moment it runs --
+      // well before createInternalBooking() is ever called below.
+      const cancelPromise = db.transaction(async (tx) => {
+        await tx
+          .update(consultationRequest)
+          .set({ status: "CANCELLED", updatedAt: new Date() })
+          .where(eq(consultationRequest.id, consultationRequestId));
+        await holdCancelOpen;
+      });
+
+      // Give the UPDATE time to actually execute and acquire its lock.
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // The booking transaction's own `SELECT ... FOR UPDATE` against
+      // this same row must now be blocked -- it cannot proceed until
+      // the cancel transaction above commits.
+      const bookingPromise = createInternalBooking(
+        db,
+        sessionId,
+        { selectedStartIso: VALID_SLOT.toISOString() },
+        NOW,
+      );
+
+      // Give the booking call time to reach and genuinely block on the lock.
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Only now does the cancel transaction commit -- CANCELLED becomes
+      // durable strictly BEFORE the booking transaction is ever allowed
+      // to read this row's status.
+      releaseCancel();
+
+      const [, bookingResult] = await Promise.all([cancelPromise, bookingPromise]);
+
+      expect(bookingResult.ok).toBe(false);
+      if (bookingResult.ok) return;
+      expect(bookingResult.reason).toBe("NOT_BOOKABLE");
+
+      expect(await db.select().from(booking)).toHaveLength(0);
+      const [row] = await db
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.id, consultationRequestId));
+      expect(row!.status).toBe("CANCELLED"); // never overwritten to BOOKED by stale pre-transaction state
+
+      const events = await db
+        .select()
+        .from(workflowEvent)
+        .where(eq(workflowEvent.consultationRequestId, consultationRequestId));
+      expect(events.filter((e) => e.toStatus === "BOOKED")).toHaveLength(0); // no false audit event
+    }, 15000);
+  });
+
+  describe("Phase 6A.2a: unique-conflict idempotency is index-order independent (sections 5-7)", () => {
+    it("(A) same consultation, same slot, concurrent submissions resolve to the SAME booking", async () => {
+      const db = testDb!;
+      const { sessionId, consultationRequestId } = await completeDiscoveryWithContact(db);
+
+      const [r1, r2] = await Promise.all([
+        createInternalBooking(db, sessionId, { selectedStartIso: VALID_SLOT.toISOString() }, NOW),
+        createInternalBooking(db, sessionId, { selectedStartIso: VALID_SLOT.toISOString() }, NOW),
+      ]);
+      expect(r1.ok).toBe(true);
+      expect(r2.ok).toBe(true);
+      if (!r1.ok || !r2.ok) return;
+      expect(r1.booking.id).toBe(r2.booking.id);
+
+      const activeBookings = await db
+        .select()
+        .from(booking)
+        .where(eq(booking.consultationRequestId, consultationRequestId));
+      expect(activeBookings.filter((b) => b.cancelledAt === null)).toHaveLength(1);
+
+      const events = await db
+        .select()
+        .from(workflowEvent)
+        .where(eq(workflowEvent.consultationRequestId, consultationRequestId));
+      expect(events.filter((e) => e.toStatus === "BOOKED")).toHaveLength(1);
+    });
+
+    it("(B) same consultation, DIFFERENT slots, concurrent submissions -> exactly one active booking, the loser resolves to the existing booking (never SLOT_TAKEN), one BOOKED WorkflowEvent", async () => {
+      const db = testDb!;
+      const { sessionId, consultationRequestId } = await completeDiscoveryWithContact(db);
+
+      const [r1, r2] = await Promise.all([
+        createInternalBooking(db, sessionId, { selectedStartIso: VALID_SLOT.toISOString() }, NOW),
+        createInternalBooking(db, sessionId, { selectedStartIso: VALID_SLOT_2.toISOString() }, NOW),
+      ]);
+      expect(r1.ok).toBe(true);
+      expect(r2.ok).toBe(true);
+      if (!r1.ok || !r2.ok) return;
+      // A same-request double submission is never told SLOT_TAKEN --
+      // exactly one booking wins the race and the other call is handed
+      // that SAME booking back.
+      expect(r1.booking.id).toBe(r2.booking.id);
+      expect([r1.alreadyBooked, r2.alreadyBooked].filter(Boolean)).toHaveLength(1);
+
+      const activeBookings = await db
+        .select()
+        .from(booking)
+        .where(eq(booking.consultationRequestId, consultationRequestId));
+      expect(activeBookings.filter((b) => b.cancelledAt === null)).toHaveLength(1);
+
+      const events = await db
+        .select()
+        .from(workflowEvent)
+        .where(eq(workflowEvent.consultationRequestId, consultationRequestId));
+      expect(events.filter((e) => e.toStatus === "BOOKED")).toHaveLength(1);
+    });
+
+    it("(C) different consultations, same slot -> exactly one succeeds, the other gets SLOT_TAKEN, the losing consultation remains unbooked", async () => {
+      const db = testDb!;
+      const a = await completeDiscoveryWithContact(db);
+      const b = await completeDiscoveryWithContact(db);
+
+      const [resultA, resultB] = await Promise.all([
+        createInternalBooking(db, a.sessionId, { selectedStartIso: VALID_SLOT.toISOString() }, NOW),
+        createInternalBooking(db, b.sessionId, { selectedStartIso: VALID_SLOT.toISOString() }, NOW),
+      ]);
+      const outcomes = [resultA, resultB];
+      expect(outcomes.filter((r) => r.ok && !r.alreadyBooked)).toHaveLength(1);
+      expect(outcomes.filter((r) => !r.ok && r.reason === "SLOT_TAKEN")).toHaveLength(1);
+
+      const [requestA] = await db
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.id, a.consultationRequestId));
+      const [requestB] = await db
+        .select()
+        .from(consultationRequest)
+        .where(eq(consultationRequest.id, b.consultationRequestId));
+      expect([requestA!.status, requestB!.status].filter((s) => s === "BOOKED")).toHaveLength(1);
+    });
+  });
 });

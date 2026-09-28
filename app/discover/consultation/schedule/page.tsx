@@ -76,6 +76,8 @@ export default async function DiscoveryConsultationSchedulePage() {
       redirect("/discover/consultation/confirmed");
     }
     const initialSlots = availability.ok && !availability.alreadyBooked ? availability.slots : [];
+    const windowStartIso =
+      availability.ok && !availability.alreadyBooked ? availability.windowStartIso : new Date().toISOString();
 
     return (
       <Section tone="default" ariaLabelledBy="schedule-heading" narrow>
@@ -94,6 +96,7 @@ export default async function DiscoveryConsultationSchedulePage() {
         <p className={styles.body}>Select a day and time that works for your family.</p>
         <BookingCalendarView
           initialSlotsIso={initialSlots.map((s) => s.toISOString())}
+          windowStartIso={windowStartIso}
           preferredCallFormat={activeRequest.preferredCallFormat ?? "VIDEO"}
         />
       </Section>

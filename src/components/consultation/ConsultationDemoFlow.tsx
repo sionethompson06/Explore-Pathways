@@ -58,9 +58,14 @@ export function ConsultationDemoFlow() {
   const [preferredCallFormat, setPreferredCallFormat] = useState<CallFormat>(DEFAULT_CALL_FORMAT);
   const [confirmed, setConfirmed] = useState<{ startIso: string; bookerTimeZone: string | null } | null>(null);
 
+  // Both derived from the exact same "now" reference so the calendar's
+  // eligible-date window and its slot list are always consistent with
+  // each other -- recomputed fresh on every mount, so the demo can never
+  // present a stale or expired window (sections 21, 66-68).
+  const demoWindowStartIso = useMemo(() => new Date().toISOString(), []);
   const syntheticSlotsIso = useMemo(
-    () => generatePlanningSlotCandidates(new Date()).map((d) => d.toISOString()),
-    [],
+    () => generatePlanningSlotCandidates(new Date(demoWindowStartIso)).map((d) => d.toISOString()),
+    [demoWindowStartIso],
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -94,8 +99,8 @@ export function ConsultationDemoFlow() {
     return { ok: true };
   }
 
-  async function handleDemoRefresh(): Promise<{ slotsIso: string[] }> {
-    return { slotsIso: syntheticSlotsIso };
+  async function handleDemoRefresh(): Promise<{ slotsIso: string[]; windowStartIso: string }> {
+    return { slotsIso: syntheticSlotsIso, windowStartIso: demoWindowStartIso };
   }
 
   function handleDemoConfirmed() {
@@ -168,6 +173,7 @@ export function ConsultationDemoFlow() {
           <p className={styles.body}>Select a day and time that works for your family.</p>
           <BookingCalendarView
             initialSlotsIso={syntheticSlotsIso}
+            windowStartIso={demoWindowStartIso}
             preferredCallFormat={preferredCallFormat}
             onConfirm={handleDemoConfirm}
             onRefresh={handleDemoRefresh}

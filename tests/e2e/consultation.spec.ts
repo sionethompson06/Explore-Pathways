@@ -183,7 +183,7 @@ test.describe("Consultation: DB-free demo preview", () => {
     await expect(page.getByText(/no real appointment is booked/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Select a Day" })).toBeVisible();
 
-    const firstDay = page.locator('button[class*="dayButton"]').first();
+    const firstDay = page.locator('button[class*="dateButton"]:not([disabled])').first();
     await firstDay.click();
     const firstTime = page.locator('button[class*="timeButton"]').first();
     await expect(firstTime).toBeVisible();

@@ -17,6 +17,7 @@ import {
   PLANNING_BOOKING_HORIZON_DAYS,
   isValidPlanningSlotStart,
   generatePlanningSlotCandidates,
+  generateEligibleCalendarDates,
 } from "@/lib/consultation/scheduling-policy";
 
 /**
@@ -231,5 +232,77 @@ describe("IANA timezone validation", () => {
     expect(isValidIanaTimeZone("")).toBe(false);
     expect(isValidIanaTimeZone(null)).toBe(false);
     expect(isValidIanaTimeZone(undefined)).toBe(false);
+  });
+});
+
+describe("Phase 6A.2a: generateEligibleCalendarDates (calendar UX, section 14-18)", () => {
+  it("enumerates only Monday-Thursday dates, ignoring hour-of-day entirely", () => {
+    const now = new Date("2026-01-05T15:00:00.000Z"); // Monday 7am Pacific
+    const dates = generateEligibleCalendarDates(now);
+    expect(dates.length).toBeGreaterThan(0);
+    for (const d of dates) {
+      const isoWeekday = new Date(Date.UTC(d.year, d.month - 1, d.day)).getUTCDay();
+      expect([1, 2, 3, 4]).toContain(isoWeekday === 0 ? 7 : isoWeekday); // Mon=1..Thu=4, Sun mapped to 7
+    }
+  });
+
+  it("never includes a Friday, Saturday, or Sunday date (weekend visibility relies on this)", () => {
+    const now = new Date("2026-01-05T15:00:00.000Z");
+    const dates = generateEligibleCalendarDates(now);
+    const weekdays = dates.map((d) => new Date(Date.UTC(d.year, d.month - 1, d.day)).getUTCDay());
+    expect(weekdays).not.toContain(5); // Friday
+    expect(weekdays).not.toContain(6); // Saturday
+    expect(weekdays).not.toContain(0); // Sunday
+  });
+
+  it("is exactly the inclusive 30-day horizon -- includes day 30, never day 31", () => {
+    const now = new Date("2026-01-05T15:00:00.000Z"); // Monday
+    const dates = generateEligibleCalendarDates(now);
+    const day30 = addCalendarDays(2026, 1, 5, PLANNING_BOOKING_HORIZON_DAYS);
+    const day31 = addCalendarDays(2026, 1, 5, PLANNING_BOOKING_HORIZON_DAYS + 1);
+    const day30Num = calendarDateNumber(day30.year, day30.month, day30.day);
+    const day31Num = calendarDateNumber(day31.year, day31.month, day31.day);
+    const dateNums = dates.map((d) => calendarDateNumber(d.year, d.month, d.day));
+    if (
+      [1, 2, 3, 4].includes(
+        (() => {
+          const w = new Date(Date.UTC(day30.year, day30.month - 1, day30.day)).getUTCDay();
+          return w === 0 ? 7 : w;
+        })(),
+      )
+    ) {
+      expect(dateNums).toContain(day30Num);
+    }
+    expect(dateNums).not.toContain(day31Num);
+    expect(Math.max(...dateNums)).toBeLessThanOrEqual(day30Num);
+  });
+
+  it("spans a real month boundary with correct year/month/day fields (mandatory month-crossing case)", () => {
+    // "Now" chosen so the 30-day horizon crosses from January into February.
+    const now = new Date("2026-01-20T15:00:00.000Z"); // Tuesday
+    const dates = generateEligibleCalendarDates(now);
+    const months = new Set(dates.map((d) => `${d.year}-${d.month}`));
+    expect(months.has("2026-1")).toBe(true);
+    expect(months.has("2026-2")).toBe(true);
+    // Every dateKey is well-formed and matches its own year/month/day.
+    for (const d of dates) {
+      expect(d.dateKey).toBe(`${d.year}-${String(d.month).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`);
+    }
+  });
+
+  it("a date can be eligible (Mon-Thu, in horizon) yet have zero valid hourly slot starts -- the exact 'too-soon date' case the calendar UI depends on (section 18)", () => {
+    // 11pm Pacific Monday -- every remaining hour today (there are none)
+    // and the *next* business day's 9am-5pm hours are all inside the
+    // 24h minimum-notice window relative to this "now".
+    const now = zonedWallTimeToUtc(2026, 1, 5, 23, 0, 0, PLANNING_TIME_ZONE); // Monday 11pm Pacific
+    const dates = generateEligibleCalendarDates(now);
+    const tuesday = dates.find((d) => d.year === 2026 && d.month === 1 && d.day === 6);
+    expect(tuesday).toBeDefined(); // Tuesday is eligible: Mon-Thu, inside horizon
+
+    const anyValidHourTuesday = Array.from({ length: 9 }, (_, i) => 9 + i).some((hour) => {
+      const candidate = zonedWallTimeToUtc(2026, 1, 6, hour, 0, 0, PLANNING_TIME_ZONE);
+      return isValidPlanningSlotStart(candidate, now);
+    });
+    expect(anyValidHourTuesday).toBe(false); // eligible, but every hour violates the 24h notice rule
   });
 });

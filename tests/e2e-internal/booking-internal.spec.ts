@@ -54,10 +54,27 @@ async function fillContactForm(page: Page, overrides: Partial<{ guardianName: st
   await page.getByLabel(/By continuing, you agree/).check();
 }
 
-/** Selects the first available day, then the first available time within it. Returns the visible time label. */
+/**
+ * Selects the first available day (advancing to a later month, exactly
+ * like a real parent would click "Next month," if the currently
+ * displayed month has no selectable date left), then the first
+ * available time within it. Returns the visible time label.
+ */
+async function selectFirstAvailableDate(page: Page) {
+  let selectable = page.locator('button[class*="dateButton"]:not([disabled])').first();
+  for (let attempt = 0; attempt < 4 && (await selectable.count()) === 0; attempt++) {
+    const nextButton = page.getByRole("button", { name: "Next month" });
+    if (!(await nextButton.isEnabled())) break;
+    await nextButton.click();
+    selectable = page.locator('button[class*="dateButton"]:not([disabled])').first();
+  }
+  await expect(selectable).toBeVisible();
+  await selectable.click();
+  return selectable;
+}
+
 async function selectFirstAvailableSlot(page: Page): Promise<string> {
-  const firstDay = page.locator('button[class*="dayButton"]').first();
-  await firstDay.click();
+  await selectFirstAvailableDate(page);
   const firstTime = page.locator('button[data-slot-iso]').first();
   await expect(firstTime).toBeVisible();
   const label = (await firstTime.innerText()).trim();
