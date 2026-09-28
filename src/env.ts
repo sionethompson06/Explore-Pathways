@@ -17,8 +17,15 @@ import { z } from "zod";
 
 const integrationModeSchema = {
   email: z.enum(["UNCONFIGURED"]).default("UNCONFIGURED"),
+  // INTERNAL (Phase 6A.2): Pathways' own native booking calendar --
+  // no Google URL required or read. REQUEST_ONLY (Phase 6A, dormant
+  // legacy option): external Google Appointment Schedule handoff,
+  // still requires GOOGLE_APPOINTMENT_SCHEDULE_URL to actually
+  // activate (see src/server/consultation-capability.ts). LIVE_VERIFIED
+  // remains fully unimplemented -- see the production-refusal guard
+  // below, unweakened by this addition.
   scheduler: z
-    .enum(["UNCONFIGURED", "REQUEST_ONLY", "LIVE_VERIFIED"])
+    .enum(["UNCONFIGURED", "INTERNAL", "REQUEST_ONLY", "LIVE_VERIFIED"])
     .default("UNCONFIGURED"),
   ai: z.enum(["DISABLED"]).default("DISABLED"),
 } as const;

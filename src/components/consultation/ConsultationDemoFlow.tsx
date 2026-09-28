@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Card } from "@/components/marketing/Card";
 import { ConsultationContactFields } from "./ConsultationContactFields";
+import { BookingCalendarView } from "./BookingCalendarView";
 import { parseConsultationContactForm } from "@/lib/consultation/validation";
-import { DEFAULT_CALL_FORMAT, PLANNING_CALL_DURATION_MINUTES } from "@/lib/consultation/constants";
+import { DEFAULT_CALL_FORMAT, PLANNING_CALL_DURATION_MINUTES, type CallFormat } from "@/lib/consultation/constants";
+import {
+  PLANNING_TIME_ZONE,
+  PLANNING_TIME_ZONE_LABEL,
+  generatePlanningSlotCandidates,
+} from "@/lib/consultation/scheduling-policy";
 import type { ConsultationContactActionState } from "@/lib/consultation/action-state";
+import type { ConfirmBookingActionResult } from "../../../app/discover/consultation/schedule/actions";
 import buttonStyles from "@/components/marketing/Button.module.css";
 import formStyles from "./ConsultationContactForm.module.css";
 import styles from "./ConsultationDemoFlow.module.css";
@@ -17,21 +24,44 @@ const INITIAL_VALUES: ConsultationContactActionState["values"] = {
   preferredCallFormat: DEFAULT_CALL_FORMAT,
 };
 
+function formatFullDateInZone(iso: string, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    timeZone,
+  }).format(new Date(iso));
+}
+
+function formatTimeInZone(iso: string, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone }).format(new Date(iso));
+}
+
 /**
- * `/discover/consultation/demo`'s entire interactive surface (section
- * 46-47): reuses the exact same presentational fields, validation
- * schema, and 45-minute constant as the real flow, but is entirely
- * client-side React state -- no `fetch`, no server action, no
- * cookie/localStorage/sessionStorage, no database. Validation failure
- * and success are both simulated locally; "Choose My Time" never
- * navigates anywhere (never a real Google scheduler), it only reveals
- * an inline demo notice.
+ * `/discover/consultation/demo`'s entire interactive surface (docs/pathways
+ * instruction sections 66-68): reuses the exact same presentational
+ * fields, validation schema, native `BookingCalendarView`, and shared
+ * scheduling-policy constants as the real flow, but is entirely
+ * client-side React state -- no `fetch` to a database-backed server
+ * action, no cookie/localStorage/sessionStorage, no real booking, no
+ * external redirect. Synthetic available slots are generated with the
+ * same pure `generatePlanningSlotCandidates` the real server uses,
+ * evaluated against the actual current time on every mount/render, so
+ * the demo can never present a stale or expired slot list. "Confirm
+ * Planning Call" never reaches a server action -- it only records the
+ * chosen slot in local state and advances to a fake confirmation step.
  */
 export function ConsultationDemoFlow() {
-  const [step, setStep] = useState<"form" | "schedule">("form");
+  const [step, setStep] = useState<"form" | "schedule" | "confirmed">("form");
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState<ConsultationContactActionState["errors"]>({});
-  const [showDemoNotice, setShowDemoNotice] = useState(false);
+  const [preferredCallFormat, setPreferredCallFormat] = useState<CallFormat>(DEFAULT_CALL_FORMAT);
+  const [confirmed, setConfirmed] = useState<{ startIso: string; bookerTimeZone: string | null } | null>(null);
+
+  const syntheticSlotsIso = useMemo(
+    () => generatePlanningSlotCandidates(new Date()).map((d) => d.toISOString()),
+    [],
+  );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +82,24 @@ export function ConsultationDemoFlow() {
       return;
     }
     setErrors({});
+    setPreferredCallFormat(parsed.data.preferredCallFormat);
     setStep("schedule");
+  }
+
+  async function handleDemoConfirm(
+    selectedStartIso: string,
+    bookerTimeZone: string | null,
+  ): Promise<ConfirmBookingActionResult> {
+    setConfirmed({ startIso: selectedStartIso, bookerTimeZone });
+    return { ok: true };
+  }
+
+  async function handleDemoRefresh(): Promise<{ slotsIso: string[] }> {
+    return { slotsIso: syntheticSlotsIso };
+  }
+
+  function handleDemoConfirmed() {
+    setStep("confirmed");
   }
 
   return (
@@ -103,13 +150,13 @@ export function ConsultationDemoFlow() {
             </button>
           </form>
         </>
-      ) : (
+      ) : null}
+
+      {step === "schedule" ? (
         <>
           <p className={styles.savedNotice}>Your information is saved.</p>
           <h1 className={styles.headline}>Choose a Time for Your Pathways Planning Call</h1>
-          <p className={styles.demoNote}>
-            This is a demo preview -- no real appointment is booked.
-          </p>
+          <p className={styles.demoNote}>This is a demo preview -- no real appointment is booked.</p>
           <Card className={styles.contextCard}>
             <ul className={styles.detailsList}>
               <li>Free</li>
@@ -118,24 +165,42 @@ export function ConsultationDemoFlow() {
               <li>Phone available</li>
             </ul>
           </Card>
-          <p className={styles.body}>
-            Google Calendar will handle selecting and confirming your appointment time.
-          </p>
-          <button
-            type="button"
-            className={`${buttonStyles.button} ${buttonStyles.primary}`}
-            onClick={() => setShowDemoNotice(true)}
-          >
-            Choose My Time
-          </button>
-          {showDemoNotice ? (
-            <p role="status" className={styles.demoNote}>
-              This is a demo preview -- no real appointment is booked, and this button does not
-              open Google Calendar.
-            </p>
-          ) : null}
+          <p className={styles.body}>Select a day and time that works for your family.</p>
+          <BookingCalendarView
+            initialSlotsIso={syntheticSlotsIso}
+            preferredCallFormat={preferredCallFormat}
+            onConfirm={handleDemoConfirm}
+            onRefresh={handleDemoRefresh}
+            onConfirmed={handleDemoConfirmed}
+          />
         </>
-      )}
+      ) : null}
+
+      {step === "confirmed" && confirmed ? (
+        <>
+          <h1 className={styles.headline}>Your Pathways Planning Call Is Reserved</h1>
+          <p className={styles.demoNote}>This is a demo preview -- no real appointment is booked.</p>
+          <Card className={styles.contextCard}>
+            <p className={styles.body}>Your Student</p>
+            <p className={styles.body}>{formatFullDateInZone(confirmed.startIso, PLANNING_TIME_ZONE)}</p>
+            {confirmed.bookerTimeZone && confirmed.bookerTimeZone !== PLANNING_TIME_ZONE ? (
+              <p className={styles.body}>{formatTimeInZone(confirmed.startIso, confirmed.bookerTimeZone)} your time</p>
+            ) : null}
+            <p className={styles.body}>
+              {formatTimeInZone(confirmed.startIso, PLANNING_TIME_ZONE)} {PLANNING_TIME_ZONE_LABEL}
+            </p>
+            <p className={styles.body}>
+              {PLANNING_CALL_DURATION_MINUTES} minutes · {preferredCallFormat === "VIDEO" ? "Video" : "Phone"}
+            </p>
+          </Card>
+          <p className={styles.body}>Your Pathways advisor will review your Discovery before the call.</p>
+          {preferredCallFormat === "VIDEO" ? (
+            <p className={styles.body}>Connection details will be provided before your appointment.</p>
+          ) : (
+            <p className={styles.body}>Pathways will use the phone number you provided for this planning request.</p>
+          )}
+        </>
+      ) : null}
     </div>
   );
 }

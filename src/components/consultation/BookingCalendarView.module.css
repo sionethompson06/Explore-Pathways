@@ -1,0 +1,186 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: #fbeceb;
+  color: #a83c2e;
+  font-weight: 600;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+@media (min-width: 900px) {
+  .layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .dayPanel {
+    flex: 0 0 auto;
+    min-width: 220px;
+  }
+  .timePanel {
+    flex: 1 1 auto;
+  }
+}
+
+.panelHeading {
+  font-size: var(--font-size-lg);
+  color: var(--color-navy-900);
+  margin: 0 0 var(--space-3);
+}
+
+.monthLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.dayList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.dayButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 64px;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  margin-bottom: var(--space-2);
+}
+
+.dayButton:hover {
+  border-color: var(--color-navy-700);
+}
+
+.dayButton:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dayButton[aria-pressed="true"] {
+  background: var(--color-navy-900);
+  border-color: var(--color-navy-900);
+  color: var(--color-warm-white);
+}
+
+.dayWeekday {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dayNumber {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.timeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.timeButton {
+  min-width: 96px;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.timeButton:hover {
+  border-color: var(--color-accent-strong);
+}
+
+.timeButton:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.timeButton[aria-pressed="true"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-white);
+}
+
+.emptyState {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.summaryCard {
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+}
+
+.summaryTitle {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+  color: var(--color-navy-900);
+}
+
+.summaryDate {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-navy-900);
+}
+
+.summaryTime {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.summaryTimeSecondary {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.summaryMeta {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.confirmButton {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+}
+
+@media (min-width: 560px) {
+  .confirmButton {
+    width: auto;
+  }
+}

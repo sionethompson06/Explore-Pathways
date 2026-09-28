@@ -2,11 +2,12 @@ import {
   pgTable,
   text,
   timestamp,
+  integer,
   pgEnum,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { user } from "./auth";
 import {
   studentPathwayRecord,
@@ -183,8 +184,13 @@ export const consultationContact = pgTable(
 
 // ---------------------------------------------------------------------------
 // Booking -- distinct from the request; a request is never conflated
-// with a confirmed appointment (Specification 05/07).
+// with a confirmed appointment (Specification 05/07). Phase 6A.2 adds
+// the smallest useful fields to support native Pathways-internal
+// scheduling (source/resourceKey/durationMinutes/bookerTimeZone)
+// without creating a parallel Appointment table.
 // ---------------------------------------------------------------------------
+
+export const bookingSourceEnum = pgEnum("booking_source", ["INTERNAL", "EXTERNAL"]);
 
 export const booking = pgTable(
   "booking",
@@ -193,13 +199,32 @@ export const booking = pgTable(
     consultationRequestId: text("consultation_request_id")
       .notNull()
       .references(() => consultationRequest.id, { onDelete: "cascade" }),
-    // Opaque reference into whatever scheduler provider is eventually
-    // configured (Phase 6); never populated in Phase 1.
+    // Opaque reference into whatever EXTERNAL scheduler provider was
+    // used (Phase 6 legacy Google handoff); always null for an
+    // INTERNAL booking, since Pathways itself is the source of truth.
     providerReference: text("provider_reference"),
     scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
     timeZone: text("time_zone"),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
     rescheduledFromBookingId: text("rescheduled_from_booking_id"),
+    // Phase 6A.2: which scheduling path created this row. Defaults to
+    // EXTERNAL (the pre-6A.2 legacy assumption) since no code path in
+    // this codebase has ever actually inserted a Booking row yet --
+    // this default only matters for a hypothetical future insert that
+    // omits it, never read as evidence one was assumed before this column existed.
+    source: bookingSourceEnum("source").notNull().default("EXTERNAL"),
+    // The scheduling resource this booking occupies -- see
+    // PLANNING_RESOURCE_KEY ("PATHWAYS_PLANNING") in
+    // src/lib/consultation/scheduling-policy.ts. A plain string key
+    // (not a foreign key to a "resources" table) so a future phase can
+    // introduce advisor-specific or specialized resources without
+    // changing this column's shape -- see section 43.
+    resourceKey: text("resource_key"),
+    durationMinutes: integer("duration_minutes"),
+    // The parent/browser timezone captured for display purposes only
+    // (section 19-20) -- never used to determine business-hour
+    // validity, which is always computed in PLANNING_TIME_ZONE.
+    bookerTimeZone: text("booker_time_zone"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -211,6 +236,22 @@ export const booking = pgTable(
     index("booking_consultation_request_idx").on(
       table.consultationRequestId,
     ),
+    // Section 13: a ConsultationRequest may have only one ACTIVE
+    // booking at a time -- a cancelled/rescheduled historical row
+    // (cancelledAt set) never counts against this, and stays possible
+    // to keep for history (never made impossible by this index).
+    uniqueIndex("booking_active_per_request_unique_idx")
+      .on(table.consultationRequestId)
+      .where(sql`${table.cancelledAt} IS NULL`),
+    // Section 14 (mandatory): the same scheduling resource may have
+    // only one ACTIVE booking at a given start time -- enforced at the
+    // database level, not merely by a SELECT-then-INSERT check in
+    // application code, which two concurrent requests could both pass.
+    uniqueIndex("booking_resource_slot_unique_idx")
+      .on(table.resourceKey, table.scheduledAt)
+      .where(
+        sql`${table.resourceKey} IS NOT NULL AND ${table.scheduledAt} IS NOT NULL AND ${table.cancelledAt} IS NULL`,
+      ),
   ],
 );
 

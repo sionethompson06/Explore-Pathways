@@ -162,6 +162,8 @@ export async function submitConsultationContact(
 export interface ActiveConsultationRequestView {
   id: string;
   status: ConsultationStatus;
+  /** The call format the parent already chose during contact capture (Phase 6A.2 section 26: scheduling never re-asks this). Null only if the contact row is somehow missing. */
+  preferredCallFormat: "VIDEO" | "PHONE" | null;
 }
 
 /**
@@ -182,12 +184,17 @@ export async function getActiveConsultationRequestForSession(
   if (!sessionRow?.studentPathwayRecordId) return null;
 
   const [request] = await db
-    .select({ id: consultationRequest.id, status: consultationRequest.status })
+    .select({
+      id: consultationRequest.id,
+      status: consultationRequest.status,
+      preferredCallFormat: consultationContact.preferredCallFormat,
+    })
     .from(consultationRequest)
+    .leftJoin(consultationContact, eq(consultationContact.consultationRequestId, consultationRequest.id))
     .where(eq(consultationRequest.studentPathwayRecordId, sessionRow.studentPathwayRecordId))
     .orderBy(desc(consultationRequest.createdAt))
     .limit(1);
-  return request ?? null;
+  return request ? { ...request, preferredCallFormat: request.preferredCallFormat ?? null } : null;
 }
 
 export type ScheduleHandoffResult =
@@ -204,21 +211,25 @@ const STATUSES_FARTHER_THAN_REQUESTED: readonly ConsultationStatus[] = [
 ];
 
 /**
- * The section 30 Google scheduler handoff: verifies capability is
- * actually REQUEST_ONLY with a configured URL, locates this session's
- * own active ConsultationRequest (never a client-supplied id),
- * transactionally transitions REQUESTED -> PENDING_VERIFICATION only
- * if not already farther along, appends the WorkflowEvent, and returns
- * the server-configured schedule URL for the caller to redirect to.
- * Never returns/accepts any URL not read directly from this server's
- * own configuration (open-redirect prevention).
+ * The section 30 legacy Google scheduler handoff -- dormant unless
+ * provider is explicitly GOOGLE_EXTERNAL (Phase 6A.2 section 39: this
+ * route must never activate for provider=INTERNAL, even though
+ * INTERNAL's capability also happens to carry state=REQUEST_ONLY).
+ * Verifies capability is actually GOOGLE_EXTERNAL with a configured
+ * URL, locates this session's own active ConsultationRequest (never a
+ * client-supplied id), transactionally transitions
+ * REQUESTED -> PENDING_VERIFICATION only if not already farther along,
+ * appends the WorkflowEvent, and returns the server-configured schedule
+ * URL for the caller to redirect to. Never returns/accepts any URL not
+ * read directly from this server's own configuration (open-redirect
+ * prevention).
  */
 export async function handOffToGoogleScheduler(
   db: Database,
   sessionId: string,
 ): Promise<ScheduleHandoffResult> {
   const capability = getConsultationCapability();
-  if (capability.state !== "REQUEST_ONLY" || !capability.scheduleUrl) {
+  if (capability.provider !== "GOOGLE_EXTERNAL" || !capability.scheduleUrl) {
     return { ok: false, reason: "SCHEDULING_UNAVAILABLE" };
   }
   const scheduleUrl = capability.scheduleUrl;

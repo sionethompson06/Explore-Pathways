@@ -175,10 +175,24 @@ test.describe("Consultation: DB-free demo preview", () => {
     await fillContactForm(page, { email: "demo.parent@example.com" });
     await page.getByRole("button", { name: "Continue to Scheduling" }).click();
 
+    // Phase 6A.2 (sections 66-68): the demo's scheduling step is now the
+    // real, presentational native calendar -- still entirely synthetic,
+    // in-memory, and DB-free -- rather than the old Phase 6A placeholder
+    // "Choose My Time" button.
     await expect(page.getByText("Your information is saved.")).toBeVisible();
-    await page.getByRole("button", { name: "Choose My Time" }).click();
-    await expect(page.getByRole("status").last()).toContainText(/no real appointment is booked/i);
-    // Still on the demo page -- the demo button never navigates anywhere.
+    await expect(page.getByText(/no real appointment is booked/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Select a Day" })).toBeVisible();
+
+    const firstDay = page.locator('button[class*="dayButton"]').first();
+    await firstDay.click();
+    const firstTime = page.locator('button[class*="timeButton"]').first();
+    await expect(firstTime).toBeVisible();
+    await firstTime.click();
+
+    await page.getByRole("button", { name: "Confirm Planning Call" }).click();
+    await expect(page.getByRole("heading", { name: "Your Pathways Planning Call Is Reserved" })).toBeVisible();
+    await expect(page.getByText(/no real appointment is booked/i).last()).toBeVisible();
+    // Still on the demo page -- the fake confirmation never navigates anywhere real.
     await expect(page).toHaveURL(/\/discover\/consultation\/demo$/);
 
     const cookies = await context.cookies();

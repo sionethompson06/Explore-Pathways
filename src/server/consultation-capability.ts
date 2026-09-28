@@ -3,27 +3,45 @@ import { env } from "@/env";
 import type { ConsultationState } from "@/lib/report/types";
 
 /**
- * Phase 6A single source of truth for "is real planning-call
- * scheduling actually available right now." Never LIVE_VERIFIED --
- * that state requires a verified provider integration (webhook/API
- * confirmation) not implemented in this phase; see env.ts's own
- * production-refuses-LIVE_VERIFIED guard, which this function does
- * not weaken or duplicate.
+ * Phase 6A.2 refactor (docs/pathways instruction sections 6-7): the
+ * single source of truth for "is real planning-call scheduling
+ * actually available right now," now distinguishing WHICH provider
+ * without leaking that distinction into the frozen Phase 5 report
+ * contract. `state` is exactly the public `ConsultationState` the
+ * report route/CTA resolver already understand (never LIVE_VERIFIED --
+ * that requires a verified provider integration not implemented in
+ * any phase so far; see env.ts's own production-refusal guard, which
+ * this function does not weaken or duplicate). `provider` is a
+ * separate, internal-only detail: which concrete scheduling mechanism
+ * backs that state, consulted only by the consultation/booking server
+ * code (never by the report assembler).
  *
- * REQUEST_ONLY requires BOTH SCHEDULER_MODE===REQUEST_ONLY AND a
- * valid, server-configured Google Appointment Schedule URL -- setting
- * only one of the two never activates scheduling. Every caller
- * (report route, /discover/consultation, /discover/consultation/schedule/go)
- * must go through this function rather than re-reading
- * process.env/SCHEDULER_MODE itself, so the activation rule lives in
- * exactly one place.
+ * - SCHEDULER_MODE=INTERNAL -> REQUEST_ONLY / INTERNAL / no URL.
+ *   Pathways' own native booking calendar; no Google URL is read or
+ *   required.
+ * - SCHEDULER_MODE=REQUEST_ONLY + a valid GOOGLE_APPOINTMENT_SCHEDULE_URL
+ *   -> REQUEST_ONLY / GOOGLE_EXTERNAL / that URL. The Phase 6A dormant
+ *   legacy external-handoff path, preserved but not preferred.
+ * - Anything else -> UNCONFIGURED / NONE / no URL.
  */
-export function getConsultationCapability(): {
+export type SchedulerProvider = "INTERNAL" | "GOOGLE_EXTERNAL" | "NONE";
+
+export interface ConsultationCapability {
   state: Exclude<ConsultationState, "LIVE_VERIFIED">;
+  provider: SchedulerProvider;
   scheduleUrl: string | null;
-} {
-  if (env.SCHEDULER_MODE === "REQUEST_ONLY" && env.GOOGLE_APPOINTMENT_SCHEDULE_URL) {
-    return { state: "REQUEST_ONLY", scheduleUrl: env.GOOGLE_APPOINTMENT_SCHEDULE_URL };
+}
+
+export function getConsultationCapability(): ConsultationCapability {
+  if (env.SCHEDULER_MODE === "INTERNAL") {
+    return { state: "REQUEST_ONLY", provider: "INTERNAL", scheduleUrl: null };
   }
-  return { state: "UNCONFIGURED", scheduleUrl: null };
+  if (env.SCHEDULER_MODE === "REQUEST_ONLY" && env.GOOGLE_APPOINTMENT_SCHEDULE_URL) {
+    return {
+      state: "REQUEST_ONLY",
+      provider: "GOOGLE_EXTERNAL",
+      scheduleUrl: env.GOOGLE_APPOINTMENT_SCHEDULE_URL,
+    };
+  }
+  return { state: "UNCONFIGURED", provider: "NONE", scheduleUrl: null };
 }
