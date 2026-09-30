@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Container } from "@/components/marketing/Container";
 import type { ContentStatus } from "@/lib/engine/types";
-import type { DiscoveryReportDTO } from "@/lib/report/types";
+import type { DiscoveryReportDTO, ReportAction } from "@/lib/report/types";
 import { ReportUtilityHeader } from "./ReportUtilityHeader";
 import { ReportHero } from "./ReportHero";
 import { InsightSection } from "./InsightSection";
@@ -53,6 +53,7 @@ export function ReportView({
   demoLabel,
   editAnswersOverride,
   secondaryTopAction,
+  primaryActionOverride,
 }: {
   report: DiscoveryReportDTO;
   /** Presentation-only subordinate notice (section 16/11 of the Phase 5.1 spec) -- never changes report content. Omitted entirely in production. */
@@ -61,12 +62,26 @@ export function ReportView({
   editAnswersOverride?: ReactNode;
   /** Interactive demo only: a "Start Demo Again" control rendered alongside the edit action. */
   secondaryTopAction?: ReactNode;
+  /**
+   * Phase 6A.3 (sections 5-7): a presentation-only substitute for
+   * `report.actions.primary`, used consistently everywhere the primary
+   * CTA renders. `report.actions` itself is never mutated -- the
+   * canonical assembled DTO (and therefore its real operational
+   * consultation state) is completely unaffected. The interactive
+   * Discovery demo is the only caller that ever passes this, so it can
+   * continue into the separate DB-free `/discover/consultation/demo`
+   * flow even though the demo report's own `operational.consultationState`
+   * honestly stays `UNCONFIGURED`. Production and the Golden Report
+   * fixture demo never pass this, so they are byte-identical to before.
+   */
+  primaryActionOverride?: ReportAction;
 }) {
   const hasSupportOpportunity =
     Boolean(report.sections.supportOpportunityMap.support) ||
     Boolean(report.sections.supportOpportunityMap.opportunities) ||
     Boolean(report.sections.supportOpportunityMap.specialHeading);
   const inlineCopy = inlineConversionCopy(report.contentStatus);
+  const primaryAction = primaryActionOverride ?? report.actions.primary;
 
   return (
     <div className={styles.page}>
@@ -90,7 +105,7 @@ export function ReportView({
             />
           </div>
 
-          <InlineConversionBand headline={inlineCopy.headline} body={inlineCopy.body} action={report.actions.primary} />
+          <InlineConversionBand headline={inlineCopy.headline} body={inlineCopy.body} action={primaryAction} />
 
           {hasSupportOpportunity ? (
             <SupportOpportunityMap
@@ -106,14 +121,14 @@ export function ReportView({
 
           <ConversionBandFull
             conversion={report.sections.conversion}
-            action={report.actions.primary}
+            action={primaryAction}
             headingId="r07-heading"
             contentStatus={report.contentStatus}
           />
         </div>
       </Container>
 
-      <MobileReportCta afterElementId={AFTER_DIRECTIONS_ANCHOR} label={report.actions.primary.label} href={report.actions.primary.href} />
+      <MobileReportCta afterElementId={AFTER_DIRECTIONS_ANCHOR} label={primaryAction.label} href={primaryAction.href} />
     </div>
   );
 }

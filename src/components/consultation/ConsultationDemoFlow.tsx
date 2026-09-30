@@ -159,9 +159,11 @@ export function ConsultationDemoFlow() {
 
       {step === "schedule" ? (
         <>
-          <p className={styles.savedNotice}>Your information is saved.</p>
+          <p className={styles.savedNotice}>Contact step complete.</p>
           <h1 className={styles.headline}>Choose a Time for Your Pathways Planning Call</h1>
-          <p className={styles.demoNote}>This is a demo preview -- no real appointment is booked.</p>
+          <p className={styles.demoNote}>
+            This is a demo preview -- your contact information is not saved and no real appointment is booked.
+          </p>
           <Card className={styles.contextCard}>
             <ul className={styles.detailsList}>
               <li>Free</li>
@@ -185,7 +187,9 @@ export function ConsultationDemoFlow() {
       {step === "confirmed" && confirmed ? (
         <>
           <h1 className={styles.headline}>Your Pathways Planning Call Is Reserved</h1>
-          <p className={styles.demoNote}>This is a demo preview -- no real appointment is booked.</p>
+          <p className={styles.demoNote}>
+            This is a preview of the confirmation experience -- no real appointment is booked.
+          </p>
           <Card className={styles.contextCard}>
             <p className={styles.body}>Your Student</p>
             <p className={styles.body}>{formatFullDateInZone(confirmed.startIso, PLANNING_TIME_ZONE)}</p>

@@ -134,13 +134,35 @@ test.describe("Interactive Discovery demo -> real Phase 5 report (Phase 5.1 sect
     // The interactive demo's own subordinate, non-overwhelming notice.
     await expect(page.getByText(DEMO_LABEL)).toBeVisible();
 
-    // Section 15: CTA safety -- consultationState stays UNCONFIGURED, so
-    // the primary action is always the safe informational link, never an
-    // operationally-live "Build My Student's Pathway" pretense.
-    const cta = page.getByRole("link", { name: "See What Comes Next" }).first();
+    // Phase 6A.3 (sections 6-10): the canonical report DTO's own
+    // consultationState stays UNCONFIGURED (proven directly against
+    // buildDemoDiscoveryReport() in tests/discovery-demo-report.test.ts)
+    // -- but the interactive demo's presentation layer overrides the
+    // VISIBLE primary CTA so the owner can continue into the connected,
+    // DB-free booking preview. Never an operationally-live "Build My
+    // Student's Pathway" pretense, and never the real DB-backed
+    // /discover/consultation route (that requires an actual guest session).
+    const cta = page.getByRole("link", { name: "Schedule My Free Pathways Planning Call" }).first();
     await expect(cta).toBeVisible();
-    await expect(cta).toHaveAttribute("href", "/how-it-works");
+    await expect(cta).toHaveAttribute("href", "/discover/consultation/demo");
     await expect(page.getByText("Build My Student's Pathway")).toHaveCount(0);
+    // Never the canonical UNCONFIGURED CTA's own label/destination on this
+    // connected interactive route -- every representation must agree.
+    await expect(page.getByRole("link", { name: "See What Comes Next" })).toHaveCount(0);
+
+    // Phase 6A.3 (section 24): every primary-CTA representation
+    // ReportView renders (InlineConversionBand, R07's ConversionBandFull,
+    // and the mobile sticky MobileReportCta -- three separate <a>
+    // elements sharing the same label) must resolve to the identical
+    // override, never just the first one found. The sticky CTA stays
+    // `aria-hidden` until scrolled, so it's located by its rendered
+    // text/href rather than by accessible role.
+    const allPrimaryCtas = page.locator("a", { hasText: "Schedule My Free Pathways Planning Call" });
+    await expect(allPrimaryCtas).toHaveCount(3);
+    const hrefs = await allPrimaryCtas.evaluateAll((links) => links.map((l) => l.getAttribute("href")));
+    for (const href of hrefs) {
+      expect(href).toBe("/discover/consultation/demo");
+    }
 
     // Honest demo boundary: no ranking/urgency language anywhere.
     const bodyText = await page.locator("body").innerText();

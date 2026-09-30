@@ -14,6 +14,7 @@ import type {
 import type { RawAnswers, StageId } from "@/lib/discovery/types";
 import type { DiscoveryReportDTO } from "@/lib/report/types";
 import { ReportView } from "@/components/report/ReportView";
+import { PLANNING_CALL_CTA_LABEL } from "@/lib/report/cta";
 import styles from "./DiscoveryQuestionnaire.module.css";
 
 /**
@@ -65,7 +66,27 @@ type DemoReportResultView =
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
-const INTERACTIVE_DEMO_LABEL = "Interactive Discovery demo — answers are not saved";
+const INTERACTIVE_DEMO_LABEL = "Interactive Discovery demo — answers are not saved and scheduling is a preview";
+
+/**
+ * Phase 6A.3 (sections 5-9): a presentation-only override so this
+ * demo's generated report can continue into the separate DB-free
+ * `/discover/consultation/demo` flow. The canonical report this
+ * component holds in `report` state is untouched -- its own
+ * `operational.consultationState` (set by `buildDemoDiscoveryReport()`
+ * in app/discover/demo/actions.ts) honestly stays `UNCONFIGURED`, and
+ * `report.actions.primary` itself is never mutated. This override is
+ * read by ReportView instead, for display purposes only, and reuses
+ * the exact production REQUEST_ONLY/INTERNAL label so the two never
+ * drift into slightly different phrasing. The href is deliberately the
+ * DB-free demo route, never the real `/discover/consultation` (which
+ * requires an actual guest session) and never an external destination.
+ */
+const CONSULTATION_DEMO_ACTION = {
+  label: PLANNING_CALL_CTA_LABEL,
+  href: "/discover/consultation/demo",
+  operationallySafe: true,
+} as const;
 
 export function DiscoveryDemoQuestionnaire({
   initialState,
@@ -336,6 +357,7 @@ export function DiscoveryDemoQuestionnaire({
               Start Demo Again
             </button>
           }
+          primaryActionOverride={CONSULTATION_DEMO_ACTION}
         />
       </div>
     );

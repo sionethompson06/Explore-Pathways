@@ -57,6 +57,27 @@ async function completeDiscoveryToReport(page: Page) {
   await expect(page).toHaveURL(/\/discover\/report$/);
 }
 
+/**
+ * Selects the first available day, advancing to a later month first
+ * (exactly like a real parent clicking "Next month") if the currently
+ * displayed month has no selectable date left -- the demo's synthetic
+ * slot list is generated against the real current wall-clock time, so
+ * which month first has a selectable date depends on when the test
+ * runs. Mirrors tests/e2e-internal/booking-internal.spec.ts's
+ * `selectFirstAvailableDate` helper.
+ */
+async function selectFirstAvailableDate(page: Page) {
+  let selectable = page.locator('button[class*="dateButton"]:not([disabled])').first();
+  for (let attempt = 0; attempt < 4 && (await selectable.count()) === 0; attempt++) {
+    const nextButton = page.getByRole("button", { name: "Next month" });
+    if (!(await nextButton.isEnabled())) break;
+    await nextButton.click();
+    selectable = page.locator('button[class*="dateButton"]:not([disabled])').first();
+  }
+  await expect(selectable).toBeVisible();
+  await selectable.click();
+}
+
 async function fillContactForm(page: Page, overrides: Partial<{ guardianName: string; email: string; mobilePhone: string }> = {}) {
   await page.getByLabel("Parent/Guardian Name").fill(overrides.guardianName ?? "Pat Guardian");
   await page.getByLabel("Email", { exact: true }).fill(overrides.email ?? "pat.guardian@example.com");
@@ -178,13 +199,14 @@ test.describe("Consultation: DB-free demo preview", () => {
     // Phase 6A.2 (sections 66-68): the demo's scheduling step is now the
     // real, presentational native calendar -- still entirely synthetic,
     // in-memory, and DB-free -- rather than the old Phase 6A placeholder
-    // "Choose My Time" button.
-    await expect(page.getByText("Your information is saved.")).toBeVisible();
+    // "Choose My Time" button. Phase 6A.3 (section 13): unlike the real
+    // production schedule page, this demo step never claims contact info
+    // was saved -- it wasn't.
+    await expect(page.getByText("Contact step complete.")).toBeVisible();
     await expect(page.getByText(/no real appointment is booked/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Select a Day" })).toBeVisible();
 
-    const firstDay = page.locator('button[class*="dateButton"]:not([disabled])').first();
-    await firstDay.click();
+    await selectFirstAvailableDate(page);
     const firstTime = page.locator('button[class*="timeButton"]').first();
     await expect(firstTime).toBeVisible();
     await firstTime.click();

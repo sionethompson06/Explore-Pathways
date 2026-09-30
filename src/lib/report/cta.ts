@@ -6,6 +6,17 @@ const SAFE_INFORMATIONAL_HREF = "/how-it-works";
 const EDIT_ANSWERS_HREF = "/discover/profile";
 
 /**
+ * The exact production REQUEST_ONLY/INTERNAL scheduling CTA label
+ * (Phase 6A.3 section 8). Extracted so a presentation-only override
+ * elsewhere (the interactive Discovery demo's connection to
+ * `/discover/consultation/demo`) can reuse the identical wording rather
+ * than risk a slightly different, drifted phrase -- never read by
+ * `resolvePrimaryAction` from anywhere else, and this extraction does
+ * not change its own return value below.
+ */
+export const PLANNING_CALL_CTA_LABEL = "Schedule My Free Pathways Planning Call";
+
+/**
  * Operationally-safe CTA resolution (section 29). The marketing
  * intent label (what the button SAYS) is always archetype-driven;
  * the actual destination/behavior (what the button DOES) is resolved
@@ -31,7 +42,7 @@ export function resolvePrimaryAction(
     // because that contract string is deliberately NOT the active
     // Phase 6A copy; report-content.json itself stays byte-unchanged.
     return {
-      label: "Schedule My Free Pathways Planning Call",
+      label: PLANNING_CALL_CTA_LABEL,
       href: "/discover/consultation",
       operationallySafe: true,
     };

@@ -94,6 +94,26 @@ it("buildDemoDiscoveryReport returns field errors (never a report) for an incomp
   expect(result.errors.length).toBeGreaterThan(0);
 });
 
+/**
+ * Phase 6A.3 (section 25): proves the demo-to-booking-preview
+ * connection is presentation-only and never contaminated the report
+ * assembler. `buildDemoDiscoveryReport()`'s own `operational.consultationState`
+ * is hardcoded `"UNCONFIGURED"` above (section 1) -- this asserts the
+ * canonical DTO it returns still resolves the honest UNCONFIGURED CTA
+ * regardless of anything the interactive demo's presentation layer
+ * (ReportView's `primaryActionOverride`) does with it afterward.
+ */
+it("the canonical report DTO's own primary action remains the honest UNCONFIGURED CTA, never the demo's presentation override", async () => {
+  const result = await buildDemoDiscoveryReport(personaRaw("P01"));
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  expect(result.report.actions.primary).toEqual({
+    label: "See What Comes Next",
+    href: "/how-it-works",
+    operationallySafe: true,
+  });
+});
+
 /** Section 28: demo/prebuilt fixture parity -- the interactive builder and the golden-fixture pipeline must produce substantively identical DTOs. */
 function assembleViaGoldenPipeline(personaId: string, profileRevisionId: string): DiscoveryReportDTO {
   const raw = personaRaw(personaId);
