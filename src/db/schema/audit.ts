@@ -31,6 +31,13 @@ export const auditEvent = pgTable(
     action: text("action").notNull(),
     targetType: text("target_type").notNull(),
     targetId: text("target_id").notNull(),
+    // Phase 6B (section 15): a small, strictly operational payload --
+    // e.g. { fromStatus, toStatus } for a CASE_STATUS_CHANGED row, or
+    // { bookingId } for BOOKING_LINKED. Nullable (most audit rows need
+    // none); never a place to copy a full Discovery payload, contact
+    // PII, or free text into -- callers writing into this table are
+    // responsible for keeping it to operational metadata only.
+    metadata: jsonb("metadata"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

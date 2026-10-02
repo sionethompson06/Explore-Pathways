@@ -1,5 +1,5 @@
 import "server-only";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, desc } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import {
   studentPathwayRecord,
@@ -7,6 +7,7 @@ import {
   discoverySession,
   consultationRequest,
   advisorAssignment,
+  pathwaysCase,
   staffRole,
   type staffRoleEnum,
 } from "@/db/schema";
@@ -278,4 +279,94 @@ export async function assertAdvisorCanAccessCase(
       "Advisor does not have an active assignment to this case.",
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// PathwaysCase access -- Phase 6B. Mirrors the ConsultationRequest-
+// scoped advisor functions above exactly (same "staff role AND active
+// assignment, always both, never an admin bypass" rule), but scoped to
+// advisorAssignment.pathwaysCaseId instead -- the case-level security
+// boundary Phase 6C's advisor workspace will build on. No advisor
+// assignment is ever created automatically by this phase; these
+// functions exist to prove the boundary holds once one exists.
+// ---------------------------------------------------------------------------
+
+export async function listActivePathwaysCasesForAdvisor(
+  db: Database,
+  advisorUserId: string,
+) {
+  const role = await getStaffRole(db, advisorUserId);
+  if (!role || !CASE_ACCESS_ROLES.includes(role)) return [];
+
+  return db
+    .select({ case: pathwaysCase })
+    .from(advisorAssignment)
+    .innerJoin(pathwaysCase, eq(advisorAssignment.pathwaysCaseId, pathwaysCase.id))
+    .where(
+      and(
+        eq(advisorAssignment.advisorUserId, advisorUserId),
+        isNull(advisorAssignment.unassignedAt),
+      ),
+    );
+}
+
+/** Throws unless the advisor BOTH currently holds an active, authorized staff role AND has an active assignment to this exact PathwaysCase. */
+export async function assertAdvisorCanAccessPathwaysCase(
+  db: Database,
+  advisorUserId: string,
+  pathwaysCaseId: string,
+): Promise<void> {
+  const role = await getStaffRole(db, advisorUserId);
+  if (!role || !CASE_ACCESS_ROLES.includes(role)) {
+    throw new AuthorizationError(
+      "User does not hold an active, authorized staff role required for case access.",
+    );
+  }
+
+  const [assignment] = await db
+    .select({ id: advisorAssignment.id })
+    .from(advisorAssignment)
+    .where(
+      and(
+        eq(advisorAssignment.advisorUserId, advisorUserId),
+        eq(advisorAssignment.pathwaysCaseId, pathwaysCaseId),
+        isNull(advisorAssignment.unassignedAt),
+      ),
+    )
+    .limit(1);
+
+  if (!assignment) {
+    throw new AuthorizationError(
+      "Advisor does not have an active assignment to this case.",
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Guest-owned case lookup -- structurally confined to the guest's own
+// session (resolved server-side from the HttpOnly session id), never a
+// client-supplied case id. Section 14: knowing an opaque case ID is
+// never, by itself, authorization -- there is no case-id parameter
+// here to pass the wrong value into, exactly like
+// getStudentForGuestToken above.
+// ---------------------------------------------------------------------------
+
+export async function getPathwaysCaseForGuestSession(
+  db: Database,
+  sessionId: string,
+) {
+  const [sessionRow] = await db
+    .select({ studentPathwayRecordId: discoverySession.studentPathwayRecordId })
+    .from(discoverySession)
+    .where(eq(discoverySession.id, sessionId))
+    .limit(1);
+  if (!sessionRow?.studentPathwayRecordId) return null;
+
+  const [row] = await db
+    .select()
+    .from(pathwaysCase)
+    .where(eq(pathwaysCase.studentPathwayRecordId, sessionRow.studentPathwayRecordId))
+    .orderBy(desc(pathwaysCase.createdAt))
+    .limit(1);
+  return row ?? null;
 }

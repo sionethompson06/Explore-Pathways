@@ -14,6 +14,7 @@ import {
   profileRevision,
   reportSnapshot,
 } from "./pathway";
+import { pathwaysCase } from "./case";
 
 /**
  * Consent, consultation workflow, advisor assignment/notes. Phase 1
@@ -267,9 +268,25 @@ export const advisorAssignment = pgTable(
     consultationRequestId: text("consultation_request_id")
       .notNull()
       .references(() => consultationRequest.id, { onDelete: "cascade" }),
+    // Phase 6B: additive, nullable -- the future PathwaysCase an
+    // assignment is actually scoped to (sections 10/14). Nullable
+    // because no code path has ever written an advisorAssignment row
+    // yet (no advisor-assignment UI exists before Phase 6C); kept
+    // alongside consultationRequestId rather than replacing it so
+    // either lookup direction stays possible without a breaking
+    // rename/removal.
+    pathwaysCaseId: text("pathways_case_id").references(() => pathwaysCase.id, {
+      onDelete: "cascade",
+    }),
     advisorUserId: text("advisor_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    // Phase 6B: who performed the assignment (an admin, or a future
+    // auto-assignment rule attributed to a system actor) -- distinct
+    // from advisorUserId, the person assigned. Nullable: a first
+    // assignment made by a not-yet-modeled process must never block on
+    // this.
+    assignedByUserId: text("assigned_by_user_id").references(() => user.id),
     assignedAt: timestamp("assigned_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -279,6 +296,7 @@ export const advisorAssignment = pgTable(
     index("advisor_assignment_consultation_request_idx").on(
       table.consultationRequestId,
     ),
+    index("advisor_assignment_pathways_case_idx").on(table.pathwaysCaseId),
     index("advisor_assignment_advisor_idx").on(table.advisorUserId),
   ],
 );
@@ -390,8 +408,16 @@ export const advisorAssignmentRelations = relations(
       fields: [advisorAssignment.consultationRequestId],
       references: [consultationRequest.id],
     }),
+    pathwaysCase: one(pathwaysCase, {
+      fields: [advisorAssignment.pathwaysCaseId],
+      references: [pathwaysCase.id],
+    }),
     advisor: one(user, {
       fields: [advisorAssignment.advisorUserId],
+      references: [user.id],
+    }),
+    assignedBy: one(user, {
+      fields: [advisorAssignment.assignedByUserId],
       references: [user.id],
     }),
   }),

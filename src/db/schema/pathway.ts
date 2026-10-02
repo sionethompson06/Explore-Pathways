@@ -26,6 +26,17 @@ import { user } from "./auth";
 
 export const studentPathwayRecord = pgTable("student_pathway_record", {
   id: text("id").primaryKey(),
+  // Phase 6B (section 5): an optional, non-authoritative display label
+  // for the student this record represents -- e.g. a first name a
+  // future verified-save flow might let a guardian set. Nullable and
+  // currently unpopulated by any write path (the production Discovery
+  // questionnaire does not yet collect a durable student name; only
+  // the interactive demo's ephemeral in-memory state does, and that
+  // never touches this table). Deliberately NOT a duplicate of grade/
+  // gradeBand, which remain derivable from this record's latest
+  // ProfileRevision rather than cached here (avoid duplication where a
+  // reference is sufficient).
+  displayName: text("display_name"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -12,6 +12,7 @@ import { generateId } from "./ids";
 import { isUniqueConstraintConflict } from "./db-conflict";
 import { resolveReportOutcomeForConsultation } from "./report-outcome";
 import { getConsultationCapability } from "./consultation-capability";
+import { ensureCaseForConsultationRequest } from "./pathways-case";
 import type { ConsultationContactInput } from "@/lib/consultation/validation";
 import { PLANNING_CONTACT_CONSENT_VERSION } from "@/lib/consultation/constants";
 
@@ -152,6 +153,20 @@ export async function submitConsultationContact(
         reason: "CONTACT_RECEIVED",
       });
     }
+
+    // Phase 6B (section 8): the family has now meaningfully entered the
+    // consultation/service workflow -- this is the narrowest
+    // technically sound point to establish the operational
+    // PathwaysCase, inside the exact same transaction so case
+    // creation is atomic with the request/contact upsert above.
+    // Idempotent regardless of whether this call is a fresh REQUESTED
+    // transition or a contact resubmission against an existing request.
+    await ensureCaseForConsultationRequest(tx, {
+      studentPathwayRecordId,
+      consultationRequestId: requestId,
+      profileRevisionId: revisionId,
+      reportSnapshotId,
+    });
 
     return requestId;
   });

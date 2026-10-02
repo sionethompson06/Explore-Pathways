@@ -4,6 +4,7 @@ import type { Database } from "@/db/client";
 import { discoverySession, consultationRequest, booking, workflowEvent } from "@/db/schema";
 import { generateId } from "./ids";
 import { isUniqueConstraintConflict } from "./db-conflict";
+import { linkBookingToCase } from "./pathways-case";
 import {
   PLANNING_CALL_DURATION_MINUTES,
   PLANNING_RESOURCE_KEY,
@@ -254,6 +255,12 @@ export async function createInternalBooking(
       toStatus: "BOOKED",
       reason: "INTERNAL_BOOKING_CONFIRMED",
     });
+
+    // Phase 6B: a genuinely new booking (never an idempotent
+    // "alreadyBooked" replay, which returns earlier above) links to
+    // and advances the case for this request, inside this same
+    // transaction.
+    await linkBookingToCase(tx, current.id, candidateBookingId);
 
     return { ok: true, alreadyBooked: false, booking: toBookingView(inserted) };
   });
