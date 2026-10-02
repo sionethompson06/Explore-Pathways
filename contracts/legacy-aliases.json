@@ -1,0 +1,70 @@
+{
+  "version": "1.0.0-candidate",
+  "policy": "Canonical IDs below are used for new records. Aliases are import-only; ambiguous legacy IDs require explicit mapping rather than guesswork.",
+  "aliases": {
+    "SUP_ADVISOR": "S01",
+    "SUP_READING": "S03",
+    "SUP_WRITING": "S05",
+    "SUP_MATH": "S04",
+    "SUP_LIVE_INSTRUCTION": "S07",
+    "OPP_DUAL_ENROLLMENT": "OP04",
+    "OPP_ADVANCED_COURSEWORK": "OP01",
+    "OPP_LEARNING_COMMUNITY": "OP14",
+    "OPP_FLEXIBLE_LEARNING": "OP16",
+    "OPP_PROJECT_BASED": "OP17",
+    "OPP_FOUNDATIONAL_ACCELERATION": "OP18",
+    "REV_INDEPENDENT_LEARNING_SUPPORT": "REV_LIVE_SUPPORT",
+    "REV_STATE_HOMESCHOOL_REQUIREMENTS": "REV_STATE_HOMESCHOOL"
+  },
+  "retired_ambiguous_ids": [
+    "P01-P13 combined base-model/overlay list",
+    "S09 used inconsistently for NCAA-only versus college-athletics services",
+    "generic OPP or SUP values not explicitly mapped here"
+  ],
+  "question_value_aliases": {
+    "discovery_reasons": {
+      "CURRENT_SCHOOL_CONCERN": "BETTER_FIT_ENVIRONMENT",
+      "DIFFERENT_ENVIRONMENT": "BETTER_FIT_ENVIRONMENT",
+      "ENVIRONMENT_CONCERN": "BETTER_FIT_ENVIRONMENT",
+      "SMALLER_ENVIRONMENT": "BETTER_FIT_ENVIRONMENT",
+      "ADVANCED_COURSES": "ACADEMIC_ACCELERATION",
+      "COLLEGE_ADVANCEMENT": "ACADEMIC_ACCELERATION",
+      "CREDIT_RECOVERY": "ACADEMIC_SUPPORT"
+    },
+    "advancement_interests": {
+      "DUAL_ENROLLMENT": "COLLEGE_LEVEL_COURSES",
+      "COLLEGE_COURSES": "COLLEGE_LEVEL_COURSES",
+      "ADVANCED_MATH": "CHALLENGING_COURSEWORK",
+      "ADVANCED_SCIENCE": "CHALLENGING_COURSEWORK",
+      "ADVANCED_ELA": "CHALLENGING_COURSEWORK"
+    },
+    "reported_support_needs": {
+      "ROUTINES": "ORGANIZATION_STUDY_HABITS",
+      "ORGANIZATION": "ORGANIZATION_STUDY_HABITS",
+      "TIME_MANAGEMENT": "ORGANIZATION_STUDY_HABITS",
+      "TASK_COMPLETION": "ORGANIZATION_STUDY_HABITS",
+      "STUDY_SKILLS": "ORGANIZATION_STUDY_HABITS",
+      "ENGAGEMENT": "ENGAGEMENT_CONFIDENCE",
+      "CONFIDENCE": "ENGAGEMENT_CONFIDENCE"
+    },
+    "learning_support_pattern": {
+      "INDEPENDENT_WORK_DIFFICULT": "CLOSE_ADULT_SUPPORT"
+    },
+    "flexibility_reasons": {
+      "COMPETITION": "ATHLETIC_TRAINING",
+      "ATHLETIC_TRAVEL": "ATHLETIC_TRAINING",
+      "BUSINESS": "WORK"
+    }
+  },
+  "question_value_removals": {
+    "preferred_learning_environment": ["BOOKS", "TECHNOLOGY"],
+    "family_priorities": [
+      "ACADEMIC_QUALITY",
+      "ATHLETIC_FLEXIBILITY",
+      "LOCATION_FLEXIBILITY",
+      "ADVANCED_COURSES",
+      "ACCREDITATION",
+      "DIPLOMA"
+    ]
+  }
+}

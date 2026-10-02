@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0-owner-calibrated",
+  "status": "OWNER_CALIBRATED_REPORT_ACCEPTANCE",
+  "source": "PHASE5_DISCOVERY_REPORT_SPEC_V1.md sections 55-61. References personaId into fixtures/golden-profiles.json -- never duplicates the raw Discovery profile. Golden report tests run the real pipeline (golden-profile raw answers -> effective answers -> Phase 4 engine -> Phase 5 report assembler -> ReportDTO); this file is the expectation source, never a pre-rendered snapshot the demo route reads from.",
+  "fixtures": [
+    {
+      "id": "GR01",
+      "personaId": "P01",
+      "expectedArchetype": "CURRENT_PLUS_GROWTH",
+      "expectedContentStatus": "PERSONALIZED",
+      "expectedDisplayedCandidateIds": ["B01"],
+      "exact": {
+        "r01Headline": "A strong foundation may already be in place. The opportunity may be what you build around it.",
+        "r02Headline": "The question may be less about changing schools—and more about creating greater challenge.",
+        "cardTitles": ["Build on the Current School Arrangement"],
+        "r03EmptyHeading": null,
+        "r06StageLabels": ["Keep the Current School", "Identify Areas Ready for More Challenge", "Add Advanced or Enrichment Opportunities", "Monitor Growth & Adjust"],
+        "r07Headline": "Your student may not need a different school. They may need a bigger plan.",
+        "ctaIntentLabel": "Build My Student's Pathway"
+      }
+    },
+    {
+      "id": "GR03",
+      "personaId": "P03",
+      "expectedArchetype": "FLEXIBLE_WITH_STRUCTURE",
+      "expectedContentStatus": "PERSONALIZED",
+      "expectedDisplayedCandidateIds": ["B07", "B03"],
+      "exact": {
+        "r01Headline": "Your family wants more flexibility—but not less support.",
+        "r02Headline": "The answer probably isn't simply “online school.” The stronger question is whether flexibility can come with enough structure.",
+        "cardTitles": ["Hybrid Schooling", "Teacher-Supported Virtual Schooling"],
+        "r03EmptyHeading": null,
+        "r06StageLabels": ["Flexible Learning Environment", "Live Teacher Interaction", "Structure & Progress Monitoring", "Targeted Academic Support", "Compare Actual Hybrid & Virtual Programs"],
+        "r07Headline": "Flexibility works best when the support around it is intentional.",
+        "ctaIntentLabel": "Build My Student's Pathway"
+      }
+    },
+    {
+      "id": "GR06",
+      "personaId": "P06",
+      "expectedArchetype": "HIGH_DEMAND_SCHEDULE",
+      "expectedContentStatus": "PERSONALIZED",
+      "expectedDisplayedCandidateIds": ["B06", "B04"],
+      "exact": {
+        "r01Headline": "Your student's education may need to move with their schedule—not compete against it.",
+        "r02Headline": "This is a scheduling challenge—not an athletics label.",
+        "cardTitles": ["Private Online Schooling", "Charter or Independent-Study Arrangement"],
+        "r03EmptyHeading": null,
+        "r06StageLabels": ["Flexible School Model", "Integrate the Real Training & Travel Schedule", "Maintain Academic Oversight", "College & Graduation Planning", "Compare Programs That Actually Fit the Travel Schedule"],
+        "r07Headline": "Athletics shouldn't force families to choose between opportunity and education.",
+        "ctaIntentLabel": "Build My Student's Pathway"
+      }
+    },
+    {
+      "id": "GR09",
+      "personaId": "P09",
+      "expectedArchetype": "ADVISOR_FIRST_PLACEMENT_REVIEW",
+      "expectedContentStatus": "ADVISOR_FIRST",
+      "expectedDisplayedCandidateIds": [],
+      "exact": {
+        "r01Headline": "One important question deserves a closer look before choosing a school direction.",
+        "r02Headline": "Reclassification is a planning question—not a school recommendation.",
+        "cardTitles": [],
+        "r03EmptyHeading": "Why we're not recommending a school model yet",
+        "r06StageLabels": ["Review Student History & Records", "Clarify the Goal of Reclassification", "Review Academic / Policy Implications", "Determine Whether a School-Model Change Is Even Necessary"],
+        "r07Headline": "This is the kind of decision that deserves an individual review.",
+        "ctaIntentLabel": "Review This With Pathways"
+      }
+    },
+    {
+      "id": "GR12",
+      "personaId": "P12",
+      "expectedArchetype": "RECOVERY_PLUS_ADVANCEMENT",
+      "expectedContentStatus": "PERSONALIZED",
+      "expectedDisplayedCandidateIds": ["B07", "B03"],
+      "exact": {
+        "r01Headline": "Getting back on track doesn't mean putting future opportunities on hold.",
+        "r02Headline": "Recovery and advancement can happen in the same plan.",
+        "cardTitles": ["Hybrid Schooling", "Public Virtual Schooling"],
+        "r03EmptyHeading": null,
+        "r06StageLabels": ["Transcript & Graduation Review", "Resolve Credit Gaps", "Protect Advanced Opportunities", "Flexible / Teacher-Supported Learning", "Build a Coordinated Graduation Plan"],
+        "r06ParallelGroupLabels": ["Resolve Credit Gaps", "Protect Advanced Opportunities"],
+        "r07Headline": "Don't let one academic challenge define the rest of the plan.",
+        "ctaIntentLabel": "Build My Student's Pathway"
+      }
+    },
+    {
+      "id": "GR14",
+      "personaId": "P14",
+      "expectedArchetype": "FIT_THEN_FEASIBILITY",
+      "expectedContentStatus": "PERSONALIZED",
+      "expectedDisplayedCandidateIds": ["B03", "B07"],
+      "exact": {
+        "r01Headline": "The right educational direction comes first. Then we determine how to make it practical.",
+        "r02Headline": "Educational fit and affordability are related—but they aren't the same question.",
+        "cardTitles": ["Public Virtual Schooling", "Hybrid Schooling"],
+        "r03EmptyHeading": null,
+        "r06StageLabels": ["Identify the Right Learning Model", "Verify Schedule & Support", "Compare Available Programs", "Apply Cost / Availability Constraints", "Choose the Practical Fit"],
+        "r07Headline": "Find the right fit first. Then make the plan practical.",
+        "ctaIntentLabel": "Build My Student's Pathway"
+      },
+      "mustNotContainCandidateId": "B06"
+    },
+    {
+      "id": "GR15",
+      "personaId": "P15",
+      "expectedArchetype": "LIMITED_EXPLORATION",
+      "expectedContentStatus": "LIMITED_INFORMATION",
+      "expectedDisplayedCandidateIds": [],
+      "exact": {
+        "r01Headline": "You're still exploring—and that's a useful place to start.",
+        "r02Headline": "You don't need to know the answer before you start exploring.",
+        "cardTitles": [],
+        "r03EmptyHeading": "We're not forcing a recommendation yet",
+        "r06StageLabels": ["Clarify the Student's Needs", "Identify the Family's Priorities", "Understand the Level of Flexibility & Support Needed", "Compare the Educational Models That Fit"],
+        "r07Headline": "You don't need to figure this out before asking for help.",
+        "ctaIntentLabel": "Help Me Clarify the Right Direction"
+      }
+    }
+  ]
+}

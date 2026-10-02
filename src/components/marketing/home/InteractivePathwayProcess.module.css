@@ -1,0 +1,187 @@
+.wrap {
+  margin-top: var(--space-6);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-4);
+}
+
+.stepItem {
+  position: relative;
+  flex: 1;
+}
+
+.stepItem:not(:last-child)::after {
+  content: "\2192";
+  position: absolute;
+  top: 1.4rem;
+  right: -1.5rem;
+  color: var(--color-border);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.stepButton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+.stepButton:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 2px;
+}
+
+.marker {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-navy-900);
+  color: var(--color-warm-white);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stepButton:hover .marker,
+.stepButton:focus-visible .marker {
+  transform: scale(1.05);
+}
+
+.marker[data-selected="true"] {
+  border-color: var(--color-green-500);
+}
+
+.number {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-green-500);
+  color: var(--color-warm-white);
+  border: 2px solid var(--color-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--color-navy-900);
+  text-align: center;
+}
+
+.stepButton[data-selected="true"] .title {
+  color: var(--color-accent-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker {
+    transition: none;
+  }
+}
+
+/* Shared desktop panel: visible at wider widths only. */
+.desktopPanel {
+  display: block;
+  margin-top: var(--space-6);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+}
+
+.description {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+  color: var(--color-navy-900);
+}
+
+.detail {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* Mobile per-step detail: hidden at wider widths. */
+.mobileDetailWrap {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .steps {
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .stepItem:not(:last-child)::after {
+    content: "";
+    top: 3.6rem;
+    right: auto;
+    left: 1.65rem;
+    width: 2px;
+    height: var(--space-5);
+    background: var(--color-border);
+    font-size: 0;
+  }
+
+  .stepButton {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .title {
+    text-align: left;
+  }
+
+  .desktopPanel {
+    display: none;
+  }
+
+  .mobileDetailWrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s ease;
+    margin-left: 4.5rem;
+  }
+
+  .mobileDetailWrap[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  .mobileDetailInner {
+    overflow: hidden;
+  }
+
+  .mobileDetailInner .description,
+  .mobileDetailInner .detail {
+    padding-top: var(--space-2);
+  }
+}
+
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .mobileDetailWrap {
+    transition: none;
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0-candidate",
+  "base_cards": [
+    {
+      "id": "BASE_B01_V1",
+      "base_model_id": "B01",
+      "title": "Build on the current school arrangement",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "What can be added or adjusted without a school change, and who would provide the support?",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B02_V1",
+      "base_model_id": "B02",
+      "title": "Explore an in-person public-school arrangement",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "Which local enrollment options, schedules and support services would actually fit?",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B03_V1",
+      "base_model_id": "B03",
+      "title": "Explore public virtual schooling",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "Which programs may serve your student, what attendance or live sessions are required, and what support is included?",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B04_V1",
+      "base_model_id": "B04",
+      "title": "Explore charter or independent-study arrangements",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "What this arrangement means in your jurisdiction, who is responsible for instruction and records, and what schedules are required.",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B05_V1",
+      "base_model_id": "B05",
+      "title": "Explore private in-person schooling",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "Admissions, tuition, the actual school environment, schedule and support services.",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B06_V1",
+      "base_model_id": "B06",
+      "title": "Explore private online schooling",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "Admissions, tuition, required live sessions, course offerings, teacher access and support responsibilities.",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B07_V1",
+      "base_model_id": "B07",
+      "title": "Explore hybrid schooling",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "Required in-person days, location, remote-work expectations, support and schedule compatibility.",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B08_V1",
+      "base_model_id": "B08",
+      "title": "Explore supported homeschooling",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "The family responsibilities, adult-support plan, applicable homeschool framework, curriculum and community options.",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    },
+    {
+      "id": "BASE_B09_V1",
+      "base_model_id": "B09",
+      "title": "Explore homeschooling with external course providers",
+      "description_template": "This is an education model worth investigating in light of the priorities you shared. Specific programs and eligibility have not been verified.",
+      "review_template": "Who coordinates instruction, how providers fit together, how learning is documented, costs and family responsibilities.",
+      "status": "APPROVED_FOR_SYNTHETIC_PROTOTYPE_PENDING_OWNER_PUBLICATION_REVIEW"
+    }
+  ],
+  "scope_statement": "This is an initial exploration based on your answers, not a school placement or academic assessment. Academic records, particular providers and eligibility have not been reviewed.",
+  "cta_templates": {
+    "LIVE_VERIFIED": "Explore your student's options with an advisor",
+    "REQUEST_ONLY": "Request a conversation",
+    "UNCONFIGURED": "See how the next step works"
+  },
+  "report_intro_fallback": "You are exploring an educational arrangement around the priorities you shared. These starting directions can help frame the questions to investigate next.",
+  "limited_information_template": "Your priorities are beginning to take shape. A little more information would help distinguish the arrangements worth exploring. The questions below are a useful starting point.",
+  "forbidden_claims": [
+    "guaranteed scholarship",
+    "guaranteed eligibility",
+    "verified credit transfer without actual review",
+    "promised learning-hours savings",
+    "fabricated testimonials",
+    "unlaunched school availability",
+    "advisor assigned when not assigned",
+    "appointment booked from browser redirect alone"
+  ]
+}

@@ -1,0 +1,924 @@
+{
+  "version": "1.0.0-phase5-report",
+  "status": "PHASE5_OWNER_CALIBRATED_REPORT_CONTENT",
+  "corrections_applied": "Phase 5 (docs/pathways/PHASE5_DISCOVERY_REPORT_SPEC_V1.md, docs/pathways/DECISION_LOG.md section P). Phase 4 (contracts/rules.json, contracts/scoring-policy.json, src/lib/engine) owns every educational decision this file explains -- qualification, ordering, public fit label, content status, and every activated overlay/support/opportunity/review-signal id. This file owns wording only: which archetype-level headline/body/pathway/CTA copy and which per-tile/per-question copy renders for an id Phase 4 already activated. No id referenced here is invented; contracts/CHANGELOG.md documents the seven owner-approved golden-report fixtures this content was authored against.",
+  "archetypes": {
+    "CURRENT_PLUS_GROWTH": {
+      "r01_headline": "A strong foundation may already be in place. The opportunity may be what you build around it.",
+      "r01_summary": "Your answers suggest that a school change may not be the most important next step right now. Your student appears ready for more challenge, while your family also values support, structure, and the parts of the current arrangement that are already working. The opportunity may be to expand what is possible without unnecessarily disrupting a solid foundation.",
+      "r02_kicker": "What stands out",
+      "r02_headline": "The question may be less about changing schools—and more about creating greater challenge.",
+      "r02_body": "Your student is reported to be doing well and ready for more challenge. The current school can remain the foundation while enrichment and advanced learning are layered onto it -- this is about expanding what is possible, not about requiring a school change.",
+      "central_support_ids": [],
+      "central_possibility_ids": [
+        "OP01",
+        "O02",
+        "OP18"
+      ],
+      "r05_questions": [
+        "Where does your student need more challenge?",
+        "What can be added without changing schools?",
+        "How will progress be monitored?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        "Keep the Current School",
+        "Identify Areas Ready for More Challenge",
+        "Add Advanced or Enrichment Opportunities",
+        "Monitor Growth & Adjust"
+      ],
+      "r07_headline": "Your student may not need a different school. They may need a bigger plan.",
+      "r07_body": "Pathways can help your family look beyond the standard school day, identify meaningful advancement opportunities, and build a coordinated plan around what your student is ready for next.",
+      "cta_intent_label": "Build My Student's Pathway",
+      "r05_explanations": [
+        "Specific subjects or skills are usually a clearer target than a general sense of being \"ahead.\"",
+        "Not every addition requires changing schools -- some can be layered onto the current arrangement.",
+        "A simple way to track whether the added challenge is actually working matters as much as adding it."
+      ]
+    },
+    "FLEXIBLE_WITH_STRUCTURE": {
+      "r01_headline": "Your family wants more flexibility—but not less support.",
+      "r01_summary": "Your answers point toward a flexible learning environment with meaningful human support built into it. Your student may benefit from greater control over where and how learning happens, but regular teacher guidance, structure, and progress monitoring still appear important.",
+      "r02_kicker": "What stands out",
+      "r02_headline": "The answer probably isn't simply “online school.” The stronger question is whether flexibility can come with enough structure.",
+      "r02_body": "Online and flexible programs vary dramatically. Some expect students to manage most of their learning independently. Others provide regular live instruction, teacher access, small-group support, and structured progress monitoring. Those differences are likely to matter for your student.",
+      "central_support_ids": [
+        "S07",
+        "S06",
+        "S12"
+      ],
+      "central_possibility_ids": [],
+      "r05_questions": [
+        "How much teaching is actually live?",
+        "Who notices when a student begins falling behind?",
+        "How much independence does the program expect?",
+        "What support does the program manage—and what falls to the family?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        "Flexible Learning Environment",
+        "Live Teacher Interaction",
+        "Structure & Progress Monitoring",
+        "Targeted Academic Support",
+        "Compare Actual Hybrid & Virtual Programs"
+      ],
+      "r07_headline": "Flexibility works best when the support around it is intentional.",
+      "r07_body": "Pathways can help you compare actual programs—not just by whether they are “online” or “hybrid,” but by how much teaching, structure, progress monitoring, and flexibility they truly provide.",
+      "cta_intent_label": "Build My Student's Pathway",
+      "r05_explanations": [
+        "Programs can use the word “online” very differently -- confirm how often students interact directly with teachers.",
+        "Confirm who is actually watching for early signs a student needs more support.",
+        "Confirm how much a program expects a student to manage on their own.",
+        "Programs differ in how much they handle directly versus leave to the family."
+      ]
+    },
+    "HIGH_DEMAND_SCHEDULE": {
+      "r01_headline": "Your student's education may need to move with their schedule—not compete against it.",
+      "r01_summary": "Athletics requires a substantial commitment of time and travel for your student. Your answers suggest that schedule flexibility is not simply a preference—it may be an important part of making school and athletics work together. Your student also appears comfortable with a relatively independent learning environment.",
+      "r02_kicker": "What stands out",
+      "r02_headline": "This is a scheduling challenge—not an athletics label.",
+      "r02_body": "The actual time and travel demand your family described is what is driving this conclusion -- not athletic prestige. A more flexible education model is worth exploring because of the real schedule, and academics remain just as important as the training itself.",
+      "central_support_ids": [
+        "S08"
+      ],
+      "central_possibility_ids": [
+        "O01",
+        "OP10",
+        "OP16"
+      ],
+      "r05_questions": [
+        "How flexible is “flexible”?",
+        "Can school continue smoothly during travel?",
+        "How will academic progress stay visible?",
+        "Does the program support your student's longer-term academic goals?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        "Flexible School Model",
+        "Integrate the Real Training & Travel Schedule",
+        "Maintain Academic Oversight",
+        "College & Graduation Planning",
+        "Compare Programs That Actually Fit the Travel Schedule"
+      ],
+      "r07_headline": "Athletics shouldn't force families to choose between opportunity and education.",
+      "r07_body": "Pathways can help your family compare programs against the real training and travel schedule, review academic requirements, and build a plan that protects both educational progress and athletic opportunity.",
+      "cta_intent_label": "Build My Student's Pathway",
+      "r05_explanations": [
+        "“Flexible” can still mean required live blocks -- confirm what the real weekly schedule requires.",
+        "Travel and competition weeks are the real test of whether a schedule actually works.",
+        "Confirm how progress gets tracked and shared, especially during busy travel stretches.",
+        "Confirm the program supports the student's longer-term academic and college goals, not just the current season."
+      ]
+    },
+    "ADVISOR_FIRST_PLACEMENT_REVIEW": {
+      "r01_headline": "One important question deserves a closer look before choosing a school direction.",
+      "r01_summary": "Your family is exploring grade placement or reclassification. That decision can affect much more than where a student attends school, and your current Discovery does not provide enough information to responsibly suggest a different educational model based on that question alone.",
+      "r01_status_badge": "Individual Review Recommended",
+      "r01_priority_chip": "Grade & Placement Planning",
+      "r02_kicker": "What stands out",
+      "r02_headline": "Reclassification is a planning question—not a school recommendation.",
+      "r02_body": "Before considering whether a student's grade placement should change, it is important to understand the student's academic record, age and grade history, long-term graduation pathway, and the policies of the schools or organizations involved.",
+      "r03_empty_heading": "Why we're not recommending a school model yet",
+      "r03_empty_body": "Your answers do not currently provide enough independent evidence to suggest that changing school models is the right next step. That is intentional. Pathways would rather identify what needs review than force a recommendation that may not fit.",
+      "r04_special_heading": "What needs to be reviewed",
+      "r04_special_tiles": [
+        {
+          "id": "REVIEW_ACADEMIC_RECORDS",
+          "title": "Academic Records",
+          "description": "A clear look at the student's academic history helps ground the reclassification question in real evidence, not guesswork."
+        },
+        {
+          "id": "REVIEW_GRADE_PLACEMENT",
+          "title": "Current Grade Placement",
+          "description": "Understanding how and why the current placement was set is a useful starting point before considering any change."
+        },
+        {
+          "id": "REVIEW_GRADUATION_TIMELINE",
+          "title": "Graduation Timeline",
+          "description": "A placement change can shift a graduation timeline in ways worth understanding before a decision is made."
+        },
+        {
+          "id": "REVIEW_PROGRAM_POLICIES",
+          "title": "Applicable Program Policies",
+          "description": "Schools and programs vary in how they handle placement changes -- their specific policies matter here."
+        }
+      ],
+      "r05_questions": [
+        "What problem is reclassification intended to solve?",
+        "What does the student's current academic record show?",
+        "How would a grade-placement change affect the graduation timeline?",
+        "What policies would apply at the student's school or future programs?",
+        "Are there unintended academic consequences that should be understood first?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        "Review Student History & Records",
+        "Clarify the Goal of Reclassification",
+        "Review Academic / Policy Implications",
+        "Determine Whether a School-Model Change Is Even Necessary"
+      ],
+      "r07_headline": "This is the kind of decision that deserves an individual review.",
+      "r07_body": "Pathways can help your family organize the relevant information, identify the questions that need answers, and understand the available options before you make a decision that could affect your student's longer-term academic path.",
+      "cta_intent_label": "Review This With Pathways",
+      "r05_explanations": [
+        "Getting specific about the goal helps target the right kind of review.",
+        "A clear read of the academic record is the starting point before any placement decision.",
+        "A placement change can shift graduation timing in ways worth understanding early.",
+        "Schools and programs vary in how they handle a placement change -- their specific policy matters.",
+        "It helps to understand any unintended academic consequences before deciding."
+      ]
+    },
+    "RECOVERY_PLUS_ADVANCEMENT": {
+      "r01_headline": "Getting back on track doesn't mean putting future opportunities on hold.",
+      "r01_summary": "Your student appears to have two important needs at the same time: making sure graduation and credit requirements are addressed while continuing to explore academic opportunities beyond the minimum. Your answers also point toward the need for flexibility, live teacher support, and a learning environment that can help coordinate both priorities.",
+      "r02_kicker": "What stands out",
+      "r02_headline": "Recovery and advancement can happen in the same plan.",
+      "r02_body": "A student who needs to resolve missing credits may still be ready for challenging coursework or college-level opportunities in other areas. The stronger plan is not to reduce the student's education to a “credit recovery” label, but to understand both what needs to be repaired and what should continue moving forward.",
+      "central_support_ids": [
+        "S10",
+        "S07",
+        "S12"
+      ],
+      "central_possibility_ids": [
+        "OP01",
+        "OP05",
+        "O07"
+      ],
+      "r05_questions": [
+        "Which credits are actually missing—and which completed credits will transfer?",
+        "Can the program address recovery without limiting advancement?",
+        "How much teacher support is built into the program?",
+        "Can college-level coursework fit into the graduation plan?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        {
+          "id": "TRANSCRIPT_REVIEW",
+          "label": "Transcript & Graduation Review"
+        },
+        {
+          "id": "RESOLVE_CREDIT_GAPS",
+          "label": "Resolve Credit Gaps",
+          "parallelGroup": "recovery-advancement"
+        },
+        {
+          "id": "PROTECT_ADVANCED_OPPORTUNITIES",
+          "label": "Protect Advanced Opportunities",
+          "parallelGroup": "recovery-advancement"
+        },
+        {
+          "id": "FLEXIBLE_TEACHER_SUPPORTED",
+          "label": "Flexible / Teacher-Supported Learning"
+        },
+        {
+          "id": "COORDINATED_GRAD_PLAN",
+          "label": "Build a Coordinated Graduation Plan"
+        }
+      ],
+      "r07_headline": "Don't let one academic challenge define the rest of the plan.",
+      "r07_body": "Pathways can help review the student's academic picture as a whole—credits, graduation requirements, advanced opportunities, program options, and the sequence needed to bring everything together.",
+      "cta_intent_label": "Build My Student's Pathway",
+      "r05_explanations": [
+        "A receiving school should review prior coursework before assuming every completed course transfers the same way.",
+        "Recovery and advancement can often be addressed by the same coordinated program.",
+        "Confirm how much live teacher support is actually built into the recovery plan.",
+        "Confirm whether college-level coursework can still fit once recovery needs are addressed."
+      ]
+    },
+    "FIT_THEN_FEASIBILITY": {
+      "r01_headline": "The right educational direction comes first. Then we determine how to make it practical.",
+      "r01_summary": "Your answers point strongly toward a flexible learning model with a combination of self-paced work and structured support. Affordability is also important to your family, but cost alone does not tell us which educational model will best match your student's needs.",
+      "r02_kicker": "What stands out",
+      "r02_headline": "Educational fit and affordability are related—but they aren't the same question.",
+      "r02_body": "Your student's learning and schedule needs should identify the kinds of models worth exploring first. From there, Pathways can help determine which available programs may meet those needs within your family's practical constraints.",
+      "central_support_ids": [],
+      "central_possibility_ids": [
+        "OP16"
+      ],
+      "r05_questions": [
+        "Is the program actually available where you live?",
+        "How much flexibility exists in the real weekly schedule?",
+        "How much academic management does the program provide?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        "Identify the Right Learning Model",
+        "Verify Schedule & Support",
+        "Compare Available Programs",
+        "Apply Cost / Availability Constraints",
+        "Choose the Practical Fit"
+      ],
+      "r07_headline": "Find the right fit first. Then make the plan practical.",
+      "r07_body": "Pathways can help compare actual programs across educational fit, schedule, support, availability, and cost—so your family isn't forced to choose based on a single factor.",
+      "cta_intent_label": "Build My Student's Pathway",
+      "r05_explanations": [
+        "Availability for remote and virtual programs often depends on your state -- confirm eligibility directly.",
+        "Confirm what the real weekly schedule requires, not just the marketing description.",
+        "Confirm how much of the day-to-day management the program actually provides."
+      ]
+    },
+    "LIMITED_EXPLORATION": {
+      "r01_headline": "You're still exploring—and that's a useful place to start.",
+      "r01_summary": "Your answers don't point strongly enough toward one educational model yet. Rather than force a recommendation based on limited information, your Discovery Report is highlighting the areas that would be most useful to clarify next.",
+      "r01_status_badge": "More Information Would Help",
+      "r01_priority_chip": "Exploring What's Possible",
+      "r02_kicker": "What stands out",
+      "r02_headline": "You don't need to know the answer before you start exploring.",
+      "r02_body": "Many families begin Pathways knowing that something may need to change without yet knowing what the alternative should look like. The next step is not choosing a school—it is getting clearer about the student's learning needs, schedule, support, and goals.",
+      "r03_empty_heading": "We're not forcing a recommendation yet",
+      "r03_empty_body": "Your current answers do not provide enough evidence to responsibly point toward one educational model over another. That's intentional. A little more context can make the next recommendation much more useful.",
+      "r04_special_heading": "Areas to clarify",
+      "r04_special_tiles": [
+        {
+          "id": "CLARIFY_LEARNS_BEST",
+          "title": "How Your Student Learns Best",
+          "description": "A clearer picture of how your student engages with learning helps narrow down which environments are worth exploring."
+        },
+        {
+          "id": "CLARIFY_STRUCTURE",
+          "title": "How Much Structure Helps",
+          "description": "Some students thrive with a lot of built-in structure; others do better with more independence. This shapes which directions fit."
+        },
+        {
+          "id": "CLARIFY_FLEXIBILITY",
+          "title": "How Much Flexibility Matters",
+          "description": "Understanding how much your family actually needs schedule flexibility changes which models are worth comparing."
+        },
+        {
+          "id": "CLARIFY_GOALS",
+          "title": "What You Want Education to Make Possible",
+          "description": "Getting clearer on the outcomes you're hoping for helps connect today's answers to a real direction."
+        }
+      ],
+      "r05_questions": [
+        "What is working well in the student's current situation?",
+        "What would you most want to improve?",
+        "Does the student work comfortably on their own, or do they benefit from frequent guidance?",
+        "Would schedule flexibility meaningfully change the student's opportunities?",
+        "Are you trying to supplement the current school—or explore something different?"
+      ],
+      "r06_title": "Your next pathway is clarity",
+      "r06_stages": [
+        "Clarify the Student's Needs",
+        "Identify the Family's Priorities",
+        "Understand the Level of Flexibility & Support Needed",
+        "Compare the Educational Models That Fit"
+      ],
+      "r07_headline": "You don't need to figure this out before asking for help.",
+      "r07_body": "A Pathways planning conversation can help your family turn broad questions into a clearer set of options and next steps.",
+      "cta_intent_label": "Help Me Clarify the Right Direction",
+      "r05_explanations": [
+        "A clear picture of what's working now helps target what actually needs to change.",
+        "Getting specific about the one thing to improve narrows down the right direction.",
+        "This shapes which kinds of learning environments are worth comparing.",
+        "Schedule flexibility can open up options that otherwise wouldn't be practical.",
+        "Supplementing versus replacing the current school points toward different directions."
+      ]
+    },
+    "GENERIC_PERSONALIZED": {
+      "r01_headline": "Your Discovery answers are pointing toward a direction worth exploring.",
+      "r01_summary": "Based on what you shared, a small set of educational directions stand out as worth a closer look. Nothing here is a final decision -- it is a starting point for the conversations and comparisons that come next.",
+      "r02_kicker": "What stands out",
+      "r02_headline": "A few things stood out in what you shared.",
+      "r02_body": "Your answers point toward specific priorities -- schedule, support, and the kind of learning environment that fits your student best. The directions below reflect those priorities; the next step is comparing how real programs deliver on them.",
+      "r05_questions": [
+        "What matters most to your family in a learning environment?",
+        "How much structure and support does your student need day to day?",
+        "What would make a new arrangement clearly better than the current one?"
+      ],
+      "r06_title": "WHAT YOUR PATHWAY COULD LOOK LIKE",
+      "r06_stages": [
+        "Clarify What Matters Most",
+        "Compare the Directions Worth Exploring",
+        "Check the Details That Matter",
+        "Build a Plan Around the Right Fit"
+      ],
+      "r07_headline": "You have a direction. Let's turn it into a plan.",
+      "r07_body": "Pathways can help your family compare actual programs, confirm the details that matter, and build a coordinated plan around your student's needs.",
+      "cta_intent_label": "Build My Student's Pathway",
+      "r05_explanations": [
+        "Getting specific about what matters most narrows down which directions are worth comparing.",
+        "Structure and support needs vary widely -- getting specific helps target the right program.",
+        "A clear standard for “better” helps make the eventual comparison meaningful."
+      ]
+    }
+  },
+  "candidate_cards": {
+    "B01__GENERIC": {
+      "title": "Build on the Current School Arrangement",
+      "description": "Keeping the current school arrangement while adding targeted opportunities may give your student more challenge or support without creating an unnecessary transition.",
+      "why": [
+        "Your family would prefer to improve what you already have"
+      ],
+      "whatToLookFor": [
+        "What can be added or adjusted without changing schools",
+        "Who would provide any additional support"
+      ]
+    },
+    "B01__CURRENT_PLUS_GROWTH": {
+      "title": "Build on the Current School Arrangement",
+      "description": "Keeping the current school arrangement while adding targeted opportunities may give your student more challenge without creating an unnecessary transition.",
+      "why": [
+        "Your family would prefer to improve what you already have",
+        "Academic advancement is important",
+        "Your student is reported to be ahead academically"
+      ],
+      "whatToLookFor": [
+        "Advanced learning in areas of strength",
+        "Enrichment beyond the standard curriculum",
+        "Additional academic challenge without unnecessary acceleration elsewhere"
+      ]
+    },
+    "B02__GENERIC": {
+      "title": "Traditional Public School",
+      "description": "An in-person public-school arrangement may be worth exploring alongside the priorities you shared.",
+      "why": [
+        "An in-person, structured environment may fit your student"
+      ],
+      "whatToLookFor": [
+        "Local enrollment options",
+        "Available schedules and support services"
+      ]
+    },
+    "B03__GENERIC": {
+      "title": "Public Virtual Schooling",
+      "description": "Public virtual schooling may provide flexibility while keeping instruction with a school or program.",
+      "why": [
+        "Flexibility and online learning are worth exploring"
+      ],
+      "whatToLookFor": [
+        "Which programs may serve your student",
+        "Required live sessions and included support"
+      ]
+    },
+    "B03__FLEXIBLE_WITH_STRUCTURE": {
+      "title": "Teacher-Supported Virtual Schooling",
+      "description": "A teacher-supported virtual program could provide greater flexibility while keeping instruction and academic management with the school or program.",
+      "why": [
+        "Your family is open to online learning",
+        "Flexibility matters",
+        "Your student benefits from human support"
+      ],
+      "whatToLookFor": [
+        "Whether live teaching is included or mostly self-directed",
+        "How progress is monitored",
+        "What support the program provides day to day"
+      ]
+    },
+    "B03__RECOVERY_PLUS_ADVANCEMENT": {
+      "title": "Public Virtual Schooling",
+      "description": "A teacher-supported virtual program may also provide the flexibility your family is looking for while allowing your student to continue progressing toward graduation.",
+      "why": [
+        "Flexibility matters for balancing recovery and advancement",
+        "Your student benefits from teacher support",
+        "Progress toward graduation needs to stay visible"
+      ],
+      "whatToLookFor": [
+        "Credit-transfer rules",
+        "Graduation requirements",
+        "Teacher support"
+      ]
+    },
+    "B03__FIT_THEN_FEASIBILITY": {
+      "title": "Public Virtual Schooling",
+      "description": "Public virtual schooling may provide the flexibility and self-paced structure your family described, while potentially aligning with your preference for tuition-free options.",
+      "why": [
+        "Flexibility and self-paced structure matter to your family",
+        "Public virtual schooling is typically tuition-free",
+        "Structure and accountability still matter"
+      ],
+      "whatToLookFor": [
+        "State eligibility and availability",
+        "Required live sessions",
+        "Teacher support"
+      ]
+    },
+    "B04__GENERIC": {
+      "title": "Charter or Independent-Study Arrangement",
+      "description": "A charter or independent-study arrangement may offer more control over when learning happens while keeping school oversight and records.",
+      "why": [
+        "Your family wants more control over the schedule"
+      ],
+      "whatToLookFor": [
+        "What this arrangement means in your jurisdiction",
+        "Who is responsible for instruction and records"
+      ]
+    },
+    "B04__HIGH_DEMAND_SCHEDULE": {
+      "title": "Charter or Independent-Study Arrangement",
+      "description": "A flexible school or independent-study structure may also provide greater control over when learning occurs while preserving school oversight and academic records.",
+      "why": [
+        "Schedule flexibility is essential",
+        "Athletics creates substantial time demands",
+        "A structured but flexible arrangement can preserve academic oversight"
+      ],
+      "whatToLookFor": [
+        "Required instructional meetings",
+        "Geographic eligibility",
+        "Attendance/documentation expectations"
+      ]
+    },
+    "B05__GENERIC": {
+      "title": "Private In-Person Schooling",
+      "description": "Private in-person schooling may be worth exploring alongside the priorities you shared.",
+      "why": [
+        "A private, in-person environment may fit your student"
+      ],
+      "whatToLookFor": [
+        "Admissions and tuition",
+        "The actual school environment and schedule"
+      ]
+    },
+    "B06__GENERIC": {
+      "title": "Private Online Schooling",
+      "description": "Private online schooling may provide flexibility with additional program-managed structure.",
+      "why": [
+        "Flexibility and online learning are worth exploring"
+      ],
+      "whatToLookFor": [
+        "Required live sessions and course offerings",
+        "Teacher access and support responsibilities"
+      ]
+    },
+    "B06__HIGH_DEMAND_SCHEDULE": {
+      "title": "Private Online Schooling",
+      "description": "An online school with a genuinely flexible academic schedule may provide room for training and travel while allowing your student to continue progressing academically.",
+      "why": [
+        "Schedule flexibility is essential",
+        "Athletics creates substantial time demands",
+        "Your student is comfortable working independently"
+      ],
+      "whatToLookFor": [
+        "Required live meeting times",
+        "Attendance rules",
+        "Teacher access"
+      ]
+    },
+    "B07__GENERIC": {
+      "title": "Hybrid Schooling",
+      "description": "A hybrid model may offer a useful balance between independent work, structure, and connection with a school or teacher.",
+      "why": [
+        "A mix of flexibility and structure may fit your family"
+      ],
+      "whatToLookFor": [
+        "Required in-person days and location",
+        "Remote-work expectations and support"
+      ]
+    },
+    "B07__FLEXIBLE_WITH_STRUCTURE": {
+      "title": "Hybrid Schooling",
+      "description": "A hybrid model may offer the balance your family described: meaningful schedule flexibility combined with regular teacher contact, accountability, and opportunities for direct support.",
+      "why": [
+        "Flexibility is important",
+        "Your student benefits from regular guidance",
+        "Live teacher support matters"
+      ],
+      "whatToLookFor": [
+        "Consistent teacher interaction",
+        "Clear expectations and progress monitoring",
+        "A schedule that provides flexibility without leaving the student on their own"
+      ]
+    },
+    "B07__RECOVERY_PLUS_ADVANCEMENT": {
+      "title": "Hybrid Schooling",
+      "description": "A hybrid structure could provide flexibility and direct teacher support while allowing academic recovery and advancement to be managed within one coordinated program.",
+      "why": [
+        "Your student benefits from regular guidance",
+        "Schedule flexibility matters",
+        "Live teacher interaction is important"
+      ],
+      "whatToLookFor": [
+        "How missing credits would be addressed",
+        "Which credits transfer",
+        "Whether college-level opportunities remain available"
+      ]
+    },
+    "B07__FIT_THEN_FEASIBILITY": {
+      "title": "Hybrid Schooling",
+      "description": "A hybrid model may offer a useful balance between independent work, structure, and regular connection with a school or teacher.",
+      "why": [
+        "A mix of independent work and structure matters to your family",
+        "Regular connection with a teacher or school is valued"
+      ],
+      "whatToLookFor": [
+        "Required in-person days",
+        "Location",
+        "Schedule compatibility"
+      ]
+    },
+    "B08__GENERIC": {
+      "title": "Supported Family-Led Homeschool",
+      "description": "A supported homeschool arrangement may fit a family ready to lead learning directly, with outside support available.",
+      "why": [
+        "Your family has meaningful capacity to lead learning directly"
+      ],
+      "whatToLookFor": [
+        "Applicable homeschool framework and requirements",
+        "Curriculum and community options"
+      ]
+    },
+    "B09__GENERIC": {
+      "title": "Homeschool with External Course Providers",
+      "description": "Homeschooling with outside course providers may combine family leadership with structured outside instruction.",
+      "why": [
+        "Your family wants to combine home leadership with outside instruction"
+      ],
+      "whatToLookFor": [
+        "Who coordinates instruction across providers",
+        "How learning is documented"
+      ]
+    }
+  },
+  "support_tiles": {
+    "S02": {
+      "title": "Academic Support Review",
+      "description": "A closer look at where extra academic support could help, and what kind of help would actually make a difference."
+    },
+    "S03": {
+      "title": "Reading Support",
+      "description": "Focused help for reading comprehension and fluency, worth discussing if reading has come up as an area to strengthen."
+    },
+    "S04": {
+      "title": "Mathematics Support",
+      "description": "Targeted help in math, worth exploring if math has been identified as an area needing extra attention."
+    },
+    "S05": {
+      "title": "Writing Support",
+      "description": "Structured help with writing skills, worth discussing if writing has come up as a priority area."
+    },
+    "S06": {
+      "title": "Organization & Learning Routines",
+      "description": "Support for building the routines and organizational habits that help independent or flexible learning actually work."
+    },
+    "S07": {
+      "title": "Live Teacher Support",
+      "description": "Regular, direct access to a live teacher -- worth confirming how much of it a given program actually provides."
+    },
+    "S08": {
+      "title": "College Planning",
+      "description": "Help mapping out college-related requirements and timelines alongside whatever school model your family chooses."
+    },
+    "S09": {
+      "title": "College-Athletic Academic Planning",
+      "description": "Coordinating academic requirements with the specific demands of pursuing athletics at the college level."
+    },
+    "S10": {
+      "title": "Graduation & Credit Planning",
+      "description": "A close look at graduation requirements and credits, to make sure nothing important gets missed along the way."
+    },
+    "S11": {
+      "title": "Parent Homeschool Planning",
+      "description": "Practical planning support for the parent leading a homeschool arrangement -- framework, curriculum, and community."
+    },
+    "S12": {
+      "title": "Academic Progress Monitoring",
+      "description": "A clear way to track how your student is actually progressing, whatever learning environment you choose."
+    }
+  },
+  "opportunity_tiles": {
+    "OP01": {
+      "title": "Advanced Coursework",
+      "description": "Coursework beyond the standard curriculum, worth exploring given your student's reported readiness for more challenge."
+    },
+    "OP02": {
+      "title": "Honors Exploration",
+      "description": "Honors-level coursework worth discussing as part of a plan for additional academic challenge."
+    },
+    "OP03": {
+      "title": "AP Exploration",
+      "description": "Advanced Placement coursework worth exploring as part of a plan for additional academic challenge."
+    },
+    "OP05": {
+      "title": "College-Level Course Exploration",
+      "description": "College-level or dual-enrollment coursework worth exploring as part of your student's academic plan."
+    },
+    "OP06": {
+      "title": "Research & Independent Projects",
+      "description": "Independent research or project-based work worth exploring for a student ready to go deeper on their own."
+    },
+    "OP07": {
+      "title": "Internship Exploration",
+      "description": "Internship or work-based learning experiences worth exploring alongside academic coursework."
+    },
+    "OP08": {
+      "title": "Career or CTE Exploration",
+      "description": "Career and technical education pathways worth exploring based on your student's interests."
+    },
+    "OP09": {
+      "title": "Industry-Credential Exploration",
+      "description": "Industry certifications or credentials worth exploring alongside your student's academic plan."
+    },
+    "OP10": {
+      "title": "Athletics Schedule Coordination",
+      "description": "Coordinating the academic schedule directly with training, competition and travel demands."
+    },
+    "OP11": {
+      "title": "Arts & Performance",
+      "description": "Arts or performance opportunities worth exploring alongside your student's academic plan."
+    },
+    "OP12": {
+      "title": "Entrepreneurship",
+      "description": "Entrepreneurship-related opportunities worth exploring alongside your student's academic plan."
+    },
+    "OP14": {
+      "title": "Learning-Community Exploration",
+      "description": "In-person or social learning-community options worth exploring alongside your student's academic plan."
+    },
+    "OP16": {
+      "title": "Flexible Weekly Routine",
+      "description": "Building a weekly routine that actually fits your family's real schedule, not just a generic school calendar."
+    },
+    "OP17": {
+      "title": "Hands-On & Project Exploration",
+      "description": "Hands-on or project-based learning worth exploring given how your student engages with material."
+    },
+    "OP18": {
+      "title": "Foundational Challenge & Enrichment",
+      "description": "Enrichment beyond the standard curriculum, sized to a younger student's foundational stage."
+    }
+  },
+  "overlay_tiles": {
+    "O01": {
+      "title": "Student-Athlete Planning",
+      "description": "Coordinating academics with a student-athlete's training, competition and travel schedule."
+    },
+    "O02": {
+      "title": "Academic Challenge & Acceleration",
+      "description": "Exploring meaningfully more academic challenge for a student who is ready for it."
+    },
+    "O03": {
+      "title": "College Advancement Exploration",
+      "description": "Exploring coursework and planning that supports a student's longer-term college goals."
+    },
+    "O04": {
+      "title": "Credit or Graduation Recovery Exploration",
+      "description": "Addressing missing credits or graduation requirements as part of a coordinated plan."
+    },
+    "O05": {
+      "title": "Flexible Lifestyle",
+      "description": "A learning arrangement built around a family's need for a genuinely flexible day-to-day schedule."
+    },
+    "O06": {
+      "title": "Foundational Academic Support",
+      "description": "Building foundational academic skills before layering on more advanced work."
+    },
+    "O07": {
+      "title": "Personalized Learning",
+      "description": "A more individualized approach to pacing and content, worth exploring alongside the models above."
+    },
+    "O08": {
+      "title": "Homeschool Support",
+      "description": "Practical support for a family exploring or already leading a homeschool arrangement."
+    },
+    "O09": {
+      "title": "Career and CTE Exploration",
+      "description": "Career and technical pathways worth exploring alongside your student's academic plan."
+    },
+    "O10": {
+      "title": "Arts and Performance",
+      "description": "Arts or performance opportunities worth exploring alongside your student's academic plan."
+    }
+  },
+  "review_questions": {
+    "REV_TRANSCRIPT": {
+      "question": "What does the student's current transcript show?",
+      "explanation": "A clear read of the actual transcript is the starting point before comparing any new arrangement.",
+      "priority": 1
+    },
+    "REV_GRADUATION": {
+      "question": "What are the exact graduation requirements still outstanding?",
+      "explanation": "Graduation requirements vary by school and state -- confirm exactly what still needs to be completed.",
+      "priority": 1
+    },
+    "REV_GRADUATION_UNKNOWN": {
+      "question": "What is the student's current graduation status?",
+      "explanation": "Before comparing options, it helps to confirm where the student actually stands on graduation requirements.",
+      "priority": 1
+    },
+    "REV_CREDIT_TRANSFER": {
+      "question": "Which completed credits will transfer?",
+      "explanation": "A receiving school should review prior coursework before a family assumes every completed course will apply in the same way.",
+      "priority": 1
+    },
+    "REV_RECLASSIFICATION": {
+      "question": "What would a grade-placement change actually resolve?",
+      "explanation": "Reclassification affects more than one school year -- it is worth understanding the full picture before deciding.",
+      "priority": 1
+    },
+    "REV_AGE_GRADE_CONTEXT": {
+      "question": "Is the current grade placement clearly settled?",
+      "explanation": "When grade placement isn't fully settled yet, it is worth clarifying before comparing specific programs.",
+      "priority": 1
+    },
+    "REV_LIVE_SUPPORT": {
+      "question": "How much teaching is actually live?",
+      "explanation": "Programs can use the word “online” very differently. Confirm how often students interact directly with teachers.",
+      "priority": 2
+    },
+    "REV_ADULT_SUPPORT": {
+      "question": "Who provides day-to-day adult support?",
+      "explanation": "Confirm who is actually available to guide learning day to day, and how much time that requires.",
+      "priority": 2
+    },
+    "REV_PROGRAM_MANAGEMENT": {
+      "question": "How much does the program manage, and how much falls to the family?",
+      "explanation": "Programs differ widely in how much scheduling, monitoring and coordination they handle versus leave to parents.",
+      "priority": 2
+    },
+    "REV_SCHEDULE_COMPATIBILITY": {
+      "question": "Does the real weekly schedule actually work for your family?",
+      "explanation": "“Flexible” can still mean required live blocks or attendance windows -- confirm the actual weekly schedule.",
+      "priority": 2
+    },
+    "REV_SOCIAL_PLAN": {
+      "question": "What does the plan look like for social connection?",
+      "explanation": "Confirm what in-person or social opportunities a program actually offers, if that matters to your student.",
+      "priority": 2
+    },
+    "REV_STATE_AVAILABILITY": {
+      "question": "Is the program actually available where you live?",
+      "explanation": "Availability for remote/virtual and home-based programs often depends on your state -- confirm eligibility directly.",
+      "priority": 3
+    },
+    "REV_COST_ALIGNMENT": {
+      "question": "What will this option actually cost?",
+      "explanation": "Educational alignment and affordability are different questions. Confirm tuition and additional fees before making a final comparison.",
+      "priority": 3
+    },
+    "REV_STATE_HOMESCHOOL": {
+      "question": "What does your state require for homeschooling?",
+      "explanation": "Homeschool requirements vary by state -- confirm what applies to your family before finalizing a plan.",
+      "priority": 3
+    },
+    "REV_ATTENDANCE_CONTEXT": {
+      "question": "What is actually driving any attendance concerns?",
+      "explanation": "Schedule, environment, health or family circumstances can all affect attendance -- it helps to understand which one applies.",
+      "priority": 4
+    },
+    "REV_COMMUNICATION_CONTEXT": {
+      "question": "What kind of communication or coordination does your family want?",
+      "explanation": "Clarifying what communication support you're looking for helps identify programs that actually deliver it.",
+      "priority": 4
+    },
+    "REV_ACADEMIC_CONTEXT": {
+      "question": "What does the fuller academic picture look like?",
+      "explanation": "A single data point rarely tells the whole story -- it helps to look at the broader academic context together.",
+      "priority": 4
+    },
+    "REV_ENVIRONMENT": {
+      "question": "What specifically about the current environment isn't working?",
+      "explanation": "Getting specific about what feels like a mismatch helps target the right kind of change.",
+      "priority": 4
+    },
+    "REV_PRIORITY_TRADEOFF": {
+      "question": "Which priority matters most if a real tradeoff comes up?",
+      "explanation": "Some priorities can pull in different directions -- it helps to know which one matters most to your family.",
+      "priority": 4
+    },
+    "REV_FOUNDATIONAL_SKILLS": {
+      "question": "Which foundational skills matter most right now?",
+      "explanation": "Identifying the specific foundational skills to prioritize helps target the right kind of support.",
+      "priority": 4
+    },
+    "REV_ADVANCEMENT_READINESS": {
+      "question": "What evidence supports moving faster in a specific area?",
+      "explanation": "Readiness for more challenge is usually specific to a subject or skill -- it helps to confirm where exactly.",
+      "priority": 4
+    },
+    "REV_COLLEGE_ATHLETICS": {
+      "question": "What does the college-athletics timeline actually require?",
+      "explanation": "College-athletics planning has its own academic and eligibility timeline worth understanding early.",
+      "priority": 4
+    },
+    "REV_NCAA": {
+      "question": "What do NCAA eligibility requirements actually require?",
+      "explanation": "NCAA eligibility rules are specific and worth reviewing directly rather than assuming.",
+      "priority": 4
+    }
+  },
+  "pathway_intro_generic": "This preliminary pathway is a starting framework built from your answers, not a finalized plan.",
+  "subordinate_statement": "This is a starting framework, not a finalized education plan.",
+  "cta_templates": {
+    "LIVE_VERIFIED": {
+      "label_source": "intent"
+    },
+    "REQUEST_ONLY": {
+      "label": "Request a Pathways Planning Call"
+    },
+    "UNCONFIGURED": {
+      "label": "See What Comes Next"
+    }
+  },
+  "conversion_value_concepts": [
+    {
+      "title": "Review",
+      "body": "Records, priorities and requirements"
+    },
+    {
+      "title": "Compare",
+      "body": "Actual programs and providers"
+    },
+    {
+      "title": "Build",
+      "body": "A personalized education pathway"
+    },
+    {
+      "title": "Implement",
+      "body": "The practical next steps"
+    }
+  ],
+  "inline_conversion_band": {
+    "headline": "Want help comparing the actual options?",
+    "body": "Pathways can help turn these directions into a complete plan."
+  },
+  "scope_statement": "This initial Discovery is based on the information you shared. It is not an academic assessment or school-placement decision.",
+  "feasibility_context_questions": {
+    "cost_preference:PREFER_TUITION_FREE": {
+      "question": "What practical cost differences matter most to your family?",
+      "explanation": "Educational fit and affordability are different questions -- this is worth discussing once the right direction is clear.",
+      "priority": 3
+    }
+  },
+  "priority_chip_labels": {
+    "FLEXIBILITY": "Flexibility",
+    "PERSONAL_SUPPORT": "Personal Support",
+    "STRUCTURE_ACCOUNTABILITY": "Structure & Accountability",
+    "ACADEMIC_ADVANCEMENT": "Academic Advancement",
+    "SELF_PACED": "Self-Paced Learning",
+    "LIVE_TEACHER": "Live Teacher Support",
+    "SOCIAL": "Social Connection",
+    "COLLEGE_PREPARATION": "College Preparation",
+    "SMALL_ENVIRONMENT": "Smaller Environment",
+    "ACADEMIC_QUALITY": "Academic Quality",
+    "ATHLETIC_FLEXIBILITY": "Athletic Flexibility",
+    "LOCATION_FLEXIBILITY": "Location Flexibility"
+  },
+  "feasibility_chip_labels": {
+    "PREFER_TUITION_FREE": "Tuition-Free Preferred",
+    "OPEN_AFFORDABLE_PAID": "Open to Affordable Paid Options",
+    "OPEN_PRIVATE_TUITION": "Open to Private Tuition",
+    "DEPENDS_ON_VALUE": "Cost Depends on Value"
+  },
+  "forbidden_claims": [
+    "best fit",
+    "perfect fit",
+    "% match",
+    "percent match",
+    "guaranteed eligibility",
+    "guaranteed scholarship",
+    "guaranteed graduation",
+    "guaranteed credit",
+    "spots are filling",
+    "act now",
+    "don't miss out",
+    "top match",
+    "best choice",
+    "ranked #1",
+    "college admission guarantee",
+    "NCAA eligibility guarantee",
+    "recruiting probability",
+    "scholarship likelihood",
+    "diagnosis",
+    "intelligence assessment"
+  ]
+}

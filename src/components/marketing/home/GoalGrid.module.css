@@ -1,0 +1,104 @@
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cardItem {
+  padding: 0;
+  border: 2px solid transparent;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cardItem:has(.link:hover),
+.cardItem:has(.link:focus-visible) {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+  border-color: var(--color-accent);
+  background: var(--color-accent-tint);
+}
+
+.cardItem:has(.link:hover) .iconWrap,
+.cardItem:has(.link:focus-visible) .iconWrap {
+  transform: scale(1.05);
+}
+
+.cardItem:has(.link:hover) .arrow,
+.cardItem:has(.link:focus-visible) .arrow {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardItem,
+  .iconWrap,
+  .arrow {
+    transition: none !important;
+  }
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  border-radius: inherit;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 2px;
+}
+
+.iconWrap {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-tint);
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.label {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--color-navy-900);
+}
+
+.description {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  flex-grow: 1;
+}
+
+.arrowRow {
+  margin-top: var(--space-2);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--color-accent-strong);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
