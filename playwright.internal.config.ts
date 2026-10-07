@@ -36,6 +36,13 @@ export default defineConfig({
     env: {
       ...process.env,
       SCHEDULER_MODE: "INTERNAL",
+      // Phase 6C: lets this suite's staff-workflow spec establish real
+      // staff sessions via the test-only /api/test-only/staff-session
+      // route (src/env.ts already refuses to start with this flag
+      // true under NODE_ENV=production, so it stays unreachable in any
+      // deployed environment -- this dev-mode-only webServer is the
+      // one place it is ever legitimately set).
+      ALLOW_TEST_FIXTURES: "true",
     } as Record<string, string>,
   },
   projects: [

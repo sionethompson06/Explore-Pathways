@@ -298,6 +298,17 @@ export const advisorAssignment = pgTable(
     ),
     index("advisor_assignment_pathways_case_idx").on(table.pathwaysCaseId),
     index("advisor_assignment_advisor_idx").on(table.advisorUserId),
+    // Phase 6C (section 13): at most one ACTIVE advisor assignment per
+    // PathwaysCase, enforced at the database level -- a concurrent
+    // assignment/reassignment race can never create two active owners.
+    // A historical (unassignedAt set) row never counts against this,
+    // so reassignment history is never blocked. The application-level
+    // defense (src/server/advisor-assignment.ts locks the PathwaysCase
+    // row for the duration of the transaction) is the primary
+    // mechanism; this index is the unconditional backstop.
+    uniqueIndex("advisor_assignment_active_per_case_unique_idx")
+      .on(table.pathwaysCaseId)
+      .where(sql`${table.unassignedAt} IS NULL AND ${table.pathwaysCaseId} IS NOT NULL`),
   ],
 );
 

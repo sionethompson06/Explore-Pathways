@@ -157,7 +157,7 @@ export async function assertGuardianCanAccessStudent(
 // depends on it.
 // ---------------------------------------------------------------------------
 
-type StaffRoleValue = (typeof staffRoleEnum.enumValues)[number];
+export type StaffRoleValue = (typeof staffRoleEnum.enumValues)[number];
 
 /**
  * The only source of truth for "is this user staff, and with which
@@ -211,7 +211,7 @@ export async function requireStaffRole(
 // must be explicitly assigned to it, the same as an advisor.
 // ---------------------------------------------------------------------------
 
-const CASE_ACCESS_ROLES = ["ADVISOR", "ADMIN"] as const satisfies readonly StaffRoleValue[];
+export const CASE_ACCESS_ROLES = ["ADVISOR", "ADMIN"] as const satisfies readonly StaffRoleValue[];
 
 /**
  * Every consultation case actively assigned to this advisor, but only

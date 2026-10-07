@@ -1,9 +1,17 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import type { Database } from "@/db/client";
-import { pathwaysCase, auditEvent, type pathwaysCaseStatusEnum, type actorTypeEnum } from "@/db/schema";
+import {
+  pathwaysCase,
+  auditEvent,
+  profileRevision,
+  studentPathwayRecord,
+  type pathwaysCaseStatusEnum,
+  type actorTypeEnum,
+} from "@/db/schema";
 import { generateId } from "./ids";
 import { isUniqueConstraintConflict } from "./db-conflict";
+import { sanitizeText } from "@/lib/discovery/validation";
 
 /**
  * Phase 6B -- the PathwaysCase domain service (docs/pathways
@@ -75,6 +83,24 @@ async function recordCaseAuditEvent(
   });
 }
 
+/**
+ * Phase 6C (section 16): maps the SAME existing, optional,
+ * already-approved `student_display_name` parent-supplied answer
+ * (DISC_001 -- see src/lib/report/profile-context.ts's identical
+ * extraction for the report's own `studentLabel`) into
+ * StudentPathwayRecord.displayName, through this one safe server-side
+ * path only. No new question is added anywhere to populate this --
+ * if the parent never supplied one, displayName simply stays null and
+ * every UI surface falls back to a neutral label ("Student").
+ */
+function extractStudentDisplayName(rawAnswers: unknown): string | undefined {
+  if (typeof rawAnswers !== "object" || rawAnswers === null) return undefined;
+  const value = (rawAnswers as Record<string, unknown>)["student_display_name"];
+  if (typeof value !== "string") return undefined;
+  const sanitized = sanitizeText(value).trim();
+  return sanitized.length > 0 ? sanitized : undefined;
+}
+
 export interface EnsureCaseInput {
   studentPathwayRecordId: string;
   consultationRequestId: string;
@@ -134,6 +160,29 @@ export async function ensureCaseForConsultationRequest(
     actorType: "GUEST",
     metadata: { status: "CONTACT_RECEIVED" },
   });
+
+  // Section 16: only on a genuinely fresh case, only when the record
+  // doesn't already have a displayName (never overwrite one a prior
+  // revision already supplied), and only when this revision actually
+  // carries the optional answer.
+  const [revisionRow] = await db
+    .select({ rawAnswers: profileRevision.rawAnswers })
+    .from(profileRevision)
+    .where(eq(profileRevision.id, input.profileRevisionId))
+    .limit(1);
+  const displayName = revisionRow ? extractStudentDisplayName(revisionRow.rawAnswers) : undefined;
+  if (displayName) {
+    await db
+      .update(studentPathwayRecord)
+      .set({ displayName, updatedAt: new Date() })
+      .where(
+        and(
+          eq(studentPathwayRecord.id, input.studentPathwayRecordId),
+          isNull(studentPathwayRecord.displayName),
+        ),
+      );
+  }
+
   return { pathwaysCaseId: candidateId, created: true };
 }
 
