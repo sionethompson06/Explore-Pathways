@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0-candidate",
+  "policy": "Canonical IDs below are used for new records. Aliases are import-only; ambiguous legacy IDs require explicit mapping rather than guesswork.",
+  "aliases": {
+    "SUP_ADVISOR": "S01",
+    "SUP_READING": "S03",
+    "SUP_WRITING": "S05",
+    "SUP_MATH": "S04",
+    "SUP_LIVE_INSTRUCTION": "S07",
+    "OPP_DUAL_ENROLLMENT": "OP04",
+    "OPP_ADVANCED_COURSEWORK": "OP01",
+    "OPP_LEARNING_COMMUNITY": "OP14",
+    "OPP_FLEXIBLE_LEARNING": "OP16",
+    "OPP_PROJECT_BASED": "OP17",
+    "OPP_FOUNDATIONAL_ACCELERATION": "OP18",
+    "REV_INDEPENDENT_LEARNING_SUPPORT": "REV_LIVE_SUPPORT",
+    "REV_STATE_HOMESCHOOL_REQUIREMENTS": "REV_STATE_HOMESCHOOL"
+  },
+  "retired_ambiguous_ids": [
+    "P01-P13 combined base-model/overlay list",
+    "S09 used inconsistently for NCAA-only versus college-athletics services",
+    "generic OPP or SUP values not explicitly mapped here"
+  ]
+}

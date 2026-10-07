@@ -1,0 +1,179 @@
+{
+  "version": "1.0.0-candidate",
+  "baseline": 50,
+  "primary_multiplier": 1.75,
+  "top_priority_multiplier": 1.5,
+  "secondary_multiplier": 1.15,
+  "default_multiplier": 1.0,
+  "multiplier_policy": "Use only the largest applicable multiplier, never multiply multipliers. Only declared group mappings apply.",
+  "group_aggregation": "Per candidate and group, take the largest positive score effect and most negative score effect, add, apply the single group multiplier, then clamp to [-6,6]. Sum group contributions onto 50; clamp to [0,100]. Grouping prevents repeated flexibility questions accumulating as independent evidence.",
+  "display_gate": "At least two distinct positive scored groups, with at least one linked to a known primary reason or top family priority. If no primary/top priority is known, require two direct stated preferences and label scope limited. Baseline score alone never qualifies.",
+  "public_labels": [
+    "WORTH_EXPLORING",
+    "WORTH_EXPLORING_WITH_CONSIDERATIONS",
+    "MORE_INFORMATION_HELPFUL"
+  ],
+  "sorting": "Descending internal score, then ascending stable base-model ID. Diversity reorders only qualifying candidates; never manufacture a candidate.",
+  "diversity": "Prefer first qualifying alternative from a different model family; if none qualifies show at most one additional same-family candidate only when its substantive distinction can be explained. Maximum two default cards.",
+  "groups": [
+    "schedule",
+    "delivery",
+    "family_role",
+    "support_structure",
+    "social",
+    "academic",
+    "cost",
+    "continuity",
+    "future",
+    "context"
+  ],
+  "primary_reason_groups": {
+    "SCHEDULE_FLEXIBILITY": [
+      "schedule"
+    ],
+    "ATHLETICS": [
+      "schedule"
+    ],
+    "HOMESCHOOL": [
+      "delivery",
+      "family_role"
+    ],
+    "ONLINE": [
+      "delivery"
+    ],
+    "ACADEMIC_ACCELERATION": [
+      "academic"
+    ],
+    "ADVANCED_COURSES": [
+      "academic"
+    ],
+    "COLLEGE_ADVANCEMENT": [
+      "future"
+    ],
+    "CREDIT_RECOVERY": [
+      "academic"
+    ],
+    "GRADE_PLANNING": [
+      "future"
+    ],
+    "TRAVEL": [
+      "schedule"
+    ],
+    "ARTS": [
+      "schedule"
+    ],
+    "ACADEMIC_SUPPORT": [
+      "academic",
+      "support_structure"
+    ],
+    "PERSONALIZED_LEARNING": [
+      "academic"
+    ],
+    "FAMILY_INVOLVEMENT": [
+      "family_role"
+    ],
+    "CURRENT_SCHOOL_CONCERN": [
+      "continuity"
+    ],
+    "DIFFERENT_ENVIRONMENT": [
+      "context"
+    ],
+    "SMALLER_ENVIRONMENT": [
+      "support_structure"
+    ],
+    "ENVIRONMENT_CONCERN": [
+      "context"
+    ]
+  },
+  "family_priority_groups": {
+    "FLEXIBILITY": [
+      "schedule"
+    ],
+    "ATHLETIC_FLEXIBILITY": [
+      "schedule"
+    ],
+    "LOCATION_FLEXIBILITY": [
+      "schedule"
+    ],
+    "PERSONAL_SUPPORT": [
+      "support_structure"
+    ],
+    "LIVE_TEACHER": [
+      "support_structure"
+    ],
+    "SELF_PACED": [
+      "delivery"
+    ],
+    "SOCIAL": [
+      "social"
+    ],
+    "AFFORDABILITY": [
+      "cost"
+    ],
+    "ADVANCED_COURSES": [
+      "academic"
+    ],
+    "ACADEMIC_ADVANCEMENT": [
+      "academic"
+    ],
+    "COLLEGE_PREPARATION": [
+      "future"
+    ],
+    "SMALL_ENVIRONMENT": [
+      "support_structure"
+    ]
+  },
+  "unmapped_priority_behavior": "Reflect explicitly in report and advisor brief; no numeric proxy. ACADEMIC_QUALITY, ACCREDITATION and DIPLOMA do not prove generic-model superiority.",
+  "material_review_mapping": {
+    "REV_ADULT_SUPPORT": [
+      "B03",
+      "B04",
+      "B06",
+      "B08",
+      "B09"
+    ],
+    "REV_LIVE_SUPPORT": [
+      "B03",
+      "B04",
+      "B06",
+      "B08",
+      "B09"
+    ],
+    "REV_SOCIAL_PLAN": [
+      "B03",
+      "B04",
+      "B06",
+      "B08",
+      "B09"
+    ],
+    "REV_PRIORITY_TRADEOFF": [
+      "B03",
+      "B04",
+      "B06",
+      "B07",
+      "B08",
+      "B09"
+    ],
+    "REV_COST_ALIGNMENT": [
+      "B05",
+      "B06"
+    ],
+    "REV_SCHEDULE_COMPATIBILITY": [
+      "B03",
+      "B04",
+      "B06",
+      "B07",
+      "B08",
+      "B09"
+    ]
+  },
+  "postprocess_rules": [
+    "Any displayed B08/B09 adds REV_STATE_HOMESCHOOL. Any displayed remote model adds REV_STATE_AVAILABILITY.",
+    "Displayed B05/B06 plus PREFER_TUITION_FREE adds REV_COST_ALIGNMENT; never infer an exact budget.",
+    "B10 cannot be a displayed candidate under this version.",
+    "Do not infer blanket incompatibility when a specific school capability has not been verified.",
+    "Other/unknown grade keeps universal questions and neutral review; do not force an age-derived grade band.",
+    "For K-4 suppress college/credit/athletic eligibility report modules and use foundational enrichment wording.",
+    "For middle grades, college-related opportunity stage is LONGER_TERM_EXPLORATION; for HS it remains EXPLORE_NOT_ELIGIBLE."
+  ]
+}

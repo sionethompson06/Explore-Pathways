@@ -1,0 +1,34 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-6);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: var(--color-warm-white);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.item:hover {
+  color: var(--color-green-100);
+}
+
+@media (max-width: 640px) {
+  .list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .item {
+    font-size: var(--font-size-sm);
+  }
+}

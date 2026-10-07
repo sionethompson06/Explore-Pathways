@@ -1,0 +1,601 @@
+{
+  "version": "1.0.0-candidate",
+  "notice": "Fictional expected behavior/invariants, not proof that any school model is educationally valid for a real student. No actual names, schools, diagnostic scores or contact details.",
+  "cases": [
+    {
+      "id": "FX01_ELEMENTARY_HOME_COMMUNITY",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "2",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "HOMESCHOOL"
+        ],
+        "primary_discovery_reason": "HOMESCHOOL",
+        "reported_academic_position": "ON_LEVEL",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "VERY_IMPORTANT",
+        "family_priorities": [
+          "FLEXIBILITY",
+          "SOCIAL"
+        ],
+        "desired_parent_involvement": "VERY_INVOLVED",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "HOMESCHOOL"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "daytime_support_availability": "MOST_LEARNING_DAYS",
+        "in_person_peer_preference": "VERY_IMPORTANT",
+        "subject_advancement_interests": [
+          "MATH"
+        ]
+      },
+      "expect": {
+        "grade_band": "ELEMENTARY",
+        "qualifies_any": [
+          "B08",
+          "B09"
+        ],
+        "signals_include": [
+          "O08",
+          "OP14",
+          "OP18"
+        ],
+        "public_excludes": [
+          "NCAA",
+          "dual-enrollment eligibility",
+          "verified math advancement"
+        ],
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX02_ELEMENTARY_SUPPORT_GAP",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "1",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "HOMESCHOOL"
+        ],
+        "primary_discovery_reason": "HOMESCHOOL",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "CLOSE_ADULT_SUPPORT",
+        "flexibility_importance": "ESSENTIAL",
+        "family_priorities": [
+          "FLEXIBILITY",
+          "PERSONAL_SUPPORT"
+        ],
+        "desired_parent_involvement": "PROGRAM_MANAGES",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "HOMESCHOOL",
+          "ONLINE_SELF_PACED"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "daytime_support_availability": "NOT_ARRANGED"
+      },
+      "expect": {
+        "grade_band": "ELEMENTARY",
+        "signals_include": [
+          "REV_ADULT_SUPPORT",
+          "REV_PRIORITY_TRADEOFF"
+        ],
+        "no_unqualified_home_recommendation": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX03_MIDDLE_ATHLETE",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "7",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "ATHLETICS"
+        ],
+        "primary_discovery_reason": "ATHLETICS",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "REGULAR_GUIDANCE",
+        "flexibility_importance": "VERY_IMPORTANT",
+        "family_priorities": [
+          "ATHLETIC_FLEXIBILITY",
+          "LIVE_TEACHER"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "ONLINE_TEACHER_SUPPORTED",
+          "HYBRID"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "weekly_athletic_commitment": "HOURS_16_20",
+        "college_athletics_interest": "TOO_EARLY"
+      },
+      "expect": {
+        "grade_band": "MIDDLE",
+        "signals_include": [
+          "O01",
+          "S07"
+        ],
+        "signals_exclude": [
+          "REV_NCAA",
+          "O04"
+        ],
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX04_HS_ATHLETE",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "ATHLETICS",
+          "ACADEMIC_ACCELERATION"
+        ],
+        "primary_discovery_reason": "ATHLETICS",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "OCCASIONAL_CHECK_INS",
+        "flexibility_importance": "ESSENTIAL",
+        "family_priorities": [
+          "ATHLETIC_FLEXIBILITY",
+          "COLLEGE_PREPARATION"
+        ],
+        "desired_parent_involvement": "PROGRAM_MANAGES",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "OPEN_TO_CHANGE",
+        "desired_delivery": [
+          "ONLINE_TEACHER_SUPPORTED"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "weekly_athletic_commitment": "HOURS_16_20",
+        "athletic_travel_frequency": "SEVERAL_MONTH",
+        "preferred_learning_environment": [
+          "BLEND"
+        ],
+        "advancement_interests": [
+          "ADVANCED_MATH"
+        ],
+        "college_athletics_interest": "DEFINITELY",
+        "ncaa_interest": "YES",
+        "reported_graduation_status": "YES"
+      },
+      "expect": {
+        "grade_band": "HIGH_SCHOOL",
+        "qualifies_any": [
+          "B03",
+          "B06"
+        ],
+        "signals_include": [
+          "REV_NCAA",
+          "REV_CREDIT_TRANSFER",
+          "O01",
+          "O02"
+        ],
+        "signals_exclude": [
+          "OP04"
+        ],
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX05_HS_UNKNOWN_CREDITS",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "11",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "EXPLORING"
+        ],
+        "primary_discovery_reason": "EXPLORING",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "OPEN_TO_CHANGE",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "reported_graduation_status": "UNKNOWN",
+        "credit_recovery_need": "UNKNOWN"
+      },
+      "expect": {
+        "signals_include": [
+          "REV_GRADUATION_UNKNOWN",
+          "REV_CREDIT_TRANSFER"
+        ],
+        "signals_exclude": [
+          "O04"
+        ],
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX06_HS_REPORTED_MISSING",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "10",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "CREDIT_RECOVERY"
+        ],
+        "primary_discovery_reason": "CREDIT_RECOVERY",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "reported_graduation_status": "MOSTLY",
+        "credit_recovery_need": "YES"
+      },
+      "expect": {
+        "signals_include": [
+          "O04",
+          "REV_TRANSCRIPT"
+        ],
+        "no_specific_course_prescription": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX07_STAY_AND_SUPPORT",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "ACADEMIC_SUPPORT"
+        ],
+        "primary_discovery_reason": "ACADEMIC_SUPPORT",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "PERSONAL_SUPPORT"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "STAY_CURRENT",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "reported_support_needs": [
+          "WRITING"
+        ]
+      },
+      "expect": {
+        "qualifies_any": [
+          "B01"
+        ],
+        "signals_include": [
+          "S05"
+        ],
+        "no_forced_switch": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX08_UNKNOWN_PROFILE",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "EXPLORING"
+        ],
+        "primary_discovery_reason": "EXPLORING",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN"
+      },
+      "expect": {
+        "candidate_count": 0,
+        "content_status": "LIMITED_INFORMATION",
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX09_PREFERENCE_NOT_CONSTRAINT",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "EXPLORING"
+        ],
+        "primary_discovery_reason": "EXPLORING",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "preferred_academic_time": "MORNING",
+        "unavailable_academic_times": [
+          "UNKNOWN"
+        ]
+      },
+      "expect": {
+        "rules_exclude": [
+          "FLEX_002"
+        ],
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX10_AHEAD_NOT_MATH_OR_COLLEGE",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "EXPLORING"
+        ],
+        "primary_discovery_reason": "EXPLORING",
+        "reported_academic_position": "AHEAD",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "college_intent": "DEFINITELY"
+      },
+      "expect": {
+        "signals_include": [
+          "O02",
+          "REV_ADVANCEMENT_READINESS"
+        ],
+        "signals_exclude": [
+          "OP04",
+          "OP05"
+        ],
+        "rules_exclude": [
+          "FOUND_002"
+        ],
+        "no_verified_readiness": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX11_UNDETERMINED_GRADE",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "OTHER",
+        "residence": {
+          "state": "OUTSIDE_US"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "EXPLORING"
+        ],
+        "primary_discovery_reason": "EXPLORING",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "student_age": 7
+      },
+      "expect": {
+        "grade_band": "UNDETERMINED",
+        "no_age_to_grade_inference": true,
+        "no_local_availability_claim": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX12_TUITION_PREFERENCE",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "ONLINE"
+        ],
+        "primary_discovery_reason": "ONLINE",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "AFFORDABILITY",
+          "PERSONAL_SUPPORT"
+        ],
+        "desired_parent_involvement": "PROGRAM_MANAGES",
+        "cost_preference": "PREFER_TUITION_FREE",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "ONLINE_TEACHER_SUPPORTED"
+        ],
+        "desired_start_timeline": "UNKNOWN"
+      },
+      "expect": {
+        "qualifies_any": [
+          "B03"
+        ],
+        "no_free_pathways_service_claim": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX13_NOT_ENROLLED_CONFLICT",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "NOT_ENROLLED",
+        "discovery_reasons": [
+          "ACADEMIC_SUPPORT"
+        ],
+        "primary_discovery_reason": "ACADEMIC_SUPPORT",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "STAY_CURRENT",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN"
+      },
+      "expect": {
+        "candidate_excludes": [
+          "B01"
+        ],
+        "no_invented_current_school": true,
+        "no_B10": true
+      }
+    },
+    {
+      "id": "FX14_RECLASSIFICATION_REVIEW_ONLY",
+      "synthetic": true,
+      "profile": {
+        "student_display_name": "Fictional Student",
+        "current_grade": "9",
+        "residence": {
+          "state": "NV"
+        },
+        "current_education_model": "TRADITIONAL_PUBLIC",
+        "discovery_reasons": [
+          "GRADE_PLANNING"
+        ],
+        "primary_discovery_reason": "GRADE_PLANNING",
+        "reported_academic_position": "UNKNOWN",
+        "learning_support_pattern": "UNKNOWN",
+        "flexibility_importance": "UNKNOWN",
+        "family_priorities": [
+          "UNKNOWN"
+        ],
+        "desired_parent_involvement": "UNKNOWN",
+        "cost_preference": "UNKNOWN",
+        "school_change_preference": "UNKNOWN",
+        "desired_delivery": [
+          "UNKNOWN"
+        ],
+        "desired_start_timeline": "UNKNOWN",
+        "reclassification_interest": "YES"
+      },
+      "expect": {
+        "signals_include": [
+          "REV_RECLASSIFICATION"
+        ],
+        "no_reclassification_recommendation": true,
+        "no_B10": true
+      }
+    }
+  ],
+  "metamorphic_tests": [
+    "Changing display name leaves underlying engine results unchanged.",
+    "Changing email/contact or marketing permission leaves educational results unchanged.",
+    "Changing timeline or advertising source leaves educational results unchanged.",
+    "Permuting multi-select values leaves results unchanged.",
+    "Repeated schedule facts never create multiple independent evidence groups.",
+    "Changing a completed HS profile to K-4 invalidates HS branch answers for active output.",
+    "A low-information/no-candidate result never enables B10.",
+    "AI output never changes deterministic candidates.",
+    "Guest A/Parent A/Advisor A cannot read another principal's report even with exact IDs."
+  ]
+}

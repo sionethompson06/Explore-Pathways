@@ -1,0 +1,198 @@
+.field {
+  border: none;
+  margin: 0 0 var(--space-6);
+  padding: 0;
+}
+
+.legend {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--color-navy-900);
+  margin-bottom: var(--space-3);
+  padding: 0;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--space-3);
+}
+
+.nativeControl {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-border);
+  background: var(--color-white);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  font-weight: 600;
+  color: var(--color-navy-800);
+}
+
+.option:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.option[data-checked="true"] {
+  border-color: var(--color-accent-strong);
+  background: var(--color-accent-tint);
+  color: var(--color-accent-strong);
+}
+
+/*
+ * A real, aria-hidden DOM node -- never CSS generated content
+ * (::before/::after) on the label itself. Generated content text can
+ * leak into the accessible-name computation in some browsers, which
+ * would make a control's name change the moment it becomes checked
+ * (e.g. "Athletics" -> "✓ Athletics"), breaking any lookup by its
+ * stable name and, more importantly, presenting an unstable name to
+ * assistive tech. The native input's own `checked` state already
+ * conveys selection to AT; this glyph is decorative only.
+ */
+.checkMark {
+  display: none;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.option[data-checked="true"] .checkMark {
+  display: inline-block;
+}
+
+.option[data-checked="true"] .checkMark::before {
+  content: "✓";
+}
+
+.option[data-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nativeControl:focus-visible + .optionLabel,
+.option:has(.nativeControl:focus-visible) {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/** Phase 3E: a per-option clarifying line (option_helpers), nested inside .optionLabel -- deliberately its own class rather than reusing .hint's <p>-level spacing, since this sits inline inside a label. */
+.optionHelper {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.error {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #b3261e;
+}
+
+/** Phase 3F: the inline "Other" free-text box -- spans the full option grid width (not one auto-fill column) since it needs room to type, not just display a short label. */
+.otherTextRow {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.otherTextLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-navy-800);
+}
+
+.textInput,
+.numberInput,
+.selectInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-border);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-navy-900);
+  background: var(--color-white);
+}
+
+.textInput:focus-visible,
+.numberInput:focus-visible,
+.selectInput:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 1px;
+  border-color: var(--color-accent-strong);
+}
+
+.integerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.numberInput {
+  max-width: 8rem;
+}
+
+.unknownToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  color: var(--color-navy-800);
+  cursor: pointer;
+}
+
+.locationRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.locationRow .selectInput {
+  flex: 2 1 14rem;
+}
+
+.locationRow .textInput {
+  flex: 1 1 9rem;
+}
+
+@media (max-width: 480px) {
+  .optionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
+}

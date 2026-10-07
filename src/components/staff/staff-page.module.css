@@ -1,0 +1,291 @@
+/*
+ * Phase 6C shared staff (admin/advisor) page styles. Deliberately
+ * plain and utilitarian -- an operations tool, not a CRM dashboard
+ * (docs/pathways instruction sections 19-20): no gradients, no
+ * animation, no charts.
+ */
+
+.page {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-9);
+}
+
+.heading {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--space-2);
+}
+
+.subheading {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-5);
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+}
+
+/* Filter form */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.filterField label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.filterField select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  color: var(--color-text);
+  min-width: 10rem;
+}
+
+.applyButton {
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-navy-700);
+  border-radius: var(--radius-sm);
+  background: var(--color-navy-700);
+  color: var(--color-white);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.applyButton:hover {
+  background: var(--color-navy-800);
+}
+
+.clearLink {
+  font-size: var(--font-size-sm);
+  align-self: center;
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.table th {
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.table tbody tr:hover {
+  background: var(--color-bg-alt);
+}
+
+.unassigned {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.emptyState {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+/* Status badge -- never color-only: the text label is always present. */
+.badge {
+  display: inline-block;
+  padding: 0.2rem var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.badge[data-status="BOOKED"],
+.badge[data-status="COMPLETED"] {
+  background: var(--color-accent-tint);
+  border-color: var(--color-accent-strong);
+  color: var(--color-accent-strong);
+}
+
+.badge[data-status="NEEDS_INFORMATION"],
+.badge[data-status="FOLLOW_UP"] {
+  background: #fdf3e2;
+  border-color: #b8780a;
+  color: #8a5c08;
+}
+
+.badge[data-status="NOT_CURRENT_SERVICE_FIT"],
+.badge[data-status="CLOSED"] {
+  background: var(--color-neutral-100);
+  border-color: var(--color-neutral-500);
+  color: var(--color-neutral-700);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Detail view */
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.detailField dt {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.detailField dd {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.section {
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-3);
+}
+
+.provenanceNote {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-top: var(--space-2);
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chip {
+  padding: 0.2rem var(--space-3);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+}
+
+/* Assignment form */
+.assignForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.assignForm select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  min-width: 12rem;
+}
+
+.assignButton {
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-accent-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-strong);
+  color: var(--color-white);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.assignButton:hover {
+  background: var(--color-accent);
+}
+
+.unassignButton {
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-neutral-500);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-neutral-700);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.unassignButton:hover {
+  background: var(--color-neutral-100);
+}
+
+.formStatus {
+  width: 100%;
+  font-size: var(--font-size-sm);
+}
+
+.formStatus[data-tone="error"] {
+  color: #b42318;
+}
+
+.formStatus[data-tone="success"] {
+  color: var(--color-accent-strong);
+}
+
+@media (max-width: 640px) {
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    display: none;
+  }
+}

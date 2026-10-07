@@ -1,0 +1,49 @@
+.hero {
+  text-align: center;
+  padding-block: var(--space-4) var(--space-2);
+}
+
+.photo {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 640px) {
+  .photo {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.tagline {
+  max-width: 36ch;
+  margin-inline: auto;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-navy-800);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  max-width: 32ch;
+  margin-inline: auto;
+}
+
+.subtitle {
+  max-width: 50ch;
+  margin-inline: auto;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+}
