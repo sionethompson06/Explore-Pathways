@@ -33,6 +33,14 @@ export const pathwaysCaseStatusEnum = pgEnum("pathways_case_status", [
   "FOLLOW_UP",
   "NOT_CURRENT_SERVICE_FIT",
   "CLOSED",
+  // Phase 6D (section 12): a distinct terminal-ish state for "the
+  // family explicitly elected not to continue," never overloaded onto
+  // NOT_CURRENT_SERVICE_FIT (that means Pathways judged a service-fit
+  // mismatch -- a different fact than a family's own commercial
+  // choice) or onto CLOSED (which stays the generic terminal state
+  // reachable from any of these). A commercial decision must never
+  // change an educational-suitability signal.
+  "FAMILY_NOT_PROCEEDING",
 ]);
 
 export const pathwaysCase = pgTable(

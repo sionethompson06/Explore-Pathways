@@ -249,10 +249,22 @@ export interface ActiveStaffMember {
   userId: string;
   name: string;
   email: string;
-  role: "ADVISOR" | "ADMIN";
+  role: "ADVISOR";
 }
 
-/** For the admin assignment control's advisor picker -- every currently-active, authorized staff member eligible to be assigned. Role-gated the same way as the queue above (ADMIN only). Includes `email` since Better Auth's magic-link sign-in leaves `name` blank until a staff member sets one -- the picker must stay able to distinguish two otherwise-nameless advisors. */
+/**
+ * For the admin assignment control's advisor picker -- every
+ * currently-active ADVISOR eligible to be assigned. Role-gated the
+ * same way as the queue above (ADMIN only may call this). Filtered to
+ * `role = "ADVISOR"` specifically (Phase 6D section 2): an ADMIN-only
+ * staff member is never a valid assignment target
+ * (src/server/advisor-assignment.ts's assignAdvisorToCase enforces the
+ * same restriction server-side), so the picker never offers an option
+ * that would only be rejected on submit. Includes `email` since Better
+ * Auth's magic-link sign-in leaves `name` blank until a staff member
+ * sets one -- the picker must stay able to distinguish two otherwise-
+ * nameless advisors.
+ */
 export async function listActiveStaffForAssignment(
   db: Database,
   adminUserId: string,
@@ -264,7 +276,7 @@ export async function listActiveStaffForAssignment(
     .select({ userId: staffRole.userId, role: staffRole.role, name: user.name, email: user.email })
     .from(staffRole)
     .innerJoin(user, eq(staffRole.userId, user.id))
-    .where(isNull(staffRole.revokedAt));
+    .where(and(isNull(staffRole.revokedAt), eq(staffRole.role, "ADVISOR")));
 
-  return { ok: true, staff: rows };
+  return { ok: true, staff: rows as ActiveStaffMember[] };
 }

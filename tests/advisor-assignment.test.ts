@@ -169,6 +169,30 @@ describe.skipIf(!hasTestDatabase)("Phase 6C advisor assignment + queues (real Po
       expect(result2).toEqual({ ok: false, reason: "TARGET_NOT_AUTHORIZED_ADVISOR" });
     });
 
+    it("Phase 6D section 2: an ADMIN-only account cannot be assigned as the case advisor, even though ADMIN is an authorized CASE_ACCESS_ROLES member for case-access purposes elsewhere", async () => {
+      const db = testDb!;
+      const a = await completeDiscoveryWithContact(db);
+      const adminId = await createStaffUser(db, "ADMIN");
+      const adminOnlyTarget = await createStaffUser(db, "ADMIN");
+
+      const result = await assignAdvisorToCase(db, {
+        pathwaysCaseId: a.pathwaysCaseId,
+        advisorUserId: adminOnlyTarget,
+        assignedByUserId: adminId,
+      });
+      expect(result).toEqual({ ok: false, reason: "TARGET_NOT_AUTHORIZED_ADVISOR" });
+
+      // And a genuine ADVISOR target is still accepted -- this is a
+      // narrowing fix, not a general lockout of assignment.
+      const advisorTarget = await createStaffUser(db, "ADVISOR");
+      const result2 = await assignAdvisorToCase(db, {
+        pathwaysCaseId: a.pathwaysCaseId,
+        advisorUserId: advisorTarget,
+        assignedByUserId: adminId,
+      });
+      expect(result2.ok).toBe(true);
+    });
+
     it("6. a case never has more than one active assignment at a time", async () => {
       const db = testDb!;
       const a = await completeDiscoveryWithContact(db);

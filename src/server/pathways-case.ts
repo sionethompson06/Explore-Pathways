@@ -46,15 +46,32 @@ type Queryable = Database | Tx;
  * reachable only from BOOKED and ONLY ever by an explicit, future
  * advisor action -- no code anywhere in this phase sets COMPLETED, and
  * a scheduled call's time simply passing never does either.
+ *
+ * Phase 6D adds `FAMILY_NOT_PROCEEDING`, reachable only from BOOKED,
+ * for the Planning Call Workspace's `FAMILY_NOT_PROCEEDING` outcome
+ * (docs/pathways PHASE6D_PLANNING_CALL_WORKSPACE.md section 12): a
+ * distinct fact from `NOT_CURRENT_SERVICE_FIT` (Pathways judged a
+ * service-fit mismatch) -- a family's own commercial decision not to
+ * continue must never be recorded as, or influence, an educational-
+ * suitability signal. Set only by src/server/planning-call.ts's
+ * `completePlanningCall`, never automatically.
  */
 const ALLOWED_CASE_STATUS_TRANSITIONS: Record<PathwaysCaseStatus, readonly PathwaysCaseStatus[]> = {
   NEW: ["CONTACT_RECEIVED", "CLOSED"],
   CONTACT_RECEIVED: ["BOOKED", "NEEDS_INFORMATION", "FOLLOW_UP", "NOT_CURRENT_SERVICE_FIT", "CLOSED"],
-  BOOKED: ["COMPLETED", "NEEDS_INFORMATION", "FOLLOW_UP", "NOT_CURRENT_SERVICE_FIT", "CLOSED"],
+  BOOKED: [
+    "COMPLETED",
+    "NEEDS_INFORMATION",
+    "FOLLOW_UP",
+    "NOT_CURRENT_SERVICE_FIT",
+    "FAMILY_NOT_PROCEEDING",
+    "CLOSED",
+  ],
   COMPLETED: ["FOLLOW_UP", "CLOSED"],
   NEEDS_INFORMATION: ["CONTACT_RECEIVED", "BOOKED", "CLOSED"],
   FOLLOW_UP: ["BOOKED", "COMPLETED", "NOT_CURRENT_SERVICE_FIT", "CLOSED"],
   NOT_CURRENT_SERVICE_FIT: ["CLOSED"],
+  FAMILY_NOT_PROCEEDING: ["CLOSED"],
   CLOSED: [],
 };
 

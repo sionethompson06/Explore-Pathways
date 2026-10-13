@@ -289,3 +289,88 @@
     display: none;
   }
 }
+
+/* Phase 6D: Planning Call Workspace form */
+.planningForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.planningForm label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.checkboxOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 400;
+  color: var(--color-text);
+  margin-top: var(--space-2);
+}
+
+.radioGroup {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.radioGroup legend {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  padding: 0 var(--space-2);
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 400;
+  color: var(--color-text);
+  margin-top: var(--space-2);
+}
+
+.saveControls {
+  display: flex;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.secondaryButton {
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-navy-700);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-navy-700);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: var(--color-bg-alt);
+}

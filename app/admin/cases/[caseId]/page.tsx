@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { requireStaffPrincipal } from "@/server/staff-principal";
 import { db } from "@/db/client";
 import { getCaseDetailForStaff, listActiveStaffForAssignment } from "@/server/staff-queue";
+import { getPrimaryPlanningCallRecord } from "@/server/planning-call";
 import { CaseDetailView } from "@/components/staff/CaseDetailView";
+import { PlanningCallSummary } from "@/components/staff/PlanningCallSummary";
 import styles from "@/components/staff/staff-page.module.css";
 import { assignAdvisorAction, unassignAdvisorAction } from "./actions";
 
@@ -42,9 +44,10 @@ export default async function AdminCaseDetailPage({
   const { caseId } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const [detailResult, staffResult] = await Promise.all([
+  const [detailResult, staffResult, planningCallRecord] = await Promise.all([
     getCaseDetailForStaff(db, principal.userId, caseId),
     listActiveStaffForAssignment(db, principal.userId),
+    getPrimaryPlanningCallRecord(db, caseId),
   ]);
 
   if (!detailResult.ok) notFound();
@@ -114,6 +117,8 @@ export default async function AdminCaseDetailPage({
           </section>
         }
       />
+
+      <PlanningCallSummary record={planningCallRecord} />
     </div>
   );
 }

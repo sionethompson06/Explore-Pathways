@@ -4,7 +4,7 @@ import type { Database } from "@/db/client";
 import { pathwaysCase, advisorAssignment, auditEvent } from "@/db/schema";
 import { generateId } from "./ids";
 import { isUniqueConstraintConflict } from "./db-conflict";
-import { getStaffRole, CASE_ACCESS_ROLES } from "./access-control";
+import { getStaffRole } from "./access-control";
 
 /**
  * Phase 6C -- the advisor-assignment domain service (docs/pathways
@@ -26,10 +26,19 @@ export type AssignAdvisorResult =
  * The section 7-8/13 assignment transaction. `assignedByUserId` must
  * hold an active ADMIN staff role -- never inferred from a client
  * claim, always looked up fresh from `staff_role`. `advisorUserId`
- * (the target) must hold an active, authorized staff role from the
- * same `CASE_ACCESS_ROLES` set the existing per-case access-control
- * functions already recognize (ADVISOR or ADMIN) -- an ordinary user
- * can never be "assigned" as an advisor.
+ * (the target) must hold an active `ADVISOR` staff role SPECIFICALLY
+ * -- never merely any staff role (Phase 6D section 2 compatibility
+ * repair). `CASE_ACCESS_ROLES` (`["ADVISOR", "ADMIN"]`) is the right
+ * set for "who may be GRANTED access to a case once assigned"
+ * (access-control.ts's assertAdvisorCanAccessPathwaysCase, used
+ * elsewhere), but it is the WRONG set for "who may be assigned AS the
+ * advisor" -- an ADMIN-only account must never become assignable
+ * merely because it is staff. `staff_role` is one row per user
+ * (staff_role_user_unique_idx), so a user is never both ADVISOR and
+ * ADMIN simultaneously under this schema; requiring exactly ADVISOR
+ * here can therefore never wrongly exclude a legitimately
+ * dual-authorized user -- that user does not exist in this data
+ * model.
  *
  * Concurrency (section 13): the PathwaysCase row is locked
  * `FOR UPDATE` for the entire transaction, so two concurrent
@@ -55,7 +64,7 @@ export async function assignAdvisorToCase(
   }
 
   const targetRole = await getStaffRole(db, input.advisorUserId);
-  if (!targetRole || !CASE_ACCESS_ROLES.includes(targetRole)) {
+  if (targetRole !== "ADVISOR") {
     return { ok: false, reason: "TARGET_NOT_AUTHORIZED_ADVISOR" };
   }
 
