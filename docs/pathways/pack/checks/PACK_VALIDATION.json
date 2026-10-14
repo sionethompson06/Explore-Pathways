@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "question_definitions": 38,
+  "rule_definitions": 52,
+  "synthetic_reference_cases": 14,
+  "claims_limited_to": "Registry references, simple reference rule invariants, noneducational-field invariance and select-order invariance. This is not a deployed engine, clinical validation, legal approval, browser test or production-security audit.",
+  "results": [
+    {
+      "fixture": "FX01_ELEMENTARY_HOME_COMMUNITY",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX02_ELEMENTARY_SUPPORT_GAP",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX03_MIDDLE_ATHLETE",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX04_HS_ATHLETE",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX05_HS_UNKNOWN_CREDITS",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX06_HS_REPORTED_MISSING",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX07_STAY_AND_SUPPORT",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX08_UNKNOWN_PROFILE",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX09_PREFERENCE_NOT_CONSTRAINT",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX10_AHEAD_NOT_MATH_OR_COLLEGE",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX11_UNDETERMINED_GRADE",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX12_TUITION_PREFERENCE",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX13_NOT_ENROLLED_CONFLICT",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    },
+    {
+      "fixture": "FX14_RECLASSIFICATION_REVIEW_ONLY",
+      "checked_structural_and_reference_rule_invariants": "PASS",
+      "application_UI_security_integration_content_tests": "NOT_RUN_APPLICATION_NOT_BUILT"
+    }
+  ]
+}

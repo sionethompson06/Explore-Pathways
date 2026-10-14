@@ -1,0 +1,41 @@
+.section {
+  padding-block: var(--space-8);
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding-block: var(--space-7);
+  }
+}
+
+.default {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.alt {
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+.accentTint {
+  background: var(--color-accent-tint);
+  color: var(--color-text);
+}
+
+.inverse {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+.inverse :global(h1),
+.inverse :global(h2),
+.inverse :global(h3),
+.inverse :global(h4) {
+  color: var(--color-text-inverse);
+}
+
+.inverse :global(p) {
+  color: var(--color-text-inverse-muted);
+}
+

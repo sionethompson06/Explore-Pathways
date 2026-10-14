@@ -1,0 +1,103 @@
+.grid {
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.item {
+  background: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.item:has(.tile:hover),
+.item:has(.tile:focus-visible) {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-card-hover);
+  background: var(--color-accent-tint);
+}
+
+.item:has(.tile:hover) .tile svg,
+.item:has(.tile:focus-visible) .tile svg {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+.tile {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: -2px;
+}
+
+.statement {
+  flex-grow: 1;
+  font-weight: 600;
+  color: var(--color-navy-800);
+}
+
+.toggleIcon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-tint);
+  color: var(--color-accent-strong);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+}
+
+.detailWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+}
+
+.detailWrap[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.detailInner {
+  overflow: hidden;
+}
+
+.detail {
+  margin: 0;
+  padding: 0 var(--space-5) var(--space-4) calc(3rem + var(--space-3) + var(--space-5));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .detailWrap,
+  .toggleIcon {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "advisor_assignment_active_per_case_unique_idx" ON "advisor_assignment" USING btree ("pathways_case_id") WHERE "advisor_assignment"."unassigned_at" IS NULL AND "advisor_assignment"."pathways_case_id" IS NOT NULL;

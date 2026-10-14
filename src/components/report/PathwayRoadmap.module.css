@@ -1,0 +1,196 @@
+.wrap {
+  max-width: var(--max-content-width);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  margin: 0 0 var(--space-2);
+}
+
+.intro {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-6);
+}
+
+/* A single continuous vertical stepper at every viewport (section 16):
+   no desktop column-izing that would squeeze a parallel group's
+   branches into an unreadable strip. The connector line threads
+   behind every numbered node. */
+.stages {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: stage;
+}
+
+.stages::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.stage {
+  counter-increment: stage;
+  position: relative;
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.node {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  z-index: 1;
+}
+
+.node::before {
+  content: counter(stage);
+}
+
+.label {
+  padding-top: var(--space-2);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+/* Marker class only -- parallel pathways keep the default vertical
+   spine layout above at every viewport, so no rules are scoped to
+   this selector; it exists so the structural distinction in
+   PathwayRoadmap.tsx is explicit and testable. */
+.parallelPathway {
+  flex-direction: column;
+}
+
+/* The parallel step: the node marks the split point; the bracket
+   visibly forks into two priority tracks and rejoins the line for
+   the next stage (sections 14/39/47 -- "obvious without reading the
+   paragraph"). */
+.stageParallel {
+  align-items: stretch;
+}
+
+.parallelBracket {
+  flex: 1;
+  position: relative;
+  padding-top: var(--space-2);
+  padding-left: var(--space-5);
+}
+
+.parallelBracket::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  width: var(--space-5);
+  height: 2px;
+  background: var(--color-accent);
+}
+
+.parallelGroup {
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-tint);
+  padding: var(--space-4);
+}
+
+.parallelLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+  margin: 0 0 var(--space-3);
+}
+
+.parallelBranches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.parallelBranch {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.subordinate {
+  margin-top: var(--space-6);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-500);
+}
+
+@media (max-width: 640px) {
+  .parallelBranches {
+    grid-template-columns: 1fr;
+  }
+
+  .label {
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (min-width: 900px) {
+  .label {
+    padding-top: var(--space-2);
+  }
+}
+
+/* Purely sequential pathways (no parallel group) get a compact
+   horizontal progression at desktop -- parallel pathways never match
+   this selector, so GR12's vertical split/rejoin treatment above is
+   completely unaffected (section 6/7 of the Phase 5.2b instruction).
+   Mobile/tablet stays the default vertical spine stepper. */
+@media (min-width: 900px) {
+  .stages.sequentialPathway {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .stages.sequentialPathway::before {
+    left: 18px;
+    right: 18px;
+    top: 18px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+
+  .stages.sequentialPathway .stage {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+    min-width: 0;
+  }
+
+  .stages.sequentialPathway .label {
+    padding-top: 0;
+  }
+}
