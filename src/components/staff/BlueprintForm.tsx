@@ -361,6 +361,13 @@ export function BlueprintForm({
         {b09Rows.map((item, i) => (
           <div key={i} className={styles.itemRow}>
             <input type="hidden" name="b09Id" value={item?.id ?? ""} />
+            <textarea
+              name="b09Question"
+              defaultValue={item?.question ?? ""}
+              placeholder="Question to verify"
+              rows={3}
+              className={`${styles.itemTextInput} ${styles.itemPrimaryInput}`}
+            />
             <select name="b09Category" defaultValue={item?.category ?? "OTHER"}>
               {VERIFICATION_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
@@ -368,7 +375,6 @@ export function BlueprintForm({
                 </option>
               ))}
             </select>
-            <input type="text" name="b09Question" defaultValue={item?.question ?? ""} placeholder="Question to verify" className={styles.itemTextInput} />
             <select name="b09Status" defaultValue={item?.status ?? "OPEN"}>
               {VERIFICATION_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -395,7 +401,13 @@ export function BlueprintForm({
         <p className={styles.provenanceNote}>Leave the text blank to exclude a row.</p>
         {b10Rows.map((item, i) => (
           <div key={i} className={styles.itemRow}>
-            <input type="text" name="b10Text" defaultValue={item?.text ?? ""} placeholder="Action" className={styles.itemTextInput} />
+            <textarea
+              name="b10Text"
+              defaultValue={item?.text ?? ""}
+              placeholder="Action"
+              rows={3}
+              className={`${styles.itemTextInput} ${styles.itemPrimaryInput}`}
+            />
             <select name="b10Owner" defaultValue={item?.owner ?? "ADVISOR"}>
               {ACTION_OWNERS.map((o) => (
                 <option key={o} value={o}>

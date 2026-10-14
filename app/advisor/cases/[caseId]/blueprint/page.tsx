@@ -102,6 +102,15 @@ export default async function AdvisorBlueprintPage({
       <h1 className={styles.heading}>{detail.studentDisplayName}</h1>
       <p className={styles.subheading}>Student Success Blueprint.</p>
 
+      {current ? (
+        <p className={styles.provenanceNote}>
+          Revision {current.revisionNumber} --{" "}
+          <span className={styles.badge} data-status={current.status}>
+            {statusLabel(current.status)}
+          </span>
+        </p>
+      ) : null}
+
       {errorMessage ? (
         <div role="alert" className={styles.formStatus} data-tone="error">
           <p>{errorMessage}</p>

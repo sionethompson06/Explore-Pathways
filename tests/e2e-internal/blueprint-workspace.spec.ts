@@ -206,9 +206,15 @@ test.describe("Phase 6E Student Success Blueprint", () => {
     await expect(advisor2Page.getByText("Marked ready for client.")).toBeVisible();
 
     // The revision is now locked: no editable form, a preview instead,
-    // and a "Start a New Revision" control appears.
+    // and a "Start a New Revision" control appears. Phase 6E.1 added an
+    // always-visible "Revision N -- STATUS" line above the preview (for
+    // the single-revision case the preview's own heading doesn't cover);
+    // both it and the preview's own "Student Success Blueprint --
+    // Revision 1" heading now legitimately contain "Revision 1" text, so
+    // target the preview heading specifically rather than a bare
+    // substring match.
     await expect(advisor2Page.getByRole("button", { name: "Save Draft" })).not.toBeVisible();
-    await expect(advisor2Page.getByText("Revision 1")).toBeVisible();
+    await expect(advisor2Page.getByRole("heading", { name: /Revision 1/ })).toBeVisible();
     await expect(advisor2Page.getByRole("heading", { name: "Start a New Revision" })).toBeVisible();
 
     // New revision: carries forward the prior revision's content.

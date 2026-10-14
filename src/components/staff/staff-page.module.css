@@ -404,6 +404,14 @@
   font-family: inherit;
 }
 
+/* Phase 6E.1: the primary free-text field in a crowded item row (B09's
+   question, B10's action) always takes its own full-width line, rather
+   than competing for width with the row's shorter metadata controls --
+   otherwise a full sentence truncates even at desktop widths. */
+.itemPrimaryInput {
+  flex-basis: 100%;
+}
+
 .lockedNote {
   padding: var(--space-3) var(--space-4);
   background: var(--color-bg-alt);

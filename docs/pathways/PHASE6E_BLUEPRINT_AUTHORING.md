@@ -125,3 +125,23 @@ Verified by `git diff --stat` against the Phase 6D starting commit (`3a1c8b6f4f6
 - `ReportSnapshot` historical behavior, the guest consultation funnel, native scheduling policy, the connected DB-free demo: `app/discover/**`, `src/lib/consultation/**`, `src/server/booking.ts`, `src/server/consultation.ts`, `src/components/consultation/**`, `src/components/discovery/**`.
 - Phase 6B/6C case-creation, assignment, and queue semantics (`src/server/pathways-case.ts`, `src/server/advisor-assignment.ts`, `src/server/staff-queue.ts`) -- byte-unchanged.
 - Phase 6D's `src/server/planning-call.ts`, `PlanningCallForm.tsx`, `PlanningCallSummary.tsx` -- byte-unchanged (read via import only).
+
+## Phase 6E.1 -- Blueprint visual acceptance & polish
+
+Phase 6E was accepted with one outstanding item: the required responsive visual inspection of the authoring/preview UI had never actually been performed. Phase 6E.1 closed that gap. No domain behavior, schema, authorization, or status logic was touched.
+
+**States inspected (actual rendered screenshots, not programmatic assertion):** A (draft, initial), B (draft, populated), D (incomplete-validation), E (internal-review preview, via the admin read-only route while the advisor's revision was INTERNAL_REVIEW), F (ready-for-client, locked advisor view), G (revision 2, new draft), H (optimistic-concurrency conflict, two tabs), I (admin read-only view of a ready revision).
+
+**Breakpoints:** 375/768/1440 for A, B, E, F, G, I; 375/1440 for D and H, per the original acceptance requirement.
+
+**Defects found and fixed (2):**
+1. B09's "Question" field and B10's "Action" field were visually crowded out by shorter sibling fields in the same flex-wrapped row at 1440px, and truncated/scrolled as single-line `<input>` elements at 375px regardless of box width. Fixed with a new `.itemPrimaryInput { flex-basis: 100%; }` modifier (`src/components/staff/staff-page.module.css`) forcing the primary field onto its own full-width line, reordered first in the DOM (`src/components/staff/BlueprintForm.tsx`), and converted both fields from `<input type="text">` to `<textarea rows={3}>` (same `name` attributes; no server-action changes).
+2. The advisor's editable Blueprint workspace showed no status/revision indicator at all in the common single-revision case (the Revision History block only renders when there is more than one revision). Fixed by adding an always-visible "Revision {N} -- {STATUS}" line to `app/advisor/cases/[caseId]/blueprint/page.tsx`, reusing the existing `statusLabel` helper and `.badge`/`.provenanceNote` styles.
+
+**Consequential test update:** the new status line gave `tests/e2e-internal/blueprint-workspace.spec.ts` a second element matching the text "Revision 1", turning its existing bare-substring assertion into a Playwright strict-mode violation. Fixed by narrowing the locator to the preview's own heading (`getByRole("heading", { name: /Revision 1/ })`) rather than weakening or removing the assertion; the underlying fact verified is unchanged.
+
+**Not changed:** B09's server-side "never silently become VERIFIED" rule, the concurrency-conflict message (no raw database/version terminology), eligibility, revision/status model, authorization, audit behavior, or any other Phase 6E domain logic. The marketing header/footer appearing on staff routes was observed (pre-existing since Phase 6C, a `app/layout.tsx` consequence) but left alone as out of scope for a presentational-only pass.
+
+**Verification:** `pnpm run typecheck` clean; `pnpm run lint` clean; `pnpm vitest run` 962/962; `pnpm exec playwright test --config=playwright.internal.config.ts` 13/13 (12 pre-existing + 1 updated); `pnpm exec playwright test` (default suite) 212/212; `pnpm run build` reproduces the same pre-existing sandbox-only `_global-error`/`useContext` anomaly (digest `3328746128`) documented since Phase 3 (DEC-G4) and reconfirmed in every subsequent phase -- not reproduced on CI, not attributable to this phase's changes.
+
+**Result:** accepted. Phase 6E's visual-acceptance gap is closed.
