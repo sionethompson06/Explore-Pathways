@@ -5,8 +5,10 @@ import { requireStaffPrincipal } from "@/server/staff-principal";
 import { db } from "@/db/client";
 import { getCaseDetailForStaff, listActiveStaffForAssignment } from "@/server/staff-queue";
 import { getPrimaryPlanningCallRecord } from "@/server/planning-call";
+import { getCurrentBlueprintRevision } from "@/server/blueprint";
 import { CaseDetailView } from "@/components/staff/CaseDetailView";
 import { PlanningCallSummary } from "@/components/staff/PlanningCallSummary";
+import { formatStaffDateTime, statusLabel } from "@/components/staff/format";
 import styles from "@/components/staff/staff-page.module.css";
 import { assignAdvisorAction, unassignAdvisorAction } from "./actions";
 
@@ -44,10 +46,11 @@ export default async function AdminCaseDetailPage({
   const { caseId } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const [detailResult, staffResult, planningCallRecord] = await Promise.all([
+  const [detailResult, staffResult, planningCallRecord, blueprintRevision] = await Promise.all([
     getCaseDetailForStaff(db, principal.userId, caseId),
     listActiveStaffForAssignment(db, principal.userId),
     getPrimaryPlanningCallRecord(db, caseId),
+    getCurrentBlueprintRevision(db, caseId),
   ]);
 
   if (!detailResult.ok) notFound();
@@ -119,6 +122,35 @@ export default async function AdminCaseDetailPage({
       />
 
       <PlanningCallSummary record={planningCallRecord} />
+
+      {blueprintRevision ? (
+        <section className={styles.section} aria-labelledby="blueprint-summary-heading">
+          <h2 id="blueprint-summary-heading" className={styles.sectionTitle}>
+            Student Success Blueprint
+          </h2>
+          <dl className={styles.detailGrid}>
+            <div className={styles.detailField}>
+              <dt>Revision</dt>
+              <dd>{blueprintRevision.revisionNumber}</dd>
+            </div>
+            <div className={styles.detailField}>
+              <dt>Status</dt>
+              <dd>
+                <span className={styles.badge} data-status={blueprintRevision.status}>
+                  {statusLabel(blueprintRevision.status)}
+                </span>
+              </dd>
+            </div>
+            <div className={styles.detailField}>
+              <dt>Last updated</dt>
+              <dd>{formatStaffDateTime(blueprintRevision.updatedAt)}</dd>
+            </div>
+          </dl>
+          <Link href={`/admin/cases/${caseId}/blueprint`} className={styles.secondaryButton}>
+            View Student Success Blueprint
+          </Link>
+        </section>
+      ) : null}
     </div>
   );
 }

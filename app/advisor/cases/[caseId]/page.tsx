@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { requireStaffPrincipal } from "@/server/staff-principal";
 import { db } from "@/db/client";
 import { getCaseDetailForStaff } from "@/server/staff-queue";
-import { getPrimaryPlanningCallRecord, listPathwayOptions } from "@/server/planning-call";
+import { getPrimaryPlanningCallRecord, listPathwayOptions, isBlueprintReady } from "@/server/planning-call";
 import { CaseDetailView } from "@/components/staff/CaseDetailView";
 import { PlanningCallForm } from "@/components/staff/PlanningCallForm";
 import { PlanningCallSummary } from "@/components/staff/PlanningCallSummary";
@@ -132,6 +132,18 @@ export default async function AdvisorCaseDetailPage({
       ) : (
         <PlanningCallSummary record={record} />
       )}
+
+      {isBlueprintReady(record) ? (
+        <section className={styles.section} aria-labelledby="blueprint-entry-heading">
+          <h2 id="blueprint-entry-heading" className={styles.sectionTitle}>
+            Student Success Blueprint
+          </h2>
+          <p className={styles.provenanceNote}>This case is eligible for a Student Success Blueprint.</p>
+          <Link href={`/advisor/cases/${caseId}/blueprint`} className={styles.secondaryButton}>
+            Open Student Success Blueprint
+          </Link>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -50,6 +50,13 @@
       "when": 1791852944244,
       "tag": "0006_moaning_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791937650066,
+      "tag": "0007_swift_ronan",
+      "breakpoints": true
     }
   ]
 }
