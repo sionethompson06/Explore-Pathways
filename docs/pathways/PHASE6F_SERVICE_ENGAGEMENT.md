@@ -78,6 +78,10 @@ Agreed price, installment amount, payment notes, and engagement terms never appe
 
 `tests/e2e-internal/service-engagement.spec.ts` (4 Playwright tests, real browser, real PostgreSQL): the full real journey from Discovery through a READY_FOR_CLIENT Blueprint, then Continue-With-Pathways → Installments → Confirm → Active Consultancy (with admin read access to the confirmed engagement), Blueprint Only (no activation), Follow-Up Needed (no activation), and a security-denial check for an unassigned advisor.
 
+Fixed one consequence of adding this phase's UI to the Blueprint page: the pre-existing `tests/e2e-internal/blueprint-workspace.spec.ts` used a bare `getByLabel("Reason")`, which became ambiguous once the new "Not Proceeding" field (also labeled "Reason (optional)") entered the DOM; narrowed to `getByLabel("Reason", { exact: true })` rather than weakening either label, the same disambiguation convention Phase 6E.1 used for a similar collision.
+
+One CI run of this phase's commit showed a single failure in `tests/discovery-demo-preview-repro.test.ts` (Phase 3C's real-`next-dev`-process repro of the Vercel Preview broken-database configuration) — a file this phase never touches, unrelated to Discovery/demo routes or `env.ts`. Confirmed non-reproducing: it passed in an isolated local re-run (990/990 full suite), and a single CI re-run of the failed job came back green. Classified as the same class of environment/resource-timing-sensitive flake already documented for other suites (DEC-Y6/DEC-Z9), never attributed to this phase and never worked around by weakening an assertion.
+
 ## Deferred (explicitly out of scope for this phase)
 
 Payment processing/automation (Stripe or any processor), invoices, recurring billing, a parent portal or electronic acceptance, provider research/matching, consultancy task management, ongoing communications, and AI. The Active Consultancy Workspace itself (managing the ongoing relationship once active) is Phase 6G, not built here — this phase stops at recording that the relationship became active.
