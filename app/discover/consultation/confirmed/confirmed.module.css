@@ -1,0 +1,42 @@
+.headline {
+  margin: 0 0 var(--space-5);
+}
+
+.card {
+  margin-bottom: var(--space-5);
+}
+
+.studentLine {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+}
+
+.date {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-navy-900);
+  margin: 0 0 var(--space-1);
+}
+
+.time {
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.timeSecondary {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-2);
+}
+
+.meta {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.body {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+  max-width: 42ch;
+}

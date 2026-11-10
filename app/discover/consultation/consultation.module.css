@@ -1,0 +1,55 @@
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-accent-strong);
+  margin: 0 0 var(--space-2);
+}
+
+.headline {
+  margin: 0 0 var(--space-4);
+}
+
+.body {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-6);
+  max-width: 42ch;
+}
+
+.contextCard {
+  margin-bottom: var(--space-6);
+}
+
+.contextList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.contextList dt {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-1);
+}
+
+.contextList dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-navy-900);
+}
+
+.backLink {
+  margin-top: var(--space-6);
+}
+
+.backLink a {
+  color: var(--color-navy-700);
+}
+
+@media (max-width: 480px) {
+  .contextList {
+    grid-template-columns: 1fr;
+  }
+}

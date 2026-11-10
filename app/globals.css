@@ -1,0 +1,200 @@
+/**
+ * Pathways marketing design tokens (Phase 2, refined in Phase 2B). A
+ * single, small token sheet plus base element styles -- deliberately
+ * not a visual framework (Tailwind, Chakra, etc.), per the Phase
+ * 2/2B authorizations' instruction not to install one without a
+ * concrete need. Colors: deep navy for structure/headings, a
+ * Pathways-green accent, a bright blue reserved for selective
+ * headline emphasis, warm white/neutral backgrounds -- matching the
+ * supplied Pathways visual reference concepts' general direction
+ * only, never as a flattened screenshot or a source of copy/claims.
+ */
+
+:root {
+  /* Color: navy (structure, headings, primary surfaces) */
+  --color-navy-900: #082f55;
+  --color-navy-800: #0a315a;
+  --color-navy-700: #123a66;
+  --color-navy-600: #1c4a7a;
+
+  /* Color: Pathways green accent (restrained -- CTAs, highlights only) */
+  --color-green-700: #178a57;
+  --color-green-600: #20a866;
+  --color-green-500: #29a96c;
+  --color-green-100: #e3f7ec;
+
+  /* Color: emphasis blue -- selective headline emphasis only
+     (Phase 2B "blue-emphasis headline treatment"), never a large
+     surface fill. */
+  --color-blue-600: #1788c9;
+  --color-blue-500: #198bd2;
+
+  /* Color: warm neutrals (backgrounds, body text) */
+  --color-warm-white: #fbf9f5;
+  --color-neutral-50: #f7f5f0;
+  --color-neutral-100: #efeae1;
+  --color-neutral-200: #e2dcd0;
+  --color-neutral-300: #cfc7b6;
+  --color-neutral-500: #7c7566;
+  --color-neutral-700: #4a4638;
+  --color-neutral-900: #211f1a;
+  --color-white: #ffffff;
+
+  /* Semantic aliases */
+  --color-bg: var(--color-warm-white);
+  --color-bg-alt: var(--color-neutral-50);
+  --color-bg-inverse: var(--color-navy-900);
+  --color-text: var(--color-neutral-900);
+  --color-text-muted: var(--color-neutral-700);
+  --color-text-inverse: var(--color-warm-white);
+  --color-text-inverse-muted: #c7d2e2;
+  --color-border: var(--color-neutral-200);
+  --color-accent: var(--color-green-600);
+  --color-accent-strong: var(--color-green-700);
+  --color-accent-tint: var(--color-green-100);
+  --color-emphasis: var(--color-blue-600);
+  --color-focus-ring: #2a7de1;
+
+  /* Type scale */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-size-sm: 0.9375rem;
+  --font-size-base: 1.0625rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+  --font-size-3xl: 2.375rem;
+  --font-size-4xl: 3rem;
+  --font-size-5xl: 3.75rem;
+  --line-height-tight: 1.15;
+  --line-height-snug: 1.35;
+  --line-height-normal: 1.6;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-full: 999px;
+  --shadow-card: 0 1px 2px rgba(11, 31, 58, 0.06), 0 8px 24px rgba(11, 31, 58, 0.08);
+  --shadow-card-hover: 0 2px 4px rgba(11, 31, 58, 0.08), 0 16px 32px rgba(11, 31, 58, 0.12);
+  --max-content-width: 72rem;
+  --max-prose-width: 42rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-navy-900);
+  line-height: var(--line-height-tight);
+  font-weight: 700;
+  margin: 0 0 var(--space-3);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  max-width: 65ch;
+}
+
+ul,
+ol {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.25em;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--color-accent-strong);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Consistent, visible keyboard focus everywhere -- never removed,
+   only restyled. */
+:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Respect the OS-level reduced-motion preference: every transition
+   and animation in this stylesheet collapses to near-zero duration. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: -3rem;
+  background: var(--color-navy-900);
+  color: var(--color-warm-white);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  z-index: 100;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: var(--space-3);
+}

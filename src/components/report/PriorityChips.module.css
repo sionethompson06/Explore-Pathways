@@ -1,0 +1,29 @@
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.educational {
+  background: rgba(41, 169, 108, 0.22);
+  border: 1px solid rgba(41, 169, 108, 0.55);
+  color: var(--color-text-inverse);
+}
+
+.feasibility {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.55);
+  color: var(--color-text-inverse-muted);
+}

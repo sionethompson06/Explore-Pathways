@@ -1,0 +1,130 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 44rem;
+  display: flex;
+  align-items: flex-end;
+  color: var(--color-warm-white);
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: 38rem;
+  }
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* Left-anchored for text-safe contrast over the photo's right-third
+     subject, plus a light bottom gradient for the indicator row --
+     deliberately subtle so the mountain/sunset photo stays visible
+     rather than darkened overall. */
+  background:
+    linear-gradient(
+      to top,
+      rgba(6, 20, 36, 0.45) 0%,
+      rgba(6, 20, 36, 0.15) 30%,
+      rgba(6, 20, 36, 0) 55%
+    ),
+    linear-gradient(
+      to right,
+      rgba(6, 20, 36, 0.85) 0%,
+      rgba(6, 20, 36, 0.68) 40%,
+      rgba(6, 20, 36, 0.35) 68%,
+      rgba(6, 20, 36, 0.06) 90%
+    );
+}
+
+.content {
+  padding-block: var(--space-8) var(--space-7);
+  max-width: 40rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-green-100);
+  margin-bottom: var(--space-3);
+}
+
+.headline {
+  font-size: var(--font-size-5xl);
+  line-height: var(--line-height-tight);
+  color: var(--color-warm-white);
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 640px) {
+  .headline {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+.emphasis {
+  color: var(--color-blue-500);
+}
+
+.supporting {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-inverse-muted);
+  max-width: 42ch;
+  margin-top: var(--space-4);
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.gradeLabel {
+  margin-top: var(--space-5);
+  margin-bottom: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-inverse-muted);
+}
+
+.indicators {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.handwrittenTop {
+  position: absolute;
+  top: var(--space-6);
+  right: var(--space-6);
+  z-index: 1;
+  max-width: 14rem;
+  text-align: right;
+}
+
+.handwrittenBottom {
+  position: absolute;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .handwrittenTop,
+  .handwrittenBottom {
+    display: none;
+  }
+}

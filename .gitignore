@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Environment files (never commit real secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor/OS
+.DS_Store
+.vscode/
+.idea/
+
+# Test/coverage output
+coverage/
+.vitest-cache/
+vitest-report.json
+
+# Playwright output (screenshots/traces are local inspection evidence,
+# not committed -- their capture is reported in the evidence docs
+# instead of the binary files themselves)
+/screenshots/
+/test-results/
+/playwright-report/
+/blob-report/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Drizzle local artifacts (migrations themselves ARE committed; this ignores generated meta journal snapshots only if configured to emit them outside migrations/)

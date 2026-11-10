@@ -1,0 +1,150 @@
+{
+  "version": "2.0.0-phase4-engine",
+  "status": "PHASE4_OWNER_CALIBRATED",
+  "corrections_applied": "See contracts/CHANGELOG.md and docs/pathways/DECISION_LOG.md section N and docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md. Extends the 1.1.0-phase3e-discovery-calibrated policy with the machine-readable parameters the Phase 4 engine (src/lib/engine) actually reads -- the human-readable string fields below are retained verbatim as documentation, but every number/threshold/mapping the engine uses to decide qualification and ordering now also exists as a structured value so the engine never has to parse English policy prose. No public numeric score exists at any layer.",
+  "baseline": 50,
+  "score_bounds": {
+    "min": 0,
+    "max": 100
+  },
+  "group_bounds": {
+    "min": -6,
+    "max": 6
+  },
+  "multipliers": {
+    "primary_reason": 1.75,
+    "family_priority": 1.5,
+    "desired_change": 1.15,
+    "default": 1.0
+  },
+  "primary_multiplier": 1.75,
+  "top_priority_multiplier": 1.5,
+  "secondary_multiplier": 1.15,
+  "default_multiplier": 1.0,
+  "multiplier_policy": "Use only the largest applicable multiplier per scoring group, never multiply multipliers. Priority when several are eligible for the same group: primary Discovery reason (1.75) > any selected family priority mapped to that group (1.50, unranked -- any one qualifying selection establishes it) > desired_primary_change mapped to that group (1.15) > default (1.00). desired_primary_change's multiplier never satisfies the display gate's primary/priority link requirement on its own -- only a primary-reason-linked or family-priority-linked positive group does.",
+  "group_aggregation": "Per candidate and group: collect all positive score effects from currently-triggered (non-RETIRED) rules in that group for that model, keep the largest; collect all negative effects, keep the most negative; add those two; apply the one group multiplier; clamp the result to group_bounds [-6,6]. Sum every group's clamped contribution onto baseline (50); clamp the total to score_bounds [0,100]. This is the internal score -- never shown publicly. Grouping prevents repeated schedule/flexibility-shaped questions from accumulating as independent evidence, and evaluation must be independent of JSON rule array order (src/lib/engine iterates all triggered rules and only then aggregates by group/model, never short-circuiting on order).",
+  "display_gate": {
+    "min_internal_score_exclusive": 50,
+    "min_positive_groups": 2,
+    "require_link_to_primary_or_priority": true,
+    "b01_stay_current_exception": true
+  },
+  "display_gate_description": "A normal candidate qualifies only when: discovery_enabled is true; it is not objectively excluded; its internal score is strictly greater than 50; at least two distinct scoring groups have a final positive (>0) contribution for that candidate; and at least one of those positive groups is a group that the family's primary Discovery reason maps to, OR a group that at least one of the family's selected family priorities maps to (desired_primary_change's own group mapping does not satisfy this link on its own -- see multiplier_policy). Baseline score alone (an internal score of 50 with zero positive groups) never qualifies -- one click alone must never create a recommendation. The ONLY exception to the two-group/link requirement is B01's explicit stay-current continuity statement (docs/pathways/PHASE4_DECISION_ENGINE_SPEC_V1.md section 12): when a real (non-NOT_ENROLLED, non-UNKNOWN/missing) current_education_model exists and school_change_preference is STAY_CURRENT, B01 may qualify on its internal score alone (still requiring score > 50), even with only one positive group. This exception is general (keyed only on those two fields), never keyed on a persona or profile identity.",
+  "max_displayed_cards": 2,
+  "tie_break": "internal_score_desc_then_base_model_id_asc",
+  "sorting": "Descending internal score first; ties (including a deliberate educational tie such as B03 vs B06) broken by ascending stable base-model ID string (B01 < B02 < ... < B09) -- never by cost, never by a hidden preference for one delivery format over another. This tie-break existing is not itself evidence that the lower-ID model is educationally superior.",
+  "diversity": {
+    "max_displayed_cards": 2,
+    "same_family_multi_display_families": [
+      "HOMESCHOOL"
+    ],
+    "description": "A ceiling of 2, never a quota to fill. Sort qualifying candidates by internal score descending (stable ID ascending tie-break), select the highest; then prefer the highest-scoring qualifying candidate from a DIFFERENT model family. Only for a family listed in same_family_multi_display_families (currently just HOMESCHOOL, i.e. B08+B09) may a second same-family candidate display instead, and only when both independently qualify -- this is a general per-family policy flag, never a persona-keyed exception. The VIRTUAL family (B03/B06) and IN_PERSON family (B02/B05) always dedupe to one representative under this policy. Cost is never used to choose the representative."
+    },
+  "public_labels": [
+    "WORTH_EXPLORING",
+    "WORTH_EXPLORING_WITH_CONSIDERATIONS",
+    "MORE_INFORMATION_HELPFUL"
+  ],
+  "content_status_values": [
+    "PERSONALIZED",
+    "LIMITED_INFORMATION",
+    "ADVISOR_FIRST"
+  ],
+  "groups": [
+    "schedule",
+    "delivery",
+    "family_role",
+    "support_structure",
+    "social",
+    "academic",
+    "cost",
+    "continuity",
+    "future",
+    "context"
+  ],
+  "primary_reason_groups": {
+    "SCHEDULE_FLEXIBILITY": ["schedule"],
+    "ATHLETICS": ["schedule"],
+    "HOMESCHOOL": ["delivery", "family_role"],
+    "ONLINE": ["delivery"],
+    "ACADEMIC_ACCELERATION": ["academic"],
+    "ACADEMIC_SUPPORT": ["academic", "support_structure"],
+    "GRADE_PLANNING": ["future"],
+    "PERSONALIZED_LEARNING": ["academic", "support_structure"],
+    "BETTER_FIT_ENVIRONMENT": ["context"],
+    "TRAVEL": ["schedule"],
+    "ARTS": ["schedule"],
+    "FAMILY_INVOLVEMENT": ["family_role"],
+    "ADVANCED_COURSES": ["academic"],
+    "COLLEGE_ADVANCEMENT": ["academic"],
+    "CREDIT_RECOVERY": ["academic", "support_structure"],
+    "CURRENT_SCHOOL_CONCERN": ["context"],
+    "DIFFERENT_ENVIRONMENT": ["context"],
+    "SMALLER_ENVIRONMENT": ["context"],
+    "ENVIRONMENT_CONCERN": ["context"]
+  },
+  "legacy_safe_mappings_note": "primary_reason_groups' TRAVEL/ARTS/FAMILY_INVOLVEMENT entries were valid discovery_reasons/primary_discovery_reason selections before Phase 3F.1 removed them from DISC_006's new-entry option set (contracts/question-bank.json grade_band_allowed_values) without aliasing or removing them, so a historical primary_discovery_reason could still literally carry one; mapped to the group their content most directly concerns (schedule for TRAVEL/ARTS since both are the same schedule-conflict family as ATHLETICS/SCHEDULE_FLEXIBILITY, family_role for FAMILY_INVOLVEMENT). ADVANCED_COURSES/COLLEGE_ADVANCEMENT/CREDIT_RECOVERY/CURRENT_SCHOOL_CONCERN/DIFFERENT_ENVIRONMENT/SMALLER_ENVIRONMENT/ENVIRONMENT_CONCERN can no longer be produced by discovery_reasons itself (Phase 3F.1 aliases them away in effective answers -- contracts/legacy-aliases.json question_value_aliases.discovery_reasons), but primary_discovery_reason (DISC_007) is not itself alias-normalized, so an older stored raw answer could in principle still carry one of these literal legacy values; each is mapped to the exact same group(s) as its canonical alias target (ADVANCED_COURSES/COLLEGE_ADVANCEMENT -> ACADEMIC_ACCELERATION -> academic; CREDIT_RECOVERY -> ACADEMIC_SUPPORT -> academic+support_structure; CURRENT_SCHOOL_CONCERN/DIFFERENT_ENVIRONMENT/SMALLER_ENVIRONMENT/ENVIRONMENT_CONCERN -> BETTER_FIT_ENVIRONMENT -> context) so the engine never treats old data as unmapped or maps it to a different group than its canonical replacement would.",
+  "family_priority_groups": {
+    "FLEXIBILITY": ["schedule"],
+    "PERSONAL_SUPPORT": ["support_structure"],
+    "STRUCTURE_ACCOUNTABILITY": ["support_structure"],
+    "ACADEMIC_ADVANCEMENT": ["academic"],
+    "SELF_PACED": ["delivery"],
+    "LIVE_TEACHER": ["support_structure"],
+    "SOCIAL": ["social"],
+    "COLLEGE_PREPARATION": ["future"],
+    "SMALL_ENVIRONMENT": ["support_structure"]
+  },
+  "desired_change_groups": {
+    "TIME_CONTROL": ["schedule"],
+    "CHALLENGE": ["academic"],
+    "SUPPORT": ["academic", "support_structure"],
+    "ATHLETICS_TIME": ["schedule"],
+    "LOCATION_FLEXIBILITY": ["schedule"],
+    "COLLEGE_COURSES": ["future"],
+    "DIFFERENT_ENVIRONMENT": ["context"],
+    "BACK_ON_TRACK": ["academic"],
+    "PERSONALIZATION": ["academic", "support_structure"],
+    "OUTSIDE_OPPORTUNITIES": ["future"]
+  },
+  "unmapped_priority_behavior": "AFFORDABILITY is feasibility-only and is deliberately absent from family_priority_groups -- it establishes no educational-alignment multiplier for any group (the cost group itself is never scored by any rule, so this is belt-and-suspenders, not merely documentation). EXPLORING/OTHER/UNKNOWN values across discovery_reasons, family_priorities and desired_primary_change are deliberately absent and establish no multiplier. ACADEMIC_QUALITY, ACCREDITATION and DIPLOMA (family_priorities) were retired entirely at Phase 3E/3F (contracts/legacy-aliases.json question_value_removals) and do not prove generic-model superiority.",
+  "material_review_mapping": {
+    "REV_ADULT_SUPPORT": ["B03", "B04", "B06", "B07", "B08", "B09"],
+    "REV_LIVE_SUPPORT": ["B03", "B04", "B06", "B07", "B08", "B09"],
+    "REV_SOCIAL_PLAN": ["B03", "B04", "B06", "B08", "B09"],
+    "REV_PRIORITY_TRADEOFF": ["B03", "B04", "B06", "B07", "B08", "B09"],
+    "REV_COST_ALIGNMENT": ["B05", "B06"],
+    "REV_SCHEDULE_COMPATIBILITY": ["B03", "B04", "B06", "B07", "B08", "B09"],
+    "REV_PROGRAM_MANAGEMENT": ["B03", "B04", "B06", "B07", "B08", "B09"],
+    "REV_STATE_AVAILABILITY": ["B03", "B04", "B06", "B08", "B09"]
+  },
+  "global_review_signals_never_scope_a_candidate": [
+    "REV_ATTENDANCE_CONTEXT",
+    "REV_COMMUNICATION_CONTEXT",
+    "REV_TRANSCRIPT",
+    "REV_GRADUATION",
+    "REV_GRADUATION_UNKNOWN",
+    "REV_CREDIT_TRANSFER",
+    "REV_ADVANCEMENT_READINESS",
+    "REV_RECLASSIFICATION",
+    "REV_COLLEGE_ATHLETICS",
+    "REV_NCAA",
+    "REV_ACADEMIC_CONTEXT",
+    "REV_FOUNDATIONAL_SKILLS",
+    "REV_ENVIRONMENT",
+    "REV_AGE_GRADE_CONTEXT",
+    "REV_STATE_HOMESCHOOL"
+  ],
+  "state_availability_policy": "REV_STATE_AVAILABILITY is attached engine-natively (src/lib/engine/considerations.ts), not by a single JSON rule: it applies to any QUALIFYING candidate whose base model ID is in material_review_mapping.REV_STATE_AVAILABILITY, regardless of the specific reason that candidate qualified. This reflects that any state-dependent remote/home direction always carries an unverified-availability consideration once it is actually being shown, not only when a specific travel/relocation answer was given.",
+  "postprocess_rules": [
+    "Any qualifying B08/B09 carries REV_STATE_HOMESCHOOL via rule HOME_001 (fires on homeschool_interest, which is required for B08/B09 to ever qualify).",
+    "Any qualifying candidate in material_review_mapping.REV_STATE_AVAILABILITY's scope (B03/B04/B06/B08/B09) carries REV_STATE_AVAILABILITY -- see state_availability_policy above; this is engine-native, not a rules.json rule.",
+    "Qualifying B05/B06 plus cost_preference = PREFER_TUITION_FREE carries REV_COST_ALIGNMENT via rule COST_ALIGNMENT_REVIEW (empty score_effects; never infer an exact budget).",
+    "B10 cannot be a displayed or qualifying candidate under any version -- excluded architecturally (taxonomy.json reachability_status EXCLUDED plus contract validation plus the engine's own candidate universe, which never includes B10 at all).",
+    "Do not infer blanket incompatibility when a specific school capability has not been verified.",
+    "Other/unknown grade keeps universal questions and neutral review; do not force an age-derived grade band.",
+    "For K-4 suppress college/credit/athletic eligibility report modules and use foundational enrichment wording (a future Phase 5/Report concern; the engine itself simply never activates those signals for ELEMENTARY grade_band since no rule condition matches).",
+    "For middle grades, college-related opportunity stage is LONGER_TERM_EXPLORATION; for HS it remains EXPLORE_NOT_ELIGIBLE (taxonomy.json opportunity default_status; a future Report concern).",
+    "DEC-H2 (Phase 3E) and DEC-N (Phase 4): cost_preference is PRACTICAL FEASIBILITY context, never a base-model score input -- a preference for tuition-free options must not itself raise a tuition-free model's score or be presented as proof it is the better educational fit, and must never lower a private model's educational score either. REV_COST_ALIGNMENT is the only mechanism by which cost reaches a candidate."
+  ]
+}

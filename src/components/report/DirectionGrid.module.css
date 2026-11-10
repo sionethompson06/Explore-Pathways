@@ -1,0 +1,81 @@
+.heading {
+  font-size: var(--font-size-2xl);
+  margin: 0 0 var(--space-5);
+}
+
+/* Zero-card special states (section 11): ADVISOR_FIRST reads as
+   confident, deliberate expert restraint (navy/blue, "under review"
+   iconography) -- never "algorithm failed". LIMITED_INFORMATION reads
+   as warmer, lighter, clarity-building (warm-neutral surface, softer
+   icon) -- never a literal empty/error state. Same DTO content
+   (emptyStateHeading/emptyStateBody) in both cases; only the
+   presentational wrapper differs. */
+.emptyWrap {
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.emptyAdvisor {
+  background: linear-gradient(160deg, var(--color-navy-900), var(--color-navy-700));
+  color: var(--color-text-inverse);
+}
+
+.emptyLimited {
+  background: var(--color-warm-white);
+  border: 1px solid var(--color-border);
+}
+
+.emptyIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyAdvisor .emptyIcon {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--color-text-inverse);
+}
+
+.emptyLimited .emptyIcon {
+  background: var(--color-accent-tint);
+  color: var(--color-accent-strong);
+}
+
+.emptyHeading {
+  font-size: var(--font-size-xl);
+  margin: 0 0 var(--space-2);
+}
+
+.emptyAdvisor .emptyHeading {
+  color: var(--color-text-inverse);
+}
+
+.emptyLimited .emptyHeading {
+  color: var(--color-navy-900);
+}
+
+.emptyBody {
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+
+.emptyAdvisor .emptyBody {
+  color: var(--color-text-inverse-muted);
+}
+
+.emptyLimited .emptyBody {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .emptyWrap {
+    flex-direction: column;
+  }
+}
