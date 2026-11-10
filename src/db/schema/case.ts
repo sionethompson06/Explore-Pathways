@@ -41,6 +41,15 @@ export const pathwaysCaseStatusEnum = pgEnum("pathways_case_status", [
   // reachable from any of these). A commercial decision must never
   // change an educational-suitability signal.
   "FAMILY_NOT_PROCEEDING",
+  // Phase 6F (section 12): the family has agreed to continue with
+  // Pathways and the consulting relationship is active -- set only by
+  // src/server/service-engagement.ts once its own activation
+  // conditions are met (family decision = CONTINUE_WITH_PATHWAYS,
+  // service arrangement recorded, payment terms confirmed/waived/
+  // handled externally, staff confirms). Reachable only from
+  // COMPLETED, the status a case already carries once its primary
+  // Planning Call outcome was CONTINUE_TO_BLUEPRINT.
+  "ACTIVE_CONSULTANCY",
 ]);
 
 export const pathwaysCase = pgTable(

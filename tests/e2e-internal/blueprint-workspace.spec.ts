@@ -218,7 +218,10 @@ test.describe("Phase 6E Student Success Blueprint", () => {
     await expect(advisor2Page.getByRole("heading", { name: "Start a New Revision" })).toBeVisible();
 
     // New revision: carries forward the prior revision's content.
-    await advisor2Page.getByLabel("Reason").selectOption("FAMILY_UPDATE");
+    // Phase 6F's "Not Proceeding" engagement field is also labeled
+    // "Reason (optional)"; target this select exactly rather than by
+    // substring, the same disambiguation convention Phase 6E.1 used.
+    await advisor2Page.getByLabel("Reason", { exact: true }).selectOption("FAMILY_UPDATE");
     await advisor2Page.getByRole("button", { name: "Create New Revision" }).click();
     await expect(advisor2Page.getByText("New revision created.")).toBeVisible();
     await expect(advisor2Page.locator("#b12Summary")).toHaveValue("Recommend staying with added flexible support.");

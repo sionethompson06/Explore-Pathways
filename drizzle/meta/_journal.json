@@ -57,6 +57,13 @@
       "when": 1791937650066,
       "tag": "0007_swift_ronan",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794348510309,
+      "tag": "0008_premium_black_panther",
+      "breakpoints": true
     }
   ]
 }

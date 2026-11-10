@@ -55,6 +55,13 @@ type Queryable = Database | Tx;
  * continue must never be recorded as, or influence, an educational-
  * suitability signal. Set only by src/server/planning-call.ts's
  * `completePlanningCall`, never automatically.
+ *
+ * Phase 6F adds `ACTIVE_CONSULTANCY`, reachable only from COMPLETED
+ * (docs/pathways PHASE6F_SERVICE_ENGAGEMENT.md section 12): set only
+ * by src/server/service-engagement.ts once a ServiceEngagement's own
+ * activation conditions are met, never automatically and never as a
+ * side effect of a family's BLUEPRINT_ONLY/FOLLOW_UP_NEEDED/
+ * NOT_PROCEEDING decision (those leave case status untouched).
  */
 const ALLOWED_CASE_STATUS_TRANSITIONS: Record<PathwaysCaseStatus, readonly PathwaysCaseStatus[]> = {
   NEW: ["CONTACT_RECEIVED", "CLOSED"],
@@ -67,11 +74,12 @@ const ALLOWED_CASE_STATUS_TRANSITIONS: Record<PathwaysCaseStatus, readonly Pathw
     "FAMILY_NOT_PROCEEDING",
     "CLOSED",
   ],
-  COMPLETED: ["FOLLOW_UP", "CLOSED"],
+  COMPLETED: ["FOLLOW_UP", "CLOSED", "ACTIVE_CONSULTANCY"],
   NEEDS_INFORMATION: ["CONTACT_RECEIVED", "BOOKED", "CLOSED"],
   FOLLOW_UP: ["BOOKED", "COMPLETED", "NOT_CURRENT_SERVICE_FIT", "CLOSED"],
   NOT_CURRENT_SERVICE_FIT: ["CLOSED"],
   FAMILY_NOT_PROCEEDING: ["CLOSED"],
+  ACTIVE_CONSULTANCY: ["CLOSED"],
   CLOSED: [],
 };
 

@@ -152,10 +152,26 @@
 }
 
 .badge[data-status="NOT_CURRENT_SERVICE_FIT"],
-.badge[data-status="CLOSED"] {
+.badge[data-status="CLOSED"],
+.badge[data-status="DECLINED"] {
   background: var(--color-neutral-100);
   border-color: var(--color-neutral-500);
   color: var(--color-neutral-700);
+}
+
+.badge[data-status="ACTIVE_CONSULTANCY"],
+.badge[data-status="ACTIVE"] {
+  background: var(--color-accent-tint);
+  border-color: var(--color-accent-strong);
+  color: var(--color-accent-strong);
+}
+
+.badge[data-status="TERMS_PENDING"],
+.badge[data-status="PENDING_DECISION"],
+.badge[data-status="CONFIRMED"] {
+  background: #fdf3e2;
+  border-color: #b8780a;
+  color: #8a5c08;
 }
 
 .visuallyHidden {
@@ -429,4 +445,104 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* Phase 6F: Continue With Pathways / Service Engagement. Progressive
+   disclosure via CSS :has() rather than client JavaScript -- the
+   conditional sections stay plain-form, server-action-only, matching
+   every other staff workspace form in this codebase. */
+.engagementForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.conditionalSection {
+  display: none;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+}
+
+/* Next.js's CSS Modules compiler (Lightning CSS/Turbopack) scopes ID
+   selectors the same as class selectors, unlike some other CSS-module
+   implementations -- an un-wrapped `#familyDecision-continue` here
+   would be rewritten to a hashed id that can never match the literal
+   `id="familyDecision-continue"` written in the JSX. `:global(...)`
+   opts each id out of that scoping so it matches the real DOM id. */
+.engagementForm:has(:global(#familyDecision-continue):checked) .showForContinue {
+  display: block;
+}
+
+.engagementForm:has(:global(#familyDecision-followup):checked) .showForFollowUp {
+  display: block;
+}
+
+.engagementForm:has(:global(#familyDecision-not-proceeding):checked) .showForNotProceeding {
+  display: block;
+}
+
+.engagementForm:has(:global(#serviceArrangement-custom):checked) .showForCustomArrangement {
+  display: block;
+}
+
+.engagementForm:has(:global(#paymentStructure-one-time):checked) .showForOneTime {
+  display: block;
+}
+.engagementForm:has(:global(#paymentStructure-monthly):checked) .showForMonthly {
+  display: block;
+}
+.engagementForm:has(:global(#paymentStructure-installments):checked) .showForInstallments {
+  display: block;
+}
+.engagementForm:has(:global(#paymentStructure-custom):checked) .showForCustomPayment {
+  display: block;
+}
+
+.moneyFieldGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.moneyField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 10rem;
+}
+
+.moneyField label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.moneyField input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+}
+
+.engagementSummary {
+  padding: var(--space-4);
+  border: 1px solid var(--color-accent-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-tint);
+}
+
+.engagementSummary dt {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: var(--space-3);
+}
+
+.engagementSummary dd {
+  margin: 0;
+  font-size: var(--font-size-base);
 }

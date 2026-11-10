@@ -15,6 +15,9 @@ import {
 } from "@/server/blueprint";
 import { BlueprintForm } from "@/components/staff/BlueprintForm";
 import { BlueprintPreview } from "@/components/staff/BlueprintPreview";
+import { ServiceEngagementForm } from "@/components/staff/ServiceEngagementForm";
+import { ServiceEngagementSummary } from "@/components/staff/ServiceEngagementSummary";
+import { getServiceEngagement } from "@/server/service-engagement";
 import { formatStaffDateTime, statusLabel } from "@/components/staff/format";
 import styles from "@/components/staff/staff-page.module.css";
 import {
@@ -24,6 +27,7 @@ import {
   markBlueprintReadyForClientAction,
   createNewBlueprintRevisionAction,
 } from "./actions";
+import { confirmServiceEngagementAction } from "./engagement-actions";
 
 export const metadata: Metadata = {
   title: "Student Success Blueprint",
@@ -44,6 +48,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   BLUEPRINT_NOT_FOUND: "No Blueprint exists yet for this case.",
   CURRENT_NOT_READY: "The current revision must be Ready for Client before starting a new revision.",
   REASON_REQUIRED: "Choose a reason for the new revision.",
+  FAMILY_DECISION_REQUIRED: "Choose what the family decided.",
+  BLUEPRINT_NOT_READY: "The Blueprint must be Ready for Client before an engagement can be recorded.",
+  ARRANGEMENT_REQUIRED: "Choose a consulting arrangement.",
+  PAYMENT_STRUCTURE_REQUIRED: "Choose a payment structure.",
 };
 
 const SUCCESS_MESSAGES: Record<string, string> = {
@@ -51,6 +59,7 @@ const SUCCESS_MESSAGES: Record<string, string> = {
   MOVED_TO_REVIEW: "Moved to internal review.",
   READY_FOR_CLIENT: "Marked ready for client.",
   NEW_REVISION_CREATED: "New revision created.",
+  ENGAGEMENT_CONFIRMED: "Engagement confirmed.",
 };
 
 /**
@@ -81,6 +90,7 @@ export default async function AdvisorBlueprintPage({
   const eligible = isBlueprintReady(planningCallRecord);
   const current = await getCurrentBlueprintRevision(db, caseId);
   const revisions = current ? await listBlueprintRevisions(db, caseId) : [];
+  const engagement = current?.status === "READY_FOR_CLIENT" ? await getServiceEngagement(db, caseId) : null;
 
   const errorMessage = resolvedSearchParams.error ? ERROR_MESSAGES[resolvedSearchParams.error] : undefined;
   const successMessage = resolvedSearchParams.success ? SUCCESS_MESSAGES[resolvedSearchParams.success] : undefined;
@@ -189,6 +199,18 @@ export default async function AdvisorBlueprintPage({
               supportOptions={supportOptions}
               opportunityOptions={opportunityOptions}
             />
+            {current.status === "READY_FOR_CLIENT" ? (
+              <section className={styles.section} aria-labelledby="engagement-heading">
+                <h2 id="engagement-heading" className={styles.sectionTitle}>
+                  Continue With Pathways
+                </h2>
+                {engagement && (engagement.status === "ACTIVE" || engagement.status === "DECLINED" || engagement.status === "CLOSED") ? (
+                  <ServiceEngagementSummary engagement={engagement} />
+                ) : (
+                  <ServiceEngagementForm pathwaysCaseId={caseId} engagement={engagement} action={confirmServiceEngagementAction} />
+                )}
+              </section>
+            ) : null}
             {canStartNewRevision ? (
               <section className={styles.section} aria-labelledby="new-revision-heading">
                 <h2 id="new-revision-heading" className={styles.sectionTitle}>
